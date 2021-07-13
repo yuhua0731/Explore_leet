@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
-import time
-import sys
 import collections
 import functools
-import math
 from typing import List
 
 
@@ -889,7 +886,7 @@ def main():
     # print(findLHS([2, 4, 3, 4]))
     # print(minOperations(6))
     # print(findingUsersActiveMinutes([[0, 5], [1, 2], [1, 5], [0, 3], [0, 5]], 5))
-    # print(numDecodings('**'))
+    print(numDecodings('**'))
 
 if __name__ == "__main__":
     main()
