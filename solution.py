@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from typing import List
+import math
+
 class Solution:
     def __init__(self) -> None:
         super().__init__()
@@ -36,3 +39,36 @@ class Solution:
                 dp_new[2] = (c == '2') * dp[0]
             dp = [i % mod for i in dp_new]
         return dp[0]
+
+
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        # DFS, failed TLE
+        # n = len(nums)
+        # global res
+        # res = 0
+        # def search_next(index, curr_max, len):
+        #     global res
+        #     if index <= n:
+        #         for i in range(index, n):
+        #             if nums[i] > curr_max:
+        #                 search_next(i + 1, nums[i], len + 1)
+        #     res = max(res, len)
+        #     return
+        
+        # search_next(0, - 10 ** 4 - 1, 0)
+        # return res
+
+        # classic dp problem
+        # dp[i] represents for LIS end with nums[i]
+        # time complexity = O(n^2)
+        # space complexity = O(n)
+        n = len(nums)
+        dp = [1] * n
+        for i in range(n):
+            for j in range(i + 1, n):
+                if nums[i] < nums[j]:
+                    dp[j] = max(dp[j], dp[i] + 1)
+        return max(dp)
+        
+
+
