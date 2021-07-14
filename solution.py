@@ -110,3 +110,21 @@ class Solution:
                 if nums1[i - 1] == nums2[j - 1]:
                     dp[i][j] = 1 + dp[i - 1][j - 1]     
         return max(max(x) for x in dp)
+
+
+    def findPeakElement(self, nums: List[int]) -> int:
+        # O(logn) time
+        # check middle element
+        # if it is a peak element, return its index
+        left, right = 0, len(nums) - 1
+        while left != right:
+            middle = (left + right) // 2
+            if middle - 1 >= 0 and nums[middle - 1] >= nums[middle]:
+                right = middle
+            elif middle + 1 < len(nums) and nums[middle + 1] >= nums[middle]:
+                left = middle + 1
+            else:
+                return middle
+        return left
+
+
