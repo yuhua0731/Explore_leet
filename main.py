@@ -9,5 +9,6 @@ def main():
     print(solu.lengthOfLIS([1, 3, 6, 7, 9, 4, 10, 5, 6]))
     print(solu.findLength([1,2,3,2,1], [3,2,1,4,7]))
     print(solu.findPeakElement([1, 2, 5, 3, 7, 4, 10]))
+    print(solu.fourSum([1,0,-1,0,-2,2], 0))
 if __name__ == "__main__":
     main()

@@ -128,3 +128,35 @@ class Solution:
         return left
 
 
+    def fourSum(self, nums: List[int], target: int) -> List[List[int]]:
+        ret, curr_four = list(), list()
+        nums.sort()
+        n = len(nums)
+
+        def find_next(index: int, sum: int) -> bool:
+            # reached end of nums
+            if len(curr_four) < 2:
+                for i in range(index + 1, n):
+                    if i > index + 1 and nums[i] == nums[i - 1]:
+                        continue
+                    curr_four.append(nums[i])
+                    find_next(i, sum - nums[i])
+                    curr_four.pop()
+            else:
+                l, r = index + 1, n - 1
+                while l < r:
+                    if nums[l] + nums[r] == sum:
+                        ret.append(curr_four + [nums[l], nums[r]])
+                        l += 1
+                        r -= 1
+                        while l < r and nums[l] == nums[l - 1]:
+                            l += 1
+                        while r > l and nums[r] == nums[r + 1]:
+                            r -= 1
+                    elif nums[l] + nums[r] < sum:
+                        l += 1
+                    else:
+                        r -= 1
+        
+        find_next(-1, target)
+        return ret
