@@ -3,6 +3,13 @@ from tricks import largestNumber
 from typing import List
 import math
 
+# Definition for singly-linked list.
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+
 class Solution:
     def __init__(self) -> None:
         super().__init__()
@@ -159,4 +166,65 @@ class Solution:
                         r -= 1
         
         find_next(-1, target)
+        return ret
+
+
+    def triangleNumber(self, nums: List[int]) -> int:
+        nums.sort()
+        n = len(nums)
+        global ret 
+        ret = 0
+                
+        # we pick the first edge
+        # 从小到大轮询，后两条边需要做减法运算
+        # 每当找到临界点，将第二条边更新，同时需要再次从最后一个index开始找临界点
+        # for i in range(n):
+        #     l, r = i + 1, n - 1
+        #     while l < r:
+        #         if nums[i] + nums[l] > nums[r]:
+        #             print(i, l, r)
+        #             ret += r - l
+        #             l += 1
+        #             r = n - 1
+        #         else:
+        #             r -= 1
+        
+        # we pick the last edge
+        # 从大到小轮询，前两条边做加法运算
+        # 每当找到临界点，将第一条边后移，第二条变无需重新找，可从当前index继续往前找
+        for i in range(n - 1, 0, -1):
+            l, r = 0, i - 1
+            while l < r:
+                if nums[l] + nums[r] > nums[i]:
+                    ret += r - l
+                    r -= 1
+                else:
+                    l += 1
+        return ret
+
+
+    def reverseKGroup(self, head: ListNode, k: int) -> ListNode:
+        if k == 1:
+            return head
+
+        element = list()
+        while head != None:
+            element.append(head.val)
+            head = head.next
+        
+        # O(k) extra space complexity
+        def reverse_rest(index: int) -> ListNode:
+            temp = None
+            if index + k > len(element):
+                # do not reverse
+                for i in range(len(element) - 1, index - 1, -1):
+                    temp = ListNode(element[i], next=temp)
+            else:
+                temp = reverse_rest(index + k)
+                # do reverse
+                for i in range(index, index + k):
+                    temp = ListNode(element[i], next=temp)
+            return temp
+
+        ret = reverse_rest(0)
         return ret
