@@ -1,13 +1,52 @@
 #!/usr/bin/env python3
 from tricks import largestNumber
 from typing import List
-import math
+import csv
+import time
 
 # Definition for singly-linked list.
 class ListNode:
     def __init__(self, val=0, next=None):
         self.val = val
         self.next = next
+
+    def printList(self):
+        temp = self
+        while temp:
+            print(temp.val, end='')
+            temp = temp.next
+        print('')
+
+
+# Definition for a binary tree node.
+class TreeNode:
+    def __init__(self, x):
+        self.val = x
+        self.left = None
+        self.right = None
+    
+    def printNode(self):
+        curr = self
+        if curr:
+            print(curr.val)
+            self.printNode(curr.left)
+            self.printNode(curr.right)
+
+
+class fileHandler:
+    def __init__(self):
+        self.timestr = time.strftime("%Y%m%d%H%M%S")
+
+    def writer(self):
+        self.timestr = time.strftime("%Y%m%d%H%M%S")
+        with open(self.timestr+'.csv','w',encoding='utf-8') as csvfile:
+            writer = csv.writer(csvfile,delimiter=',')
+            writer.writerow(['TimeDiff(us)','Cobid','Length','RTR','Data'])
+
+    def take_writer(self):
+        with open(self.timestr+'.csv','w',encoding='utf-8') as csvfile:
+            writer = csv.writer(csvfile,delimiter=',')
+            writer.writerow('hello')
 
 
 class Solution:
@@ -203,28 +242,62 @@ class Solution:
         return ret
 
 
+    # python pointer
     def reverseKGroup(self, head: ListNode, k: int) -> ListNode:
-        if k == 1:
-            return head
+        current = head
+        next = None
+        prev = None
+        count = 0
+ 
+        # Reverse first k nodes of the linked list
+        while current and count < k:
+            next, current.next, prev = current.next, prev, current
+            current = next
+            count += 1
+            ListNode.printList(current)
+ 
+        # next is now a pointer to (k+1)th node
+        # recursively call for the list starting
+        # from current. And make rest of the list as
+        # next of first node
+        if next is not None:
+            head.next = self.reverseKGroup(next, k)
+ 
+        # prev is new head of the input list
+        return prev
 
-        element = list()
-        while head != None:
-            element.append(head.val)
-            head = head.next
+
+    def lowestCommonAncestor(self, root: TreeNode, p: TreeNode, q: TreeNode) -> TreeNode:
+        # accepted
+        # global ancester 
+        # ancester = None
+        # def find_index(node: TreeNode):
+        #     global ancester
+        #     ret = [False, False]
+        #     if ancester:
+        #         return ret
+        #     ret[0] = True if node == p else False
+        #     ret[1] = True if node == q else False
+        #     if node and not all(i for i in ret):
+        #         ret_left = find_index(node.left)
+        #         ret_right = find_index(node.right)
+        #         ret[0] |= ret_left[0] | ret_right[0]
+        #         ret[1] |= ret_left[1] | ret_right[1]
+        #     print(f'{node.val if node else None}: {ret}')
+        #     if all(i for i in ret):
+        #         ancester = node
+        #     return ret
+
+        # find_index(root)
+        # return ancester
+
+        # we realize that this is a binary search tree
+        # which obey the rule: left.val < node.val < right.val
+        def find_ancester(node: TreeNode, p_: int, q_: int):
+            if node.val > p_ and node.val > q_:
+                return find_ancester(node.left, p_, q_)
+            if node.val < p_ and node.val < q_:
+                return find_ancester(node.right, p_, q_)
+            return node
         
-        # O(k) extra space complexity
-        def reverse_rest(index: int) -> ListNode:
-            temp = None
-            if index + k > len(element):
-                # do not reverse
-                for i in range(len(element) - 1, index - 1, -1):
-                    temp = ListNode(element[i], next=temp)
-            else:
-                temp = reverse_rest(index + k)
-                # do reverse
-                for i in range(index, index + k):
-                    temp = ListNode(element[i], next=temp)
-            return temp
-
-        ret = reverse_rest(0)
-        return ret
+        return find_ancester(root, p.val, q.val)
