@@ -68,3 +68,8 @@ l = r
 #       ↑           ↑          ↑          ↑
 #     head         pre        jump      l & r
 ```
+
+## 3. Binary Search Tree, BTS for short
+also called an **ordered**, or **sorted** search tree.
+
+node.val is greater than all values from its left subtree, and less than all values from its right subtree

@@ -3,6 +3,7 @@ from tricks import largestNumber
 from typing import List
 import csv
 import time
+import random
 
 # Definition for singly-linked list.
 class ListNode:
@@ -26,11 +27,12 @@ class TreeNode:
         self.right = None
     
     def printNode(self):
-        curr = self
-        if curr:
-            print(curr.val)
-            self.printNode(curr.left)
-            self.printNode(curr.right)
+        if self:
+            print(self.val)
+        if self.left:
+            self.left.printNode()
+        if self.right:
+            self.right.printNode()
 
 
 class fileHandler:
@@ -254,7 +256,6 @@ class Solution:
             next, current.next, prev = current.next, prev, current
             current = next
             count += 1
-            ListNode.printList(current)
  
         # next is now a pointer to (k+1)th node
         # recursively call for the list starting
@@ -301,3 +302,89 @@ class Solution:
             return node
         
         return find_ancester(root, p.val, q.val)
+
+
+    class shuffle:
+        def __init__(self, nums: List[int]):
+            self.origin = nums.copy()
+            self.sf = nums
+
+        def reset(self) -> List[int]:
+            """
+            Resets the array to its original configuration and return it.
+            """
+            return self.origin
+            
+        # random sort key
+        # sorted(self.nums, key = lambda _: random.random())
+        def shuffle(self) -> List[int]:
+            """
+            Returns a random shuffling of the array.
+            """
+            random.shuffle(self.sf)
+            return self.sf
+
+    
+    def pushDominoes(self, dominoes: str) -> str:
+        for i in range(len(dominoes)):
+            pass
+        return dominoes
+
+
+    def sortedArrayToBST(self, nums: List[int]) -> TreeNode:
+        # find middle node and put it to root
+        # loop until all node are set
+        def subtree(left: int, right: int) -> TreeNode:
+            if right <= left:
+                return None
+            middle = left + (right - left) // 2
+            ret = TreeNode(nums[middle])
+            ret.left = subtree(left, middle)
+            ret.right = subtree(middle + 1, right)
+            return ret
+        return subtree(0, len(nums))
+
+
+    def threeSumClosest(self, nums: List[int], target: int) -> int:
+        # DFS
+        # nums.sort()
+        # ret = sum(nums[:3])
+        # sums = 0
+        # for i in range(len(nums)):
+        #     if 3 * nums[i] >= ret and ret >= target:
+        #         break
+        #     sums = nums[i]
+        #     for j in range(i + 1, len(nums)):
+        #         if sums + 2 * nums[j] >= ret and ret >= target:
+        #             break
+        #         sums += nums[j]
+        #         for k in range(j + 1, len(nums)):
+        #             if sums + nums[k] >= ret and ret >= target:
+        #                 break
+        #             sums += nums[k]
+        #             if abs(sums - target) < abs(ret - target):
+        #                 ret = sums
+        #                 if ret == target:
+        #                     return ret
+        #             sums -= nums[k]
+        #         sums -= nums[j]
+        #     sums -= nums[i]
+        # return ret
+
+        # more efficient way
+        nums.sort()
+        ret = sum(nums[:3])
+        n = len(nums)
+        for i in range(len(nums) - 2):
+            if i > 0 and nums[i] == nums[i - 1]: continue
+            l, r = i + 1, n - 1
+            ls, rs = nums[i] + nums[l] + nums[l + 1], nums[i] + nums[r] + nums[r - 1]
+            if ls > target: r = l + 1
+            elif rs < target: l = r - 1
+            while l < r:
+                sums = nums[i] + nums[l] + nums[r]
+                if abs(sums - target) < abs(ret - target): ret = sums
+                if sums == target: return sums
+                elif sums < target: l += 1
+                else: r -= 1
+        return ret
