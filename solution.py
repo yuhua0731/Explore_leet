@@ -4,6 +4,7 @@ from typing import List
 import csv
 import time
 import random
+import collections
 
 # Definition for singly-linked list.
 class ListNode:
@@ -388,3 +389,183 @@ class Solution:
                 elif sums < target: l += 1
                 else: r -= 1
         return ret
+
+
+    def twoSum(self, nums: List[int], target: int) -> List[int]:
+        # time complexity: O(n)
+        visited = dict()
+        for i in range(len(nums)):
+            if target - nums[i] in visited:
+                return [visited[target - nums[i]], i]
+            elif nums[i] not in visited:
+                visited[nums[i]] = i
+        return [0, 0]
+
+
+    def largestIsland(self, grid: List[List[int]]) -> int:
+        m, n = len(grid), len(grid[0])
+        surroundings = [[-1, 0], [0, -1]]
+        # key: str formed by two indices
+        # value: island index, can be used to access island list
+        find_island = dict()
+        island = list()
+        for i in range(m):
+            for j in range(n):
+                if grid[i][j]:
+                    # extend island
+                    temp = set()
+                    for sur in surroundings:
+                        newi, newj = i + sur[0], j + sur[1]
+                        if f'{newi} {newj}' in find_island:
+                            temp.add(find_island[f'{newi} {newj}'])
+                    temp = list(temp)
+                    if not temp:
+                        # new island
+                        find_island[f'{i} {j}'] = len(island)
+                        island.append(1)
+                    else:
+                        # extend exist island
+                        find_island[f'{i} {j}'] = temp[0]
+                        island[temp[0]] += 1
+                    # merge other island to temp[0]
+                    for isl in temp[1:]:
+                        for key, value in find_island.items():
+                            if value == isl:
+                                find_island[key] = temp[0]
+                        island[temp[0]] += island[isl]
+        ret = max(island) if island else 0
+        surroundings = [[-1, 0], [1, 0], [0, -1], [0, 1]]
+        for i in range(m):
+            for j in range(n):
+                if not grid[i][j]:
+                    area = set()
+                    for sur in surroundings:
+                        newi, newj = i + sur[0], j + sur[1]
+                        if f'{newi} {newj}' in find_island:
+                            area.add(find_island[f'{newi} {newj}'])
+                    ret = max(ret, sum(island[k] for k in area) + 1)
+        return ret
+
+
+    def subsetsWithDup(self, nums: List[int]) -> List[List[int]]:
+        # DFS
+        # subset, not list, no order
+        n = len(nums)
+        ret = set()
+        global subset
+        subset = ''
+        def extend(index: int):
+            global subset
+            if index == n:
+                return
+            for i in range(index, n):
+                temp = len(f' {nums[i]}')
+                subset += f' {nums[i]}'
+                if subset not in ret:
+                    ret.add(subset)
+                    extend(i + 1)
+                subset = subset[:(0 - temp)]
+        ret.add(subset)
+        nums.sort()
+        extend(0)
+        ret_list = list()
+        for i in ret:
+            ret_list.append(list(map(int, i.split(' ')[1:])))
+        return ret_list
+
+
+    def powerset(self, s):
+        x = len(s)
+        masks = [1 << i for i in range(x)]
+        for i in range(1 << x):
+            yield [ss for mask, ss in zip(masks, s) if i & mask]
+
+
+    def pathSum(self, root: TreeNode, targetSum: int) -> List[List[int]]:
+        ret = []
+        def find_next(node: TreeNode, path: List[int], curr_sum: int):
+            temp = path.copy()
+            temp.append(node.val)
+            curr_sum += node.val
+            if not node.left and not node.right:
+                # leaf
+                if curr_sum == targetSum:
+                    ret.append(temp)
+                    return
+            if node.left:
+                find_next(node.left, temp, curr_sum)
+            if node.right:
+                find_next(node.right, temp, curr_sum)
+        if root:
+            find_next(root, [], 0)
+        return ret
+
+
+    def stoneGame(self, piles: List[int]) -> bool:
+        # dp[i, j] => [first player point, second player point]
+        # represents for a game with piles[i, j + 1]
+        n = len(piles)
+        dp = [[[0] * 2 for i in range(n)] for i in range(n)]
+        for i in range(n):
+            dp[i][i][0] = piles[i]
+        for step in range(1, n):
+            for i in range(n):
+                j = i + step
+                if j >= n :
+                    continue
+                if dp[i + 1][j][1] + piles[i] > dp[i][j - 1][1] + piles[j]:
+                    # take first
+                    dp[i][j] = [dp[i + 1][j][1] + piles[i], dp[i + 1][j][0]]
+                else:
+                    # take last
+                    dp[i][j] = [dp[i][j - 1][1] + piles[j], dp[i][j - 1][0]]
+        # for i in range(n):
+        #     print(dp[i])
+        return dp[0][n - 1][0] > dp[0][n - 1][1]
+
+
+    def matrixRankTransform(self, A):
+        n, m = len(A), len(A[0])
+        rank = [0] * (m + n)
+        d = collections.defaultdict(list)
+        for i in range(n):
+            for j in range(m):
+                d[A[i][j]].append([i, j])
+
+        def find(i):
+            if p[i] != i:
+                p[i] = find(p[i])
+            return p[i]
+
+        for a in sorted(d):
+            p = range(m + n)
+            rank2 = rank[:]
+            for i, j in d[a]:
+                i, j = find(i), find(j + n)
+                p[i] = j
+                rank2[j] = max(rank2[i], rank2[j])
+            for i, j in d[a]:
+                rank[i] = rank[j + n] = A[i][j] = rank2[find(i)] + 1
+        return A
+
+
+    def matrixRankTransform(self, matrix: List[List[int]]) -> List[List[int]]:
+        temp = collections.defaultdict(list)
+        m, n = len(matrix), len(matrix[0])
+        rank = [0] * (m + n) # confused
+        for i in range(m):
+            for j in range(n):
+                temp[matrix[i][j]].append([i, j])
+        print(temp.items())
+        
+        # loop with sorted keys
+        for i in sorted(temp):
+            pass
+    
+
+    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+        # beats 98% in time
+        anagram = collections.defaultdict(list)
+        for s in strs:
+            anagram[''.join(sorted(s))].append(s)
+        return list(anagram.values())
