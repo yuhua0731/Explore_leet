@@ -29,5 +29,6 @@ def main():
     print(solu.stoneGame([3,101,3]))
     print(solu.matrixRankTransform([[7, 8], [8, 7]]))
     print(solu.groupAnagrams(["ddbdddd","bcb"]))
+    print(solu.canReorderDoubled([-2,2,-4,4]))
 if __name__ == "__main__":
     main()

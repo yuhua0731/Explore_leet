@@ -170,6 +170,18 @@ void union(int a, int b) {
 }
 ```
 
+## 9. collections
+### Counter
+A Counter is a dict subclass for counting hashable objects. It is a collection where elements are stored as dictionary keys and their counts are stored as dictionary values. Counts are allowed to be any integer value including zero or negative counts.
 ```python
+arr = [1, 1, 7]
+count = collections.Counter(arr)
+# Counter({1: 2, 7: 1})
+```
 
+## 10. sort with customize functions
+```python
+arr.sort(key=functools.cmp_to_key(lambda x, y: 1 if abs(x) > abs(y) else -1))
+arr.sort(key=abs) # sort original list
+sorted(arr, key=abs) # do not affect original list
 ```

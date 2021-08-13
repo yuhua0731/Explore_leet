@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-from tricks import largestNumber
 from typing import List
 import csv
 import time
 import random
 import collections
+import functools
 
 # Definition for singly-linked list.
 class ListNode:
@@ -569,3 +569,24 @@ class Solution:
         for s in strs:
             anagram[''.join(sorted(s))].append(s)
         return list(anagram.values())
+
+
+    def canReorderDoubled(self, arr: List[int]) -> bool:
+        # count = collections.defaultdict(int)
+        # for i in arr:
+        #     count[i] += 1
+        # arr.sort(key=functools.cmp_to_key(lambda x, y: 1 if abs(x) > abs(y) else -1))
+        # for i in arr:
+        #     if count[i] == 0:
+        #         continue
+        #     if count[i * 2] == 0:
+        #         return False
+        #     count[i] -= 1
+        #     count[i * 2] -= 1
+        # return sum(list(count.values())) == 0
+        count = collections.Counter(arr)
+        for key in sorted(count, key=abs):
+            if count[key] > count[2 * key]:
+                return False
+            count[2 * key] -= count[key]
+        return True
