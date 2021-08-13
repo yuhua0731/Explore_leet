@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from tricks import largestNumber
-from solution import ListNode, TreeNode, Solution
+from solution import ListNode, Solution, TreeNode
 
 def main():
     solu = Solution()
@@ -18,5 +18,17 @@ def main():
     print(p.reset())
     solu.sortedArrayToBST([1, 2, 3, 4, 5, 7, 10]).printNode()
     print(solu.threeSumClosest([0, -1, -1, 2, 3, 6, -4, -2, 3, 5, -1], -3))
+    print(solu.twoSum([1, 2, 3, 4, 7], 10))
+    print(solu.largestIsland([[1, 1], [1, 1]]))
+    print(solu.subsetsWithDup([4, 4, 4, 1, 4]))
+    print(list(solu.powerset([1, 2, 3])))
+    a = TreeNode(1)
+    a.left = TreeNode(2)
+    a.right = TreeNode(2)
+    print(solu.pathSum(a, 3))
+    print(solu.stoneGame([3,101,3]))
+    print(solu.matrixRankTransform([[7, 8], [8, 7]]))
+    print(solu.groupAnagrams(["ddbdddd","bcb"]))
+    print(solu.canReorderDoubled([-2,2,-4,4]))
 if __name__ == "__main__":
     main()
