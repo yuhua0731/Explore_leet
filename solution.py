@@ -4,10 +4,10 @@ import csv
 import time
 import random
 import collections
-import functools
 
-# Definition for singly-linked list.
+
 class ListNode:
+    # Definition for singly-linked list.
     def __init__(self, val=0, next=None):
         self.val = val
         self.next = next
@@ -26,7 +26,7 @@ class TreeNode:
         self.val = x
         self.left = None
         self.right = None
-    
+
     def printNode(self):
         if self:
             print(self.val)
@@ -42,20 +42,19 @@ class fileHandler:
 
     def writer(self):
         self.timestr = time.strftime("%Y%m%d%H%M%S")
-        with open(self.timestr+'.csv','w',encoding='utf-8') as csvfile:
-            writer = csv.writer(csvfile,delimiter=',')
-            writer.writerow(['TimeDiff(us)','Cobid','Length','RTR','Data'])
+        with open(self.timestr+'.csv', 'w', encoding='utf-8') as csvfile:
+            writer = csv.writer(csvfile, delimiter=',')
+            writer.writerow(['TimeDiff(us)', 'Cobid', 'Length', 'RTR', 'Data'])
 
     def take_writer(self):
-        with open(self.timestr+'.csv','w',encoding='utf-8') as csvfile:
-            writer = csv.writer(csvfile,delimiter=',')
+        with open(self.timestr+'.csv', 'w', encoding='utf-8') as csvfile:
+            writer = csv.writer(csvfile, delimiter=',')
             writer.writerow('hello')
 
 
 class Solution:
     def __init__(self) -> None:
         super().__init__()
-
 
     def isIsomorphic(self, s: str, t: str) -> bool:
         mappings = dict()
@@ -68,7 +67,6 @@ class Solution:
                     return False
                 mappings[s[i]] = t[i]
         return True
-
 
     def numDecodings(self, s: str) -> int:
         """
@@ -89,7 +87,6 @@ class Solution:
                 dp_new[2] = (c == '2') * dp[0]
             dp = [i % mod for i in dp_new]
         return dp[0]
-
 
     def lengthOfLIS(self, nums: List[int]) -> int:
         # DFS, failed TLE
@@ -137,8 +134,7 @@ class Solution:
                     else:
                         right = middle
                 tails[left] = min(tails[left], nums[i])
-        return len(tails)        
-
+        return len(tails)
 
     def findLength(self, nums1: List[int], nums2: List[int]) -> int:
         # forgive me, this is find subsequence
@@ -157,9 +153,8 @@ class Solution:
         for i in range(1, m + 1):
             for j in range(1, n + 1):
                 if nums1[i - 1] == nums2[j - 1]:
-                    dp[i][j] = 1 + dp[i - 1][j - 1]     
+                    dp[i][j] = 1 + dp[i - 1][j - 1]
         return max(max(x) for x in dp)
-
 
     def findPeakElement(self, nums: List[int]) -> int:
         # O(logn) time
@@ -175,7 +170,6 @@ class Solution:
             else:
                 return middle
         return left
-
 
     def fourSum(self, nums: List[int], target: int) -> List[List[int]]:
         ret, curr_four = list(), list()
@@ -206,17 +200,16 @@ class Solution:
                         l += 1
                     else:
                         r -= 1
-        
+
         find_next(-1, target)
         return ret
-
 
     def triangleNumber(self, nums: List[int]) -> int:
         nums.sort()
         n = len(nums)
-        global ret 
+        global ret
         ret = 0
-                
+
         # we pick the first edge
         # 从小到大轮询，后两条边需要做减法运算
         # 每当找到临界点，将第二条边更新，同时需要再次从最后一个index开始找临界点
@@ -230,7 +223,7 @@ class Solution:
         #             r = n - 1
         #         else:
         #             r -= 1
-        
+
         # we pick the last edge
         # 从大到小轮询，前两条边做加法运算
         # 每当找到临界点，将第一条边后移，第二条变无需重新找，可从当前index继续往前找
@@ -244,34 +237,32 @@ class Solution:
                     l += 1
         return ret
 
-
-    # python pointer
     def reverseKGroup(self, head: ListNode, k: int) -> ListNode:
+        # python pointer
         current = head
         next = None
         prev = None
         count = 0
- 
+
         # Reverse first k nodes of the linked list
         while current and count < k:
             next, current.next, prev = current.next, prev, current
             current = next
             count += 1
- 
+
         # next is now a pointer to (k+1)th node
         # recursively call for the list starting
         # from current. And make rest of the list as
         # next of first node
         if next is not None:
             head.next = self.reverseKGroup(next, k)
- 
+
         # prev is new head of the input list
         return prev
 
-
     def lowestCommonAncestor(self, root: TreeNode, p: TreeNode, q: TreeNode) -> TreeNode:
         # accepted
-        # global ancester 
+        # global ancester
         # ancester = None
         # def find_index(node: TreeNode):
         #     global ancester
@@ -301,9 +292,8 @@ class Solution:
             if node.val < p_ and node.val < q_:
                 return find_ancester(node.right, p_, q_)
             return node
-        
-        return find_ancester(root, p.val, q.val)
 
+        return find_ancester(root, p.val, q.val)
 
     class shuffle:
         def __init__(self, nums: List[int]):
@@ -315,7 +305,7 @@ class Solution:
             Resets the array to its original configuration and return it.
             """
             return self.origin
-            
+
         # random sort key
         # sorted(self.nums, key = lambda _: random.random())
         def shuffle(self) -> List[int]:
@@ -325,12 +315,10 @@ class Solution:
             random.shuffle(self.sf)
             return self.sf
 
-    
     def pushDominoes(self, dominoes: str) -> str:
         for i in range(len(dominoes)):
             pass
         return dominoes
-
 
     def sortedArrayToBST(self, nums: List[int]) -> TreeNode:
         # find middle node and put it to root
@@ -344,7 +332,6 @@ class Solution:
             ret.right = subtree(middle + 1, right)
             return ret
         return subtree(0, len(nums))
-
 
     def threeSumClosest(self, nums: List[int], target: int) -> int:
         # DFS
@@ -377,19 +364,26 @@ class Solution:
         ret = sum(nums[:3])
         n = len(nums)
         for i in range(len(nums) - 2):
-            if i > 0 and nums[i] == nums[i - 1]: continue
+            if i > 0 and nums[i] == nums[i - 1]:
+                continue
             l, r = i + 1, n - 1
-            ls, rs = nums[i] + nums[l] + nums[l + 1], nums[i] + nums[r] + nums[r - 1]
-            if ls > target: r = l + 1
-            elif rs < target: l = r - 1
+            ls, rs = nums[i] + nums[l] + \
+                nums[l + 1], nums[i] + nums[r] + nums[r - 1]
+            if ls > target:
+                r = l + 1
+            elif rs < target:
+                l = r - 1
             while l < r:
                 sums = nums[i] + nums[l] + nums[r]
-                if abs(sums - target) < abs(ret - target): ret = sums
-                if sums == target: return sums
-                elif sums < target: l += 1
-                else: r -= 1
+                if abs(sums - target) < abs(ret - target):
+                    ret = sums
+                if sums == target:
+                    return sums
+                elif sums < target:
+                    l += 1
+                else:
+                    r -= 1
         return ret
-
 
     def twoSum(self, nums: List[int], target: int) -> List[int]:
         # time complexity: O(n)
@@ -400,7 +394,6 @@ class Solution:
             elif nums[i] not in visited:
                 visited[nums[i]] = i
         return [0, 0]
-
 
     def largestIsland(self, grid: List[List[int]]) -> int:
         m, n = len(grid), len(grid[0])
@@ -446,7 +439,6 @@ class Solution:
                     ret = max(ret, sum(island[k] for k in area) + 1)
         return ret
 
-
     def subsetsWithDup(self, nums: List[int]) -> List[List[int]]:
         # DFS
         # subset, not list, no order
@@ -454,6 +446,7 @@ class Solution:
         ret = set()
         global subset
         subset = ''
+
         def extend(index: int):
             global subset
             if index == n:
@@ -473,16 +466,15 @@ class Solution:
             ret_list.append(list(map(int, i.split(' ')[1:])))
         return ret_list
 
-
     def powerset(self, s):
         x = len(s)
         masks = [1 << i for i in range(x)]
         for i in range(1 << x):
             yield [ss for mask, ss in zip(masks, s) if i & mask]
 
-
     def pathSum(self, root: TreeNode, targetSum: int) -> List[List[int]]:
         ret = []
+
         def find_next(node: TreeNode, path: List[int], curr_sum: int):
             temp = path.copy()
             temp.append(node.val)
@@ -500,7 +492,6 @@ class Solution:
             find_next(root, [], 0)
         return ret
 
-
     def stoneGame(self, piles: List[int]) -> bool:
         # dp[i, j] => [first player point, second player point]
         # represents for a game with piles[i, j + 1]
@@ -511,7 +502,7 @@ class Solution:
         for step in range(1, n):
             for i in range(n):
                 j = i + step
-                if j >= n :
+                if j >= n:
                     continue
                 if dp[i + 1][j][1] + piles[i] > dp[i][j - 1][1] + piles[j]:
                     # take first
@@ -522,7 +513,6 @@ class Solution:
         # for i in range(n):
         #     print(dp[i])
         return dp[0][n - 1][0] > dp[0][n - 1][1]
-
 
     def matrixRankTransform(self, A):
         n, m = len(A), len(A[0])
@@ -548,20 +538,18 @@ class Solution:
                 rank[i] = rank[j + n] = A[i][j] = rank2[find(i)] + 1
         return A
 
-
     def matrixRankTransform(self, matrix: List[List[int]]) -> List[List[int]]:
         temp = collections.defaultdict(list)
         m, n = len(matrix), len(matrix[0])
-        rank = [0] * (m + n) # confused
+        rank = [0] * (m + n)  # confused
         for i in range(m):
             for j in range(n):
                 temp[matrix[i][j]].append([i, j])
         print(temp.items())
-        
+
         # loop with sorted keys
         for i in sorted(temp):
             pass
-    
 
     def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
         # beats 98% in time
@@ -569,7 +557,6 @@ class Solution:
         for s in strs:
             anagram[''.join(sorted(s))].append(s)
         return list(anagram.values())
-
 
     def canReorderDoubled(self, arr: List[int]) -> bool:
         # count = collections.defaultdict(int)
