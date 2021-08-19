@@ -1,7 +1,7 @@
 # Explore_leet
 ## 1. heapq in python
 heap queue, aka priority queue, always keep all elements sorted with smallest element in the first position
-### 2 different properties:
+### two different properties:
 - zero-based indexing, h[i]'s children are h[2 * i + 1] and h[2 * i + 2]
 - min-heap, pop method returns the smallest element
 tip: if you want to implement a max heap, just negative all elements
@@ -184,4 +184,28 @@ count = collections.Counter(arr)
 arr.sort(key=functools.cmp_to_key(lambda x, y: 1 if abs(x) > abs(y) else -1))
 arr.sort(key=abs) # sort original list
 sorted(arr, key=abs) # do not affect original list
+```
+
+## 11. conversion among diff types
+```python
+# bytes to int
+int.from_bytes(byte_variable, byteorder = 'little', signed=True)
+
+# int to bytes
+int_variable.to_bytes(4, byteorder='little')
+
+# bytes to float
+b = b'\xc2\xdatZ'
+
+# native byte order (little-endian on my machine)
+struct.unpack('f', b)[0] # 1.7230105268977664e+16
+
+# big-endian 
+struct.unpack('>f', b)[0] # -109.22724914550781
+
+# bytes to string:
+b.decode("utf-8")
+
+# print 2 decimal places float:
+"{:.2f}".format(float)
 ```

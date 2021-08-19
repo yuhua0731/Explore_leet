@@ -52,6 +52,36 @@ class fileHandler:
             writer.writerow('hello')
 
 
+class NumArray:
+    # Your NumArray object will be instantiated and called as such:
+    # obj = NumArray(nums)
+    # param_1 = obj.sumRange(left,right)
+
+    # TLE
+    # sum_range = collections.defaultdict(list)
+    # def __init__(self, nums: List[int]):
+    #     n = len(nums)
+    #     for i in range(n):
+    #         for value in self.sum_range.values():
+    #             value.append(value[-1] + nums[i])
+    #         self.sum_range[i].append(nums[i])
+
+    # def sumRange(self, left: int, right: int) -> int:
+    #     return self.sum_range[left][right - left]
+
+    part = [0]
+    def __init__(self, nums: List[int]):
+        # append additional element at the front of list
+        # prevent from checking if index out of range
+        for i in nums:
+            self.part.append(self.part[-1] + i)
+            
+    def sumRange(self, left: int, right: int) -> int:
+        # sum to right - sum to (left - 1)
+        # left & right are inclusive
+        return self.part[right + 1] - self.part[left]
+
+
 class Solution:
     def __init__(self) -> None:
         super().__init__()
@@ -68,7 +98,7 @@ class Solution:
                 mappings[s[i]] = t[i]
         return True
 
-    def numDecodings(self, s: str) -> int:
+    def numDecodingsWithStar(self, s: str) -> int:
         """
         dp[0] represents for ending with one digit number
         dp[1] represents for total decodings when last digit is '1'
@@ -577,3 +607,70 @@ class Solution:
                 return False
             count[2 * key] -= count[key]
         return True
+
+    def minWindow(self, s: str, t: str) -> str:
+        # sliding windows
+        left, right = 0, 1
+        ret, exist = s, False
+        count = collections.Counter(t)        
+
+        while right <= len(s):
+            if s[right - 1] in count:
+                count[s[right - 1]] -= 1
+            if all(i <= 0 for i in count.values()):
+                exist = True
+                # contain all chars, start move left cursor
+                while True:
+                    if len(ret) > (right - left):
+                        ret = s[left:right]
+                    if s[left] in count:
+                        count[s[left]] += 1
+                    left += 1
+                    if not all(i <= 0 for i in count.values()):
+                        break
+            right += 1
+        return ret if exist else ""
+
+    def goodNodes(self, root: TreeNode) -> int:
+        global ret
+        # DFS
+        def find_path(node: TreeNode, path: List):
+            global ret
+            # node is a leaf
+            if node.val >= (max(path) if path else node.val):
+                ret += 1
+            if node.left:
+                path.append(node.val)
+                find_path(node.left, path)
+                path.pop()
+            if node.right:
+                path.append(node.val)
+                find_path(node.right, path)
+                path.pop()
+        ret = 0
+        find_path(root, [])
+        return ret
+
+    def numDecodings(self, s: str) -> int:
+        """
+        dp[0] represents for ending with one-digit number
+        dp[1] represents for total decodings when last digit is '1'
+        dp[2] represents for total decodings when last digit is '2'
+        dp[3] represents for ending with two-digit number
+        """
+        dp, dp_new = [1, 0, 0, 0], [0] * 4
+        for i in map(int, s):
+            if i == 0:
+                dp_new = [0, 0, 0, dp[1] + dp[2]]
+            elif i == 1:
+                dp_new = [dp[0] + dp[3], dp[0] + dp[3], 0, dp[1] + dp[2]]
+            elif i == 2:
+                dp_new = [dp[0] + dp[3], 0, dp[0] + dp[3], dp[1] + dp[2]]
+            elif i in range(3, 7):
+                dp_new = [dp[0] + dp[3], 0, 0, dp[1] + dp[2]]
+            else:
+                dp_new = [dp[0] + dp[3], 0, 0, dp[1]]
+            if sum(dp) == 0:
+                return 0
+            dp = dp_new
+        return dp[0] + dp[3]

@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-from solution import ListNode, fileHandler
+from solution import ListNode, TreeNode, fileHandler
 import time
 import csv
+import json
+from bitstring import BitArray
 
 a = b = list()
 a.append(1)
@@ -35,6 +37,26 @@ pre = l
 ListNode.printList(head)
 ListNode.printList(pre)
 
-a = fileHandler()
-a.writer()
-a.take_writer()
+# a = fileHandler()
+# a.writer()
+# a.take_writer()
+
+print(ord('z') - ord('A'))
+
+aa = {}
+aa["name"] = "name"
+print(aa)
+
+strtest = "/+/response"
+print(strtest.replace('+', "777777"))
+
+msg = b'\x11\x85\x06\x09\x78\x00\x01\x02\x6c\xff\x87\xb2'
+print(msg[-4:])
+
+a = int.from_bytes(b'\xff', byteorder='little', signed=True)
+b = a + 1000
+print(a)
+print(b)
+print(b - a)
+
+print(int(BitArray(hex=b'\x01'.hex()).bin[7]))

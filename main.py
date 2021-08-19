@@ -5,7 +5,7 @@ from solution import ListNode, Solution, TreeNode
 def main():
     solu = Solution()
     print(solu.isIsomorphic('apple', 'heelo'))
-    print(solu.numDecodings('1234**01*0'))
+    print(solu.numDecodingsWithStar('1234**01*0'))
     print(solu.lengthOfLIS([1, 3, 6, 7, 9, 4, 10, 5, 6]))
     print(solu.findLength([1, 2, 3, 2, 1], [3, 2, 1, 4, 7]))
     print(solu.findPeakElement([1, 2, 5, 3, 7, 4, 10]))
@@ -31,6 +31,10 @@ def main():
     print(solu.matrixRankTransform([[7, 8], [8, 7]]))
     print(solu.groupAnagrams(["ddbdddd", "bcb"]))
     print(solu.canReorderDoubled([-2, 2, -4, 4]))
+    print(solu.minWindow("ADBEBANC", "ABC"))
+    print(solu.numDecodings('0')) # 0
+    print(solu.numDecodings('06')) # 0
+    print(solu.numDecodings('2101')) # 1
 
 
 if __name__ == "__main__":
