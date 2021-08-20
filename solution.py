@@ -674,3 +674,19 @@ class Solution:
                 return 0
             dp = dp_new
         return dp[0] + dp[3]
+
+    def maxProduct(self, root: TreeNode) -> int:
+        sum_set = set()
+        def sum_tree(node: TreeNode):
+            if node:
+                ret = node.val + sum_tree(node.left) + sum_tree(node.right)
+                sum_set.add(ret)
+                return ret
+            else:
+                return 0            
+        
+        sum_node = sum_tree(root)
+        MOD = 10 ** 9 + 7
+        return max([(sum_node - i) * i for i in sum_set]) % MOD
+
+
