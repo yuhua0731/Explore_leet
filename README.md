@@ -209,3 +209,24 @@ b.decode("utf-8")
 # print 2 decimal places float:
 "{:.2f}".format(float)
 ```
+
+## 12. multiple for loops and if in the same statement
+The best way to remember this is that the order of for loop inside the list comprehension is based on the order in which **they appear in traditional loop approach**. Outer most loop comes first, and then the inner loops subsequently.
+
+So, the equivalent list comprehension would be:
+```python
+[entry for tag in tags for entry in entries if tag in entry]
+```
+In general, **if-else statement comes before the first for loop**, and if you have just an if statement, it will come at the **end**. For e.g, if you would like to add an empty list, if tag is not in entry, you would do it like this:
+```python
+[entry if tag in entry else [] for tag in tags for entry in entries]
+```
+
+## 13. zip() in python
+```python
+a =     [0, 1, 2]
+a[1:] = [1, 2]
+b =     [1, 2, 0]
+# here is a little trick: to form a list of (a[i], a[i + 1], b[i])
+tuple(zip(a, a[1:], b)) = ((0, 1, 1), (1, 2, 2))
+```

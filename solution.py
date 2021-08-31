@@ -4,6 +4,8 @@ import csv
 import time
 import random
 import collections
+import math
+import functools
 
 
 class ListNode:
@@ -70,12 +72,13 @@ class NumArray:
     #     return self.sum_range[left][right - left]
 
     part = [0]
+
     def __init__(self, nums: List[int]):
         # append additional element at the front of list
         # prevent from checking if index out of range
         for i in nums:
             self.part.append(self.part[-1] + i)
-            
+
     def sumRange(self, left: int, right: int) -> int:
         # sum to right - sum to (left - 1)
         # left & right are inclusive
@@ -612,7 +615,7 @@ class Solution:
         # sliding windows
         left, right = 0, 1
         ret, exist = s, False
-        count = collections.Counter(t)        
+        count = collections.Counter(t)
 
         while right <= len(s):
             if s[right - 1] in count:
@@ -634,6 +637,7 @@ class Solution:
     def goodNodes(self, root: TreeNode) -> int:
         global ret
         # DFS
+
         def find_path(node: TreeNode, path: List):
             global ret
             # node is a leaf
@@ -677,16 +681,346 @@ class Solution:
 
     def maxProduct(self, root: TreeNode) -> int:
         sum_set = set()
+
         def sum_tree(node: TreeNode):
             if node:
                 ret = node.val + sum_tree(node.left) + sum_tree(node.right)
                 sum_set.add(ret)
                 return ret
             else:
-                return 0            
-        
+                return 0
+
         sum_node = sum_tree(root)
         MOD = 10 ** 9 + 7
         return max([(sum_node - i) * i for i in sum_set]) % MOD
 
+    def isValidSudoku(self, board: List[List[str]]) -> bool:
+        # A Sudoku board (partially filled) could be valid but is not necessarily solvable
+        count = collections.defaultdict(set)
+        # key: r1 - r9, c1 - c9, s1 - s9
+        for i in range(9):
+            for j in range(9):
+                if board[i][j] == '.':
+                    continue
+                if board[i][j] in count[f'r{i}'] or board[i][j] in count[f'c{j}'] or board[i][j] in count[f's{i // 3 * 3 + j // 3}']:
+                    return False
+                count[f'r{i}'].add(board[i][j])
+                count[f'c{j}'].add(board[i][j])
+                count[f's{i // 3 * 3 + j // 3}'].add(board[i][j])
+        return True
 
+    def solveSudoku(self, board: List[List[str]]) -> None:
+        """
+        Do not return anything, modify board in-place instead.
+        """
+        count = collections.defaultdict(set)
+        # key: r1 - r9, c1 - c9, s1 - s9
+        for i in range(9):
+            for j in range(9):
+                if board[i][j] == '.':
+                    continue
+                count[f'r{i}'].add(board[i][j])
+                count[f'c{j}'].add(board[i][j])
+                count[f's{i // 3 * 3 + j // 3}'].add(board[i][j])
+
+        # traverse from top-left to bottom-right
+        def solve_next(i: int, j: int):
+            while i < 9:
+                # locate next item to be solved
+                if board[i][j] != '.':
+                    j += 1
+                    if j == 9:
+                        i += 1
+                        j = 0
+                else:
+                    # DFS
+                    for element in map(str, range(1, 10)):
+                        if element in count[f'r{i}'] or element in count[f'c{j}'] or element in count[f's{i // 3 * 3 + j // 3}']:
+                            continue
+                        else:
+                            board[i][j] = element
+                            count[f'r{i}'].add(element)
+                            count[f'c{j}'].add(element)
+                            count[f's{i // 3 * 3 + j // 3}'].add(element)
+                            if solve_next(i, j):
+                                return True
+                            board[i][j] = '.'
+                            count[f'r{i}'].remove(element)
+                            count[f'c{j}'].remove(element)
+                            count[f's{i // 3 * 3 + j // 3}'].remove(element)
+                    return False
+            return True
+
+        solve_next(0, 0)
+        return board
+
+    def rectangleArea(self, rectangles: List[List[int]]) -> int:
+        # sort all x coordinates
+        xs = sorted(
+            set([x for x1, y1, x2, y2 in rectangles for x in [x1, x2]]))
+        # ☆☆☆ refer to 12# in README.md ☆☆☆
+        # sorted(set([x for x1, y1, x2, y2 in rectangles for x in [x1, x2]]))
+        # is equivalent to the following codes:
+        # temp = []
+        # for x1, y1, x2, y2 in rectangles:
+        #     for x in [x1, x2]:
+        #         temp.append(x)
+        # xs = sorted(set(temp))
+
+        # form a dict which key is x_coordinate and value is the index
+        x_i = {value: index for index, value in enumerate(xs)}
+
+        L = []  # empty list
+        for x1, y1, x2, y2 in rectangles:
+            L.append([y1, x1, x2, 1])  # bottom edge
+            L.append([y2, x1, x2, -1])  # top edge
+            # these two lines form a rectangle
+        L.sort()  # first key is y coordinate, second key is x1, and then x2
+
+        cur_y = cur_x_sum = area = 0
+        count = [0] * len(x_i)
+        for y, x1, x2, signal in L:
+            area += (y - cur_y) * cur_x_sum
+            cur_y = y  # current y level
+            for i in range(x_i[x1], x_i[x2]):
+                count[i] += signal
+                # signal = 1, start from here, add 1 to all x_range
+                # signal = -1, end here, minus 1 from all x_range
+            """
+            ex. 
+            input = [[0,0,2,2],[1,1,2,4]]
+            count = [1, 1, 0] y = 0
+                  ↓ [1, 2, 0] y = 1 there is an overlap cell | area += (y: 1 - curr_y: 0) * curr_x_sum: 2
+                  ↓ [0, 1, 0] y = 2 area += (y: 2 - curr_y: 1) * curr_x_sum: 2
+                  ↓ [0, 0, 0] y = 4 area += (y: 4 - curr_y: 2) * curr_x_sum: 1
+            """
+            cur_x_sum = sum(x2 - x1 if c else 0 for x1, x2,
+                            c in zip(xs, xs[1:], count))
+        return area % (10 ** 9 + 7)
+
+    def findGCD(self, nums: List[int]) -> int:
+        min_, max_ = min(nums), max(nums)
+        while True:
+            max_ = max_ % min_
+            if max_ == 0:
+                return min_
+            min_, max_ = max_, min_
+
+    def findDifferentBinaryString(self, nums: List[str]) -> str:
+        n = len(nums)
+        nums = sorted(set(nums))
+        count = 0
+        for i in nums:
+            if int(i, 2) != count:
+                ret = str(bin(count))[2:]
+                while len(ret) < n:
+                    ret = '0' + ret
+                return ret
+            count += 1
+        ret = str(bin(count))[2:]
+        while len(ret) < n:
+            ret = '0' + ret
+        return ret
+
+    def minimizeTheDifference(self, mat: List[List[int]], target: int) -> int:
+        # DFS?
+        # m = len(mat)
+        # for row in mat:
+        #     row.sort()
+        # init = sum([i[0] for i in mat])
+        # if init >= target:
+        #     return abs(init - target)
+        # global diff
+        # diff = abs(init - target)
+        # def find_next(row: int, cur_sum: int):
+        #     global diff
+        #     # print(row, cur_sum, diff)
+        #     if cur_sum - target >= diff or diff == 0:
+        #         return
+        #     if row == m - 1:
+        #         # last row
+        #         for i in mat[row]:
+        #             diff = min(diff, abs((cur_sum + i) - target))
+        #     else:
+        #         for i in mat[row]:
+        #             find_next(row + 1, cur_sum + i)
+        # find_next(0, 0)
+        # return diff
+        nums = {0}
+        for row in mat:
+            nums = {x + i for x in row for i in nums}  # set
+        return min(abs(target - x) for x in nums)
+
+    def recoverArray(self, n: int, sums: List[int]) -> List[int]:
+        total = sum(sums)
+        n = len(sums)
+        sum_arr = total / (n / 2)
+
+    def findTarget(self, root: TreeNode, k: int) -> bool:
+        global node_val
+        node_val = set()
+
+        def find_next(node: TreeNode):
+            global node_val
+            if node:
+                if k - node.val in node_val:
+                    return True
+                else:
+                    node_val.add(node.val)
+                    return find_next(node.left) or find_next(node.right)
+            return False
+        return find_next(root)
+
+    def complexNumberMultiply(self, num1: str, num2: str) -> str:
+        num1_part = [int(i) for i in num1[:-1].split('+')]
+        num2_part = [int(i) for i in num2[:-1].split('+')]
+        ret_part = [num1_part[0] * num2_part[0] - num1_part[1] * num2_part[1],
+                    num1_part[0] * num2_part[1] + num1_part[1] * num2_part[0]]
+        return f'{str(ret_part[0])}+{str(ret_part[1])}i'
+
+    def judgeSquareSum(self, c: int) -> bool:
+        # 0 <= c <= 2 ** 31 - 1
+        # def perfect_sqrt(i):
+        #     return math.sqrt(i).is_integer()
+        # return any(perfect_sqrt(c - a ** 2) for a in range(math.floor(math.sqrt(c / 2)) + 1))
+        mid = math.floor(math.sqrt(c / 2))
+        base = 0
+        while base <= mid:
+            if math.sqrt(c - base ** 2).is_integer():
+                return True
+            base += 1
+        return False
+
+    def isValidSerialization(self, preorder: str) -> bool:
+        # node = preorder.split(',')
+        # global index
+        # index = 0
+        # def traverse():
+        #     global index
+        #     if index >= len(node) or node[index] == '#':
+        #         return
+        #     else:
+        #         # left child
+        #         index += 1
+        #         traverse()
+        #         # right child
+        #         index += 1
+        #         traverse()
+        # traverse()
+        # return index == len(node) - 1
+
+        # use stack
+        node = []
+        for i in preorder.split(','):
+            while i == '#' and node and node[-1] == '#':
+                # find two contiguous '#'
+                # pop them out
+                node.pop()
+                # pop their parent node as well
+                if not node:
+                    return False
+                node.pop()
+            node.append(i)
+        return len(node) == 1 and node[0] == '#'                
+      
+    def findLUSlength(self, strs: List[str]) -> int:
+        # brute force, accepted
+        strs.sort(key=functools.cmp_to_key(lambda x, y: 1 if len(x) < len(y) else -1))
+        checked = set()
+        def is_subsequence(a: str, b: str):
+            index_a, index_b = 0, 0
+            while index_a < len(a) and index_b < len(b):
+                if a[index_a] == b[index_b]:
+                    index_a += 1
+                index_b += 1
+            return index_a == len(a)
+
+        for i in range(len(strs)):
+            """
+            - why do we only care about the whole word, rather than check all subsequences of it?
+            - if the whole word is a common subsequence of another word, 
+              then all subsequences of it are common subs of that word as well.
+            """
+            # check whole word
+            if strs[i] not in checked:
+                checked.add(strs[i])
+                if all(not is_subsequence(strs[i], strs[j]) for j in range(len(strs)) if i != j):
+                    return len(strs[i])
+        return -1
+
+    def minPatches(self, nums: List[int], n: int) -> int:
+        nums.sort()
+        cover, count, i = 1, 0, 0
+        while n >= cover:
+            if i < len(nums) and nums[i] <= cover:
+                cover += nums[i]
+                i += 1
+            else:
+                count += 1
+                cover *= 2
+        return count
+
+    def maxCount(self, m: int, n: int, ops: List[List[int]]) -> int:
+        if not ops:
+            return m * n
+        # ops_x = sorted(ops)
+        # ops_y = sorted(ops, key=functools.cmp_to_key(lambda a, b: 1 if a[1] > b[1] or (a[1] == b[1] and a[0] > b[0]) else -1))
+        # return ops_x[0][0] * ops_y[0][1]
+        return min(x for x, y in ops) * min(y for x, y in ops)
+            
+    def minimumDifference(self, nums: List[int], k: int) -> int:
+        nums.sort()
+        return min((nums[i + k - 1] - nums[i]) for i in range(len(nums) + 1 - k))
+
+    def kthLargestNumber(self, nums: List[str], k: int) -> str:
+        return str(tuple(sorted(map(int, nums), reverse=True))[k - 1])
+
+    def minSessions(self, tasks: List[int], sessionTime: int) -> int:
+        tasks.sort(reverse=True)
+        session = list()
+        global ret
+        ret = len(tasks)
+        def find_next(index: int):
+            global ret
+            if index == len(tasks) or any(se >= sum(tasks[index:]) for se in session):
+                print(session)
+                ret = min(len(session), ret)
+                return
+            i = tasks[index]
+            for s in range(len(session)):
+                if session[s] >= i:
+                    session[s] -= i
+                    find_next(index + 1)
+                    session[s] += i
+                s += 1
+            session.append(sessionTime - i)
+            find_next(index + 1)
+            session.pop()
+        find_next(0)
+        return ret
+            
+    def numberOfUniqueGoodSubsequences(self, binary: str) -> int:
+        # TLE
+        # unique = set()
+        # def find_next(index: int, subs: str):
+        #     if subs:
+        #         unique.add(subs)
+        #     for i in range(index, len(binary)):
+        #         if not subs and binary[i] == '0':
+        #             unique.add("0")
+        #             continue
+        #         subs += binary[i]
+        #         find_next(i + 1, subs)
+        #         subs = subs[:-1]
+        # find_next(0, "")
+        # return len(unique)
+
+        # dp
+        dp = [0, 0] # end with 0, end with 1
+        MOD = 10 ** 9 + 7
+        for i in binary:
+            # add "1" as leading number in the further loop
+            dp[int(i)] = (sum(dp) + int(i)) % MOD
+            print(dp)
+        # add "0" to unique subs if "0" exists
+        return (sum(dp) + ('0' in binary)) % MOD

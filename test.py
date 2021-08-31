@@ -4,6 +4,7 @@ import time
 import csv
 import json
 from bitstring import BitArray
+import math
 
 a = b = list()
 a.append(1)
@@ -51,7 +52,7 @@ strtest = "/+/response"
 print(strtest.replace('+', "777777"))
 
 msg = b'\x11\x85\x06\x09\x78\x00\x01\x02\x6c\xff\x87\xb2'
-print(msg[-4:])
+print(msg[-4:].hex())
 
 a = int.from_bytes(b'\xff', byteorder='little', signed=True)
 b = a + 1000
@@ -59,4 +60,11 @@ print(a)
 print(b)
 print(b - a)
 
-print(int(BitArray(hex=b'\x01'.hex()).bin[7]))
+print(int(BitArray(b'\x01').bin[7]))
+
+rectangles = [[3, 3, 4, 10], [0, 0, 9, 10]]
+xs = [x for x1, y1, x2, y2 in rectangles for x in [x1, x2]]
+print(xs)
+
+print(math.sqrt(4) is int)
+print(math.ceil(5))
