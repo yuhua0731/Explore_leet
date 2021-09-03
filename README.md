@@ -230,3 +230,17 @@ b =     [1, 2, 0]
 # here is a little trick: to form a list of (a[i], a[i + 1], b[i])
 tuple(zip(a, a[1:], b)) = ((0, 1, 1), (1, 2, 2))
 ```
+
+# tuple in dict
+- tuple is immutable
+- tuple can be key as well as value in dict
+
+there are two common ways to modify a tuple:
+- generate a new tuple with new value, and replace the elder one
+- use += operator:
+```python
+>>> t = {'k': (1, 2)}
+>>> t['k'] += (3,)
+>>> t
+{'k': (1, 2, 3)}
+```

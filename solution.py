@@ -6,6 +6,7 @@ import random
 import collections
 import math
 import functools
+import itertools
 
 
 class ListNode:
@@ -30,12 +31,9 @@ class TreeNode:
         self.right = None
 
     def printNode(self):
-        if self:
-            print(self.val)
-        if self.left:
-            self.left.printNode()
-        if self.right:
-            self.right.printNode()
+        if self: print(self.val)
+        if self.left: self.left.printNode()
+        if self.right: self.right.printNode()
 
 
 class fileHandler:
@@ -983,7 +981,6 @@ class Solution:
         def find_next(index: int):
             global ret
             if index == len(tasks) or any(se >= sum(tasks[index:]) for se in session):
-                print(session)
                 ret = min(len(session), ret)
                 return
             i = tasks[index]
@@ -1000,27 +997,194 @@ class Solution:
         return ret
             
     def numberOfUniqueGoodSubsequences(self, binary: str) -> int:
-        # TLE
-        # unique = set()
-        # def find_next(index: int, subs: str):
-        #     if subs:
-        #         unique.add(subs)
-        #     for i in range(index, len(binary)):
-        #         if not subs and binary[i] == '0':
-        #             unique.add("0")
-        #             continue
-        #         subs += binary[i]
-        #         find_next(i + 1, subs)
-        #         subs = subs[:-1]
-        # find_next(0, "")
-        # return len(unique)
+        """
+        Q. 为什么保证unique?
+        A. 在遍历i的时候，每次加上最后一位（"0"或"1"），都使得之前的集合增加了1位的长度，
+        如果之前的集合是互相唯一的，那么在加上最后一位后仍为互相独立。同时，由于增加后集合里的元素
+        最小长度为2，则需要补上1位长度的子序列。当i为"1"时，可以直接将其加入集合，因为元素允许以"1"
+        作为起始，之后的遍历将会在这个"1"上增加长度。但是当i为"0"时，我们暂时不将其加入集合。因为
+        元素不允许以"0"作为起始，如果加进去在后续遍历时则会产生非法子序列。这也是为什么在最后返回之前，
+        我们需要将之前忽略的"0"加上去。
 
+        Q. 为什么保证dp包含了所有可能的子序列？
+        A. 不论子序列是由哪几位组成，其最后一位只有两种可能，即"0"或"1"。比如输入序列为"1001011",
+        你可能会想，当遍历到最后一位时，前面的"(1001)011"子序列怎么被算进去？其实我们可以从最后一位往前倒推，
+        这个子序列与"(1)0(0)1(0)1(1)"是相同的子序列。
+        """
         # dp
         dp = [0, 0] # end with 0, end with 1
         MOD = 10 ** 9 + 7
         for i in binary:
             # add "1" as leading number in the further loop
             dp[int(i)] = (sum(dp) + int(i)) % MOD
-            print(dp)
         # add "0" to unique subs if "0" exists
         return (sum(dp) + ('0' in binary)) % MOD
+
+    def findMin(self, nums: List[int]) -> int:
+        # it's sorted, but with several retations
+        # time complexity: O(logN)
+        left, right = 0, len(nums) - 1
+        while left < right:
+            mid = left + (right - left) // 2
+            if nums[mid] >= nums[right]:
+                left = mid + 1
+            else:
+                right = mid
+        return nums[left]
+
+    def arrayNesting(self, nums: List[int]) -> int:
+        left = {i for i in range(len(nums))}
+        visited = set()
+        index = count = ret = 0
+        while True:
+            if index in visited:
+                ret = max(count, ret)
+                if not left:
+                    break
+                visited.clear()
+                count = 0
+                index = left.pop()
+            visited.add(index)
+            left.discard(index)
+            index = nums[index]
+            count += 1
+        return ret
+
+    def recoverArray(self, n: int, sums: List[int]) -> List[int]:
+        def find(sums):
+            if len(sums) == 1: return []
+            counts = collections.Counter(sums)
+            ele = sums[1] - sums[0]
+            print(sums, ele)
+            partA, partB = [], [] # A: all sums consist of ele | B: all sums not cal ele
+            clear_flag = False
+            for i in sums:
+                # let's assume that i(sum of a subset) including ele
+                # then i - ele will be another sum, and will be counted in counts
+                # and temp do not include ele
+                temp = i - ele
+                if counts[i] > 0 and counts[temp] > 0:
+                    counts[i] -= 1
+                    counts[temp] -= 1
+                    partA.append(i)
+                    partB.append(temp)
+                    # temp + ele = i
+                    # if temp == 0, then ele is positive, and we can drop temp, take i to next loop
+                    # if i == 0, then ele is negative, and we drop i, take temp to next level
+                    # if temp == i == 0, then ele is 0, and partA & B are completely same, then both ways are acceptable
+                    if temp == 0: clear_flag = True
+            if clear_flag: return [ele] + find(partB)
+            else: return [-ele] + find(partA)
+        sums.sort()
+        return find(sums)
+
+    def minTimeToType(self, word: str) -> int:
+        count = len(word)
+        word = 'a' + word
+        for i in range(1, len(word)):
+            small, big = min(ord(word[i - 1]), ord(word[i])), max(ord(word[i - 1]), ord(word[i]))
+            count += min(big - small, small - big + 26)
+        return count
+
+    def maxMatrixSum(self, matrix: List[List[int]]) -> int:
+        # find a cell with negative value
+        # search four neighbors, flip a set to see if their value increase
+        # nega = set()
+        # n = len(matrix)
+        # neighbor = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+        # for i in n:
+        #     for j in n:
+        #         if matrix[i][j] < 0:
+        #             nega.add([i, j])
+        # while True:
+        #     if not nega:
+        #         break
+        #     for cell in nega:
+        #         for neigh in neighbor:
+        #             cell_ = [cell[0] + neigh[0], cell[1] + neigh[1]]
+        #             if all(i >= 0 and i < n for i in cell_):
+        #                 temp_sum = matrix[cell[0]][cell[1]] + matrix[cell_[0]][cell_[1]]
+        #                 if temp_sum < 0:
+        #                     pass
+        # return sum([sum(i) for i in matrix])
+
+        nega_ele = list()
+        posi_min = 10 ** 5 + 1
+        ans = 0
+        for i in matrix:
+            for j in i:
+                if j >= 0:
+                    if posi_min != 10 ** 5 + 1: ans += max(posi_min, j)
+                    posi_min = min(posi_min, j)
+                else:
+                    nega_ele.append(j)
+                    nega_ele.sort()
+                    if len(nega_ele) == 3:
+                        ans -= nega_ele.pop(0) + nega_ele.pop(0)
+        if len(nega_ele) % 2 == 0:
+            ans -= sum(nega_ele)
+            ans += posi_min if posi_min != 10 ** 5 + 1 else 0
+        else:
+            ans += nega_ele[0] if posi_min == 10 ** 5 + 1 else abs(nega_ele[0] + posi_min)
+        return ans
+    
+    def countPaths(self, n: int, roads: List[List[int]]) -> int:
+        # dijkstra
+        # 0 - (n - 1)
+        # neighbors of all nodes
+        # key: node
+        # value: dict of its neighbors, and the time cost to travel
+        neighbor = collections.defaultdict(dict)
+        # shortest_path and its number of diff ways
+        # key: destnation node
+        # value: [shortest time, number of ways]
+        shortest_path = dict()
+        # form path & neighbor dict
+        for e1, e2, cost in roads:
+            neighbor[e1][e2] = cost
+            neighbor[e2][e1] = cost
+
+        # start from node 0, cost is 0, with only 1 way
+        shortest_path[0] = [0, 1]
+        # node, time, number of ways
+        curr_state = [0, 0, 1]
+        # loop until current shortest path belong to our target node
+        visited = set() # prevent from revisiting a node, which will cause an endless loop
+        while True:
+            if curr_state[0] == n - 1:
+                return curr_state[2] % (10 ** 9 + 7)
+            visited.add(curr_state[0])
+            for neigh, cost in neighbor[curr_state[0]].items():
+                extend_time = curr_state[1] + cost
+                if neigh not in shortest_path or shortest_path[neigh][0] > extend_time:
+                    # this node has not visited beforem, or a shorter path is found
+                    shortest_path[neigh] = [extend_time, curr_state[2]]
+                elif shortest_path[neigh][0] == extend_time:
+                    # same short path is found, add 1 to number of ways
+                    shortest_path[neigh][1] += curr_state[2]
+            # get overall shortest path, and update curr_state
+            curr_state[1] = float('inf')
+            for node, [cost, way] in shortest_path.items():
+                if node not in visited and cost < curr_state[1]:
+                    curr_state = [node, cost, way]
+
+    def generateTrees(self, n: int) -> List[TreeNode]:
+        # given a range (start, end), node val from start to end - 1
+        # pick a root i, then its children can be formed from (start, i) & (i + 1, end)
+        # form all sub trees of two children
+        # combine two result lists
+        def form_subtree(start: int, end: int) -> List[TreeNode]:
+            if start >= end:
+                return [None]
+            ans = list()
+            for root in range(start, end):
+                left_child = form_subtree(start, root)
+                right_child = form_subtree(root + 1, end)
+                for left, right in list(itertools.product(left_child, right_child)):
+                    root_node = TreeNode(root)
+                    if left: root_node.left = left
+                    if right: root_node.right = right
+                    ans.append(root_node)
+            return ans
+        return form_subtree(1, n + 1)
+                

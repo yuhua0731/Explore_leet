@@ -62,6 +62,17 @@ def main():
     print(solu.minSessions([2,3,3,4,4,4,5,6,7,10], 12))
     print(solu.minSessions([1,1,1,1,1,1,1,1,1,1,1,1,1,1], 14))
     print(solu.numberOfUniqueGoodSubsequences("100101"))
+    print(solu.findMin([4,5,6,7,0,1,2]))
+    print(solu.arrayNesting([0,2,1]))
+    print(solu.arrayNesting([5,4,0,3,1,6,2]))
+    print(solu.recoverArray(4, [0,0,5,5,4,-1,4,9,9,-1,4,3,4,8,3,8]))
+    print(solu.minTimeToType('bza'))
+    print(solu.maxMatrixSum([[-10000,-10000,-10000],[-10000,-10000,-10000],[-10000,-10000,-10000]]))
+    for i in solu.generateTrees(3):
+        print("TreeNode: ")
+        i.printNode()
+        print("TreeNode end")
+    print(solu.countPaths(7, [[0,6,7],[0,1,2],[1,2,3],[1,3,3],[6,3,3],[3,5,1],[6,5,1],[2,5,1],[0,4,5],[4,6,2]]))
 
 if __name__ == "__main__":
     main()
