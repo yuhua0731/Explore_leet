@@ -7,6 +7,7 @@ import collections
 import math
 import functools
 import itertools
+import operator
 
 
 class ListNode:
@@ -1187,4 +1188,58 @@ class Solution:
                     ans.append(root_node)
             return ans
         return form_subtree(1, n + 1)
-                
+
+    def numberOfCombinations(self, num: str) -> int:
+        # positive, no leading zeros, non-decreasing
+        # dp[i] is a dict
+        # key: last number
+        # value: count
+        # TLE :(
+        if num[0] == '0': return 0
+        dp = list()
+        # generate dp0 and append to dp list
+        dp.append({0: 1})
+        for i in range(1, len(num) + 1):
+            dp0 = collections.defaultdict(int)
+            for j in range(i):
+                if num[j] == '0': continue
+                last_number = int(num[j:i])
+                for last, count in sorted(dp[j].items()):
+                    if last_number >= last: dp0[last_number] += count
+                    else: break
+            dp.append(dp0)
+        return sum(dp[-1].values())
+
+    def outerTrees(self, trees: List[List[int]]) -> List[List[int]]:
+        if len(trees) <= 1: return trees # only 1 tree
+        def cross_product(A, B, C):
+            return (B[0] - A[0]) * (C[1] - A[1]) - (B[1] - A[1]) * (C[0] - A[0])
+
+        ans = []
+        trees.sort()
+        for i in itertools.chain(range(len(trees)), reversed(range(len(trees)-1))):
+            while len(ans) >= 2 and cross_product(ans[-2], ans[-1], trees[i]) < 0:
+                ans.pop()
+            ans.append(trees[i])
+        ans.pop()
+        res = []
+        [res.append(x) for x in ans if x not in res]
+        return res
+
+    def orderlyQueue(self, s: str, k: int) -> str:
+        # order first k letters in s, then find a position last should be inserted
+        # if k == len(s): return ''.join(sorted(s))
+        # first, last = sorted(s[:k]), s[k:]
+        # for i in range(k):
+        #     if ord(first[i]) > ord(last[0]): 
+        #         return ''.join(first[:i]) + last + ''.join(first[i:])
+        # return ''.join(first) + last
+        if k == 1: # order will not be changed with any operation
+            ans = s
+            for i in range(len(s)):
+                temp = s[i:] + s[:i]
+                if temp < ans: ans = temp
+            return ans
+        return "".join(sorted(s))
+        
+    
