@@ -7,7 +7,7 @@ import collections
 import math
 import functools
 import itertools
-import operator
+import heapq
 
 
 class ListNode:
@@ -1242,4 +1242,262 @@ class Solution:
             return ans
         return "".join(sorted(s))
         
-    
+    def countQuadruplets(self, nums: List[int]) -> int:
+        # DFS
+        global ans
+        ans = 0
+
+        def find_addition(index: int, s: int, count: int):
+            global ans
+            if count == 3:
+                try:
+                    while True:
+                        temp = nums[index:].index(s)
+                        ans += 1
+                        index += temp + 1
+                except:
+                    return
+            else:
+                for i in range(index, len(nums)):
+                    find_addition(i + 1, s + nums[i], count + 1)
+
+        find_addition(0, 0, 0)
+        return ans
+
+    def numberOfWeakCharacters(self, properties: List[List[int]]) -> int:
+        # sort attack in descending order, while defend in ascending order
+        max_defend = ans = 0
+        for _, defend in sorted(properties, key=lambda x: (-x[0], x[1])):
+            if defend < max_defend: ans += 1
+            else: max_defend = defend
+        return ans
+
+    def firstDayBeenInAllRooms(self, nextVisit: List[int]) -> int:
+        # if you have been in room i an odd number of times (including the current visit)
+        # on the next day you will visit the room specified by nextVisit[i]
+        # if you have been in room i an even number of times (including the current visit)
+        # on the next day you will visit room (i + 1) mod n
+
+        # since nextVisit[i] is 0 ~ i, to visit i + 1, we have to visit i twice
+        # dp[i] = dp[i - 1] + (dp[i - 1] - dp[nextVisit[i - 1]]) + 1 + 1
+        #  
+        # (first visit i - 1) + (second visit i - 1) - (first visit nextVisit[i - 1]) 
+        # + (jump from i - 1 to nextVisit[i - 1]) + (visit i from i - 1)
+        n = len(nextVisit)
+        dp = [0] * n
+        for i in range(1, n):
+            dp[i] = (2 * dp[i - 1] - dp[nextVisit[i - 1]] + 2) % (10 ** 9 + 7)
+        return dp[-1]
+
+    def reverseList(self, head: ListNode) -> ListNode:
+        # a  ->  b  ->  c
+        pre_ = None
+        curr_ = head
+        # None     a  ->  b  ->  c
+        # pre_   curr_
+        while curr_:
+            next_ = curr_.next
+            # None     a   ->   b  ->  c
+            # pre_   curr_     next_
+            curr_.next = pre_
+            # None <-  a        b  ->  c
+            # pre_   curr_     next_
+            pre_ = curr_
+            # None <-  a        b  ->  c
+            #      pre_&curr_  next_
+            curr_ = next_
+            # None <-  a        b  ->  c
+            #         pre_  curr_&next_
+        
+        # None  <-   a   <-   b   <-   c       None
+        #                             pre_   curr_&next_
+        return pre_
+
+    def gcdSort(self, nums: List[int]) -> bool:
+        # if two nodes has the same root, then they are connected
+        root = [i for i in range(max(nums) + 1)]
+        
+        # simple gcd function
+        # def gcd(a: int, b: int) -> int:
+        #     if a < b: a, b = b, a
+        #     while b != 0:
+        #         a %= b
+        #         a, b = b, a
+        #     return a
+
+        def find(x) -> int:
+            if root[x] != x: root[x] = find(root[x])
+            return root[x]
+
+        def union(x, y):
+            # this will not stuck in an endless loop
+            # find(x) was called first
+            # ----- in find function, we update root[x] simultaneously -----!!!
+            # find will exit recursion until root[x] == x
+            # thus, root[find(x)] == find(x) is guaranteed
+            root[find(x)] = find(y)
+
+        def sieve(n: int) -> list:  # O(N*log(logN)) ~ O(N)
+            spf = [i for i in range(n)]
+            for i in range(2, n):
+                if spf[i] != i: continue  # Skip if it's a not prime number
+                for j in range(i * i, n, i):
+                    if spf[j] > i:  # update to the smallest prime factor of j
+                        spf[j] = i
+            return spf
+        spf = sieve(max(nums) + 1)
+
+        def get_prime_factors(n: int) -> list:
+            ans = list()
+            while n > 1:
+                ans.append(spf[n])
+                n //= spf[n]
+            return ans
+        
+        # use values as nodes
+        for num in nums:
+            for factor in get_prime_factors(num):
+                # found a new edge
+                union(factor, num)
+        print(root)
+        sorted_nums = sorted(nums)
+        for snum, num in zip(sorted_nums, nums):
+            if find(snum) != find(num):
+                return False
+        return True
+
+        # use indices as nodes
+        # TLE
+        # for i in range(n):
+        #     for j in range(i + 1, n):
+        #         if gcd(nums[i], nums[j]) > 1:
+        #             # found a new edge
+        #             union(i, j)
+        # nums_e = list(enumerate(nums))
+        # tranform = list(enumerate(sorted(nums_e, key=lambda x: x[-1])))
+        # for target_pos, (origin_pos, _) in tranform:
+        #     # if target_pos and origin_pos are in the same graph for all nodes, return TRUE
+        #     if find(target_pos) != find(origin_pos):
+        #         return False
+        # return True
+
+    def findMiddleIndex(self, nums: List[int]) -> int:
+        total = sum(nums)
+        left_sum = 0
+        for i in range(len(nums)):
+            if total - left_sum - nums[i] == left_sum:
+                return i
+            left_sum += nums[i]
+        return -1
+
+    def findFarmland(self, land: List[List[int]]) -> List[List[int]]:
+        # dp
+        ans, count = dict(), 0
+        m, n = len(land), len(land[0])
+        for x in range(m):
+            for y in range(n):
+                if land[x][y] == 1:
+                    # farmland
+                    if x - 1 >= 0 and land[x - 1][y] != 0:
+                        land[x][y] = land[x - 1][y]
+                        ans[land[x][y]][2], ans[land[x][y]][3] = x, y
+                    elif y - 1 >= 0 and land[x][y - 1] != 0:
+                        land[x][y] = land[x][y - 1]
+                        ans[land[x][y]][2], ans[land[x][y]][3] = x, y
+                    else:
+                        # new start of a farmland
+                        count += 1
+                        land[x][y] = count
+                        ans[count] = [x, y, x, y]
+        return ans.values()
+
+    def orderOfLargestPlusSign(self, n: int, mines: List[List[int]]) -> int:
+        max_length = [[[0] * 4 for _ in range(n)] for _ in range(n)]
+        for i in range(n):
+            for j in range(n):
+                max_length[i][j][:] = [j + 1, n - j, i + 1, n - i]
+        
+        # group by rows
+        mine_row = collections.defaultdict(list)
+        mine_column = collections.defaultdict(list)
+        for x, y in mines:
+            mine_row[x].append(y)
+            mine_column[y].append(x)
+        for row, mine in mine_row.items():
+            # row = 0
+            # mine = [3, 6]
+            mine.sort()
+            mine = [-1] + mine + [n]
+            for i in range(len(mine) - 1):
+                left, right = mine[i], mine[i + 1]
+                for column in range(max(left, 0), right):
+                    max_length[row][column][:2] = [column - left, right - column]
+        for column, mine in mine_column.items():
+            # column = 0
+            # mine = [3, 6]
+            mine.sort()
+            mine = [-1] + mine + [n]
+            for i in range(len(mine) - 1):
+                up, down = mine[i], mine[i + 1]
+                for row in range(max(up, 0), down):
+                    max_length[row][column][2:] = [row - up, down - row]
+        # print(max_length)
+        ans = 0
+        for row in max_length:
+            for cell in row:
+                ans = max(ans, min(cell))
+        return ans
+
+    def reachableNodes(self, edges: List[List[int]], maxMoves: int, n: int) -> int:
+        ans = 0
+        inter = dict()
+        neighbor = collections.defaultdict(list)
+        for x, y, cnt in edges:
+            neighbor[x].append(y)
+            neighbor[y].append(x)
+            inter[(x, y)] = cnt
+            inter[(y, x)] = cnt
+        visited = set() # element is nodes, for original nodes, we store '1'
+        curr = [] # element is (step, node)
+        heapq.heappush(curr, (0, 0))
+        while curr:
+            curr_node = heapq.heappop(curr) # (step, node)
+            if curr_node[1] not in visited:
+                visited.add(curr_node[1])
+                ans += 1
+                curr_neighbor = neighbor[curr_node[1]]
+                for nei in curr_neighbor:
+                    if nei not in visited:
+                        # this neighbor is not visited, check if we can reach it
+                        count = inter[(curr_node[1], nei)]
+                        if curr_node[0] + count + 1 <= maxMoves:
+                            # yes, we can reach this neighbor with curr_node[0] + count + 1 steps
+                            heapq.heappush(curr, (curr_node[0] + count + 1, nei))
+                            ans += count # all subdivided nodes should be added to the answer
+                            inter[(curr_node[1], nei)] = 0 # we remove all sub-nodes from inter
+                            inter[(nei, curr_node[1])] = 0
+                        else:
+                            # no, we cannot reach this neighbor
+                            temp = maxMoves - curr_node[0] # how many steps remain
+                            ans += temp
+                            inter[(curr_node[1], nei)] -= temp # we remove those sub-nodes from inter
+                            inter[(nei, curr_node[1])] -= temp
+                    else:
+                        # this neighbor is visited before, just add subdivided nodes
+                        ans += min(inter[(curr_node[1], nei)], maxMoves - curr_node[0])
+        return ans
+        """
+        inter is a dict
+        key is a tuple of two nodes
+        value is total subdivided nodes between them, after some sub-nodes were reached, we decrease this value
+
+        neighbor is a defaultdict of list
+        key is a node
+        value is a list of all connected nodes
+
+        visited is a set
+        store all visited nodes
+
+        curr is a heapq
+        element is (min steps to reach node i, i)
+        """

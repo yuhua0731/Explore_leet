@@ -182,6 +182,7 @@ count = collections.Counter(arr)
 ## 10. sort with customize functions
 ```python
 arr.sort(key=functools.cmp_to_key(lambda x, y: 1 if abs(x) > abs(y) else -1))
+arr.sort(key=lambda x: (-x[0], x[1]))
 arr.sort(key=abs) # sort original list
 sorted(arr, key=abs) # do not affect original list
 ```
@@ -231,7 +232,7 @@ b =     [1, 2, 0]
 tuple(zip(a, a[1:], b)) = ((0, 1, 1), (1, 2, 2))
 ```
 
-# tuple in dict
+## 14. tuple in dict
 - tuple is immutable
 - tuple can be key as well as value in dict
 
@@ -243,4 +244,15 @@ there are two common ways to modify a tuple:
 >>> t['k'] += (3,)
 >>> t
 {'k': (1, 2, 3)}
+```
+
+## 15. periodical function
+```python
+# this function will be called every 2 seconds
+def periodical_func():
+    print(time.time())
+    time.sleep(1)
+    threading.Timer(1, periodical_func).start()
+
+periodical_func() # first call here
 ```
