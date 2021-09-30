@@ -32,9 +32,12 @@ class TreeNode:
         self.right = None
 
     def printNode(self):
-        if self: print(self.val)
-        if self.left: self.left.printNode()
-        if self.right: self.right.printNode()
+        if self:
+            print(self.val)
+        if self.left:
+            self.left.printNode()
+        if self.right:
+            self.right.printNode()
 
 
 class fileHandler:
@@ -920,12 +923,14 @@ class Solution:
                     return False
                 node.pop()
             node.append(i)
-        return len(node) == 1 and node[0] == '#'                
-      
+        return len(node) == 1 and node[0] == '#'
+
     def findLUSlength(self, strs: List[str]) -> int:
         # brute force, accepted
-        strs.sort(key=functools.cmp_to_key(lambda x, y: 1 if len(x) < len(y) else -1))
+        strs.sort(key=functools.cmp_to_key(
+            lambda x, y: 1 if len(x) < len(y) else -1))
         checked = set()
+
         def is_subsequence(a: str, b: str):
             index_a, index_b = 0, 0
             while index_a < len(a) and index_b < len(b):
@@ -966,7 +971,7 @@ class Solution:
         # ops_y = sorted(ops, key=functools.cmp_to_key(lambda a, b: 1 if a[1] > b[1] or (a[1] == b[1] and a[0] > b[0]) else -1))
         # return ops_x[0][0] * ops_y[0][1]
         return min(x for x, y in ops) * min(y for x, y in ops)
-            
+
     def minimumDifference(self, nums: List[int], k: int) -> int:
         nums.sort()
         return min((nums[i + k - 1] - nums[i]) for i in range(len(nums) + 1 - k))
@@ -979,6 +984,7 @@ class Solution:
         session = list()
         global ret
         ret = len(tasks)
+
         def find_next(index: int):
             global ret
             if index == len(tasks) or any(se >= sum(tasks[index:]) for se in session):
@@ -996,7 +1002,7 @@ class Solution:
             session.pop()
         find_next(0)
         return ret
-            
+
     def numberOfUniqueGoodSubsequences(self, binary: str) -> int:
         """
         Q. 为什么保证unique?
@@ -1013,7 +1019,7 @@ class Solution:
         这个子序列与"(1)0(0)1(0)1(1)"是相同的子序列。
         """
         # dp
-        dp = [0, 0] # end with 0, end with 1
+        dp = [0, 0]  # end with 0, end with 1
         MOD = 10 ** 9 + 7
         for i in binary:
             # add "1" as leading number in the further loop
@@ -1053,11 +1059,12 @@ class Solution:
 
     def recoverArray(self, n: int, sums: List[int]) -> List[int]:
         def find(sums):
-            if len(sums) == 1: return []
+            if len(sums) == 1:
+                return []
             counts = collections.Counter(sums)
             ele = sums[1] - sums[0]
             print(sums, ele)
-            partA, partB = [], [] # A: all sums consist of ele | B: all sums not cal ele
+            partA, partB = [], []  # A: all sums consist of ele | B: all sums not cal ele
             clear_flag = False
             for i in sums:
                 # let's assume that i(sum of a subset) including ele
@@ -1073,9 +1080,12 @@ class Solution:
                     # if temp == 0, then ele is positive, and we can drop temp, take i to next loop
                     # if i == 0, then ele is negative, and we drop i, take temp to next level
                     # if temp == i == 0, then ele is 0, and partA & B are completely same, then both ways are acceptable
-                    if temp == 0: clear_flag = True
-            if clear_flag: return [ele] + find(partB)
-            else: return [-ele] + find(partA)
+                    if temp == 0:
+                        clear_flag = True
+            if clear_flag:
+                return [ele] + find(partB)
+            else:
+                return [-ele] + find(partA)
         sums.sort()
         return find(sums)
 
@@ -1083,7 +1093,8 @@ class Solution:
         count = len(word)
         word = 'a' + word
         for i in range(1, len(word)):
-            small, big = min(ord(word[i - 1]), ord(word[i])), max(ord(word[i - 1]), ord(word[i]))
+            small, big = min(ord(word[i - 1]), ord(word[i])
+                             ), max(ord(word[i - 1]), ord(word[i]))
             count += min(big - small, small - big + 26)
         return count
 
@@ -1115,7 +1126,8 @@ class Solution:
         for i in matrix:
             for j in i:
                 if j >= 0:
-                    if posi_min != 10 ** 5 + 1: ans += max(posi_min, j)
+                    if posi_min != 10 ** 5 + 1:
+                        ans += max(posi_min, j)
                     posi_min = min(posi_min, j)
                 else:
                     nega_ele.append(j)
@@ -1126,9 +1138,10 @@ class Solution:
             ans -= sum(nega_ele)
             ans += posi_min if posi_min != 10 ** 5 + 1 else 0
         else:
-            ans += nega_ele[0] if posi_min == 10 ** 5 + 1 else abs(nega_ele[0] + posi_min)
+            ans += nega_ele[0] if posi_min == 10 ** 5 + \
+                1 else abs(nega_ele[0] + posi_min)
         return ans
-    
+
     def countPaths(self, n: int, roads: List[List[int]]) -> int:
         # dijkstra
         # 0 - (n - 1)
@@ -1150,7 +1163,7 @@ class Solution:
         # node, time, number of ways
         curr_state = [0, 0, 1]
         # loop until current shortest path belong to our target node
-        visited = set() # prevent from revisiting a node, which will cause an endless loop
+        visited = set()  # prevent from revisiting a node, which will cause an endless loop
         while True:
             if curr_state[0] == n - 1:
                 return curr_state[2] % (10 ** 9 + 7)
@@ -1183,8 +1196,10 @@ class Solution:
                 right_child = form_subtree(root + 1, end)
                 for left, right in list(itertools.product(left_child, right_child)):
                     root_node = TreeNode(root)
-                    if left: root_node.left = left
-                    if right: root_node.right = right
+                    if left:
+                        root_node.left = left
+                    if right:
+                        root_node.right = right
                     ans.append(root_node)
             return ans
         return form_subtree(1, n + 1)
@@ -1195,23 +1210,29 @@ class Solution:
         # key: last number
         # value: count
         # TLE :(
-        if num[0] == '0': return 0
+        if num[0] == '0':
+            return 0
         dp = list()
         # generate dp0 and append to dp list
         dp.append({0: 1})
         for i in range(1, len(num) + 1):
             dp0 = collections.defaultdict(int)
             for j in range(i):
-                if num[j] == '0': continue
+                if num[j] == '0':
+                    continue
                 last_number = int(num[j:i])
                 for last, count in sorted(dp[j].items()):
-                    if last_number >= last: dp0[last_number] += count
-                    else: break
+                    if last_number >= last:
+                        dp0[last_number] += count
+                    else:
+                        break
             dp.append(dp0)
         return sum(dp[-1].values())
 
     def outerTrees(self, trees: List[List[int]]) -> List[List[int]]:
-        if len(trees) <= 1: return trees # only 1 tree
+        if len(trees) <= 1:
+            return trees  # only 1 tree
+
         def cross_product(A, B, C):
             return (B[0] - A[0]) * (C[1] - A[1]) - (B[1] - A[1]) * (C[0] - A[0])
 
@@ -1231,17 +1252,18 @@ class Solution:
         # if k == len(s): return ''.join(sorted(s))
         # first, last = sorted(s[:k]), s[k:]
         # for i in range(k):
-        #     if ord(first[i]) > ord(last[0]): 
+        #     if ord(first[i]) > ord(last[0]):
         #         return ''.join(first[:i]) + last + ''.join(first[i:])
         # return ''.join(first) + last
-        if k == 1: # order will not be changed with any operation
+        if k == 1:  # order will not be changed with any operation
             ans = s
             for i in range(len(s)):
                 temp = s[i:] + s[:i]
-                if temp < ans: ans = temp
+                if temp < ans:
+                    ans = temp
             return ans
         return "".join(sorted(s))
-        
+
     def countQuadruplets(self, nums: List[int]) -> int:
         # DFS
         global ans
@@ -1268,8 +1290,10 @@ class Solution:
         # sort attack in descending order, while defend in ascending order
         max_defend = ans = 0
         for _, defend in sorted(properties, key=lambda x: (-x[0], x[1])):
-            if defend < max_defend: ans += 1
-            else: max_defend = defend
+            if defend < max_defend:
+                ans += 1
+            else:
+                max_defend = defend
         return ans
 
     def firstDayBeenInAllRooms(self, nextVisit: List[int]) -> int:
@@ -1280,8 +1304,8 @@ class Solution:
 
         # since nextVisit[i] is 0 ~ i, to visit i + 1, we have to visit i twice
         # dp[i] = dp[i - 1] + (dp[i - 1] - dp[nextVisit[i - 1]]) + 1 + 1
-        #  
-        # (first visit i - 1) + (second visit i - 1) - (first visit nextVisit[i - 1]) 
+        #
+        # (first visit i - 1) + (second visit i - 1) - (first visit nextVisit[i - 1])
         # + (jump from i - 1 to nextVisit[i - 1]) + (visit i from i - 1)
         n = len(nextVisit)
         dp = [0] * n
@@ -1308,7 +1332,7 @@ class Solution:
             curr_ = next_
             # None <-  a        b  ->  c
             #         pre_  curr_&next_
-        
+
         # None  <-   a   <-   b   <-   c       None
         #                             pre_   curr_&next_
         return pre_
@@ -1316,7 +1340,7 @@ class Solution:
     def gcdSort(self, nums: List[int]) -> bool:
         # if two nodes has the same root, then they are connected
         root = [i for i in range(max(nums) + 1)]
-        
+
         # simple gcd function
         # def gcd(a: int, b: int) -> int:
         #     if a < b: a, b = b, a
@@ -1326,7 +1350,8 @@ class Solution:
         #     return a
 
         def find(x) -> int:
-            if root[x] != x: root[x] = find(root[x])
+            if root[x] != x:
+                root[x] = find(root[x])
             return root[x]
 
         def union(x, y):
@@ -1340,7 +1365,8 @@ class Solution:
         def sieve(n: int) -> list:  # O(N*log(logN)) ~ O(N)
             spf = [i for i in range(n)]
             for i in range(2, n):
-                if spf[i] != i: continue  # Skip if it's a not prime number
+                if spf[i] != i:
+                    continue  # Skip if it's a not prime number
                 for j in range(i * i, n, i):
                     if spf[j] > i:  # update to the smallest prime factor of j
                         spf[j] = i
@@ -1353,7 +1379,7 @@ class Solution:
                 ans.append(spf[n])
                 n //= spf[n]
             return ans
-        
+
         # use values as nodes
         for num in nums:
             for factor in get_prime_factors(num):
@@ -1416,7 +1442,7 @@ class Solution:
         for i in range(n):
             for j in range(n):
                 max_length[i][j][:] = [j + 1, n - j, i + 1, n - i]
-        
+
         # group by rows
         mine_row = collections.defaultdict(list)
         mine_column = collections.defaultdict(list)
@@ -1431,7 +1457,8 @@ class Solution:
             for i in range(len(mine) - 1):
                 left, right = mine[i], mine[i + 1]
                 for column in range(max(left, 0), right):
-                    max_length[row][column][:2] = [column - left, right - column]
+                    max_length[row][column][:2] = [
+                        column - left, right - column]
         for column, mine in mine_column.items():
             # column = 0
             # mine = [3, 6]
@@ -1457,11 +1484,11 @@ class Solution:
             neighbor[y].append(x)
             inter[(x, y)] = cnt
             inter[(y, x)] = cnt
-        visited = set() # element is nodes, for original nodes, we store '1'
-        curr = [] # element is (step, node)
+        visited = set()  # element is nodes, for original nodes, we store '1'
+        curr = []  # element is (step, node)
         heapq.heappush(curr, (0, 0))
         while curr:
-            curr_node = heapq.heappop(curr) # (step, node)
+            curr_node = heapq.heappop(curr)  # (step, node)
             if curr_node[1] not in visited:
                 visited.add(curr_node[1])
                 ans += 1
@@ -1472,19 +1499,24 @@ class Solution:
                         count = inter[(curr_node[1], nei)]
                         if curr_node[0] + count + 1 <= maxMoves:
                             # yes, we can reach this neighbor with curr_node[0] + count + 1 steps
-                            heapq.heappush(curr, (curr_node[0] + count + 1, nei))
-                            ans += count # all subdivided nodes should be added to the answer
-                            inter[(curr_node[1], nei)] = 0 # we remove all sub-nodes from inter
+                            heapq.heappush(
+                                curr, (curr_node[0] + count + 1, nei))
+                            ans += count  # all subdivided nodes should be added to the answer
+                            # we remove all sub-nodes from inter
+                            inter[(curr_node[1], nei)] = 0
                             inter[(nei, curr_node[1])] = 0
                         else:
                             # no, we cannot reach this neighbor
-                            temp = maxMoves - curr_node[0] # how many steps remain
+                            # how many steps remain
+                            temp = maxMoves - curr_node[0]
                             ans += temp
-                            inter[(curr_node[1], nei)] -= temp # we remove those sub-nodes from inter
+                            # we remove those sub-nodes from inter
+                            inter[(curr_node[1], nei)] -= temp
                             inter[(nei, curr_node[1])] -= temp
                     else:
                         # this neighbor is visited before, just add subdivided nodes
-                        ans += min(inter[(curr_node[1], nei)], maxMoves - curr_node[0])
+                        ans += min(inter[(curr_node[1], nei)],
+                                   maxMoves - curr_node[0])
         return ans
         """
         inter is a dict
@@ -1501,3 +1533,194 @@ class Solution:
         curr is a heapq
         element is (min steps to reach node i, i)
         """
+
+    def maxNumberOfBalloons(self, text: str) -> int:
+        # b a ll oo n
+        ans = {'b': 0, 'a': 0, 'l': 0, 'o': 0, 'n': 0}
+        for c in text:
+            if c in ans:
+                ans[c] += 1 if c in ['l', 'o'] else 2
+        return min([i // 2 for i in ans.values()])
+
+    def reverseOnlyLetters(self, s: str) -> str:
+        c_list = list(s)
+        left, right = 0, len(s) - 1
+        while left < right:
+            if not c_list[left].isalpha():
+                left += 1
+            elif not c_list[right].isalpha():
+                right -= 1
+            else:
+                c_list[left], c_list[right] = c_list[right], c_list[left]
+                left += 1
+                right -= 1
+        return "".join(c_list)
+
+    def maxTurbulenceSize(self, arr: List[int]) -> int:
+        # loop from left to right
+        ans = count = pre = 0
+        for i in arr:
+            if count == 0:
+                count += 1
+            elif count == 1:
+                if i != pre:
+                    count += 1
+                    bigger = (i < pre)          
+            # count >= 2
+            elif (bigger and i > pre) or (not bigger and i < pre):
+                count += 1
+                bigger = not bigger
+            elif i != pre:
+                count = 2
+                bigger = (i < pre)
+            else:
+                count = 1
+            pre = i
+            ans = max(ans, count)
+        return ans
+
+    def spiralOrder(self, matrix: List[List[int]]) -> List[int]:
+        global m, n
+        m, n = len(matrix), len(matrix[0])
+        ans = []
+        # right -> down -> left -> up -> ...
+        def split_layer(x, y, step, dir):
+            global m, n
+            if step == 0:
+                return
+            for _ in range(step):
+                x += dir[0]
+                y += dir[1]
+                ans.append(matrix[x][y])
+            if dir == [0, 1]: # right
+                m -= 1
+                split_layer(x, y, m, [1, 0])
+            elif dir == [0, -1]: # left
+                m -= 1
+                split_layer(x, y, m, [-1, 0])
+            elif dir == [1, 0]: # down
+                n -= 1
+                split_layer(x, y, n, [0, -1])
+            elif dir == [-1, 0]: # up
+                n -= 1
+                split_layer(x, y, n, [0, 1])
+        split_layer(0, -1, n, [0, 1])
+        return ans
+
+    def addOperators(self, num: str, target: int) -> List[str]:
+        # since num's len is less than 11
+        # we can try brute force first
+        ans = list()
+        # def add_next(s: str, index: int):
+        #     if index == len(s):
+        #         # reach end
+        #         try:
+        #             if eval(s) == target:
+        #                 ans.append(s)
+        #         except: pass
+        #     else:
+        #         zero = False
+        #         if s[index - 1] == '0': 
+        #             if index == 1: zero = True
+        #             elif not s[index - 2].isdigit(): zero = True
+        #         # none
+        #         if not zero: add_next(s, index + 1)
+        #         # '+'
+        #         add_next(s[:index] + '+' + s[index:], index + 2)
+        #         # '-'
+        #         add_next(s[:index] + '-' + s[index:], index + 2)
+        #         # '*'
+        #         add_next(s[:index] + '*' + s[index:], index + 2)
+        # add_next(num, 1)
+        # return ans
+
+        def backtracking(idx=0, path='', value=0, prev=None):            
+            if idx == len(num) and value == target:
+                ans.append(path)
+                return
+            
+            for i in range(idx + 1, len(num) + 1):
+                tmp = int(num[idx: i])
+                if i == idx + 1 or (i > idx + 1 and num[idx] != '0'):
+                    if prev is None :
+                        backtracking(i, num[idx: i], tmp, tmp) # no operator will be added
+                    else:
+                        backtracking(i, path + '+' + num[idx: i], value + tmp, tmp)
+                        backtracking(i, path + '-' + num[idx: i], value - tmp, -tmp)
+                        backtracking(i, path + '*' + num[idx: i], value - prev + prev * tmp, prev * tmp)
+        ans = []
+        backtracking()
+        return ans
+                
+    def findMaxConsecutiveOnes(self, nums: List[int]) -> int:
+        ans = 0
+        count = 0
+        for i in nums:
+            if i == 1:
+                count += 1
+                ans = max(ans, count)
+            else:
+                count = 0
+        return ans
+
+    def tribonacci(self, n: int) -> int:
+        ans = [0, 1, 1]
+        if n < len(ans): return ans[n]
+        for _ in range(2, n):
+            ans = [ans[1], ans[2], sum(ans)]
+        return ans[2]
+    
+    def splitListToParts(self, head: ListNode, k: int) -> List[ListNode]:
+        n, curr = 0, head
+        while curr:
+            curr = curr.next
+            n += 1
+        base = n // k
+        addi = n - k * base
+        
+        # addi * (base + 1) + (k - addi) * base
+        ans = list()
+        root = curr = head
+        for _ in range(addi):
+            i = 1
+            while i < base + 1:
+                i += 1
+                curr = curr.next
+            ans.append(root)
+            if curr:
+                root = curr.next
+                curr.next = None
+                curr = root
+            else:
+                root = curr
+        for _ in range(k - addi):
+            i = 1
+            while i < base:
+                i += 1
+                curr = curr.next
+            ans.append(root)
+            if curr:
+                root = curr.next
+                curr.next = None
+                curr = root
+        return ans
+
+    def canPartitionKSubsets(self, nums: List[int], k: int) -> bool:
+        if sum(nums) % k != 0: return False
+        
+        # can be equally subsets at first judgement
+        def check_next(index, ans):
+            # print(index, ans)
+            if index == len(nums): return True
+            curr = nums[index]
+            for i in range(len(ans)):
+                if ans[i] >= curr:
+                    ans[i] -= curr
+                    if check_next(index + 1, ans): return True
+                    ans[i] += curr
+            return False
+
+        ans = [sum(nums) // k] * k
+        nums.sort(reverse=True)
+        return check_next(0, ans)
+

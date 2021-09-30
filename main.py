@@ -90,6 +90,14 @@ def main():
     print(solu.orderOfLargestPlusSign(5, [[4,2]]))
     print(solu.reachableNodes([[0,1,10],[0,2,1],[1,2,2]], 6, 3))
     print(solu.reachableNodes([[0,1,4],[1,2,6],[0,2,8],[1,3,1]], 10, 4))
+    print(solu.maxNumberOfBalloons("loonbalxballpoon"))
+    print(solu.reverseOnlyLetters("Test1ng-Leet=code-Q!"))
+    print(solu.spiralOrder([[1, 2, 3], [4, 5, 6], [7, 8, 9]]))
+    print(solu.addOperators("103", 3))
+    print(solu.addOperators("00", 0))
+    print(solu.addOperators("3456237490", 911))
+    print(solu.tribonacci(25))
+    print(solu.canPartitionKSubsets([18,20,39,73,96,99,101,111,114,190,207,295,471,649,700,1037], 4))
 
 if __name__ == "__main__":
     main()
