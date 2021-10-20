@@ -5,6 +5,7 @@ import csv
 import json
 from bitstring import BitArray
 import math
+import threading
 
 a = b = list()
 a.append(1)
@@ -68,3 +69,38 @@ print(xs)
 
 print(math.sqrt(4) is int)
 print(math.ceil(5))
+
+temp = [[1, 2], [3, 4]]
+print(sum([sum(i) for i in temp]))
+
+a = [1, 2]
+b = list()
+b.append(a.copy())
+a[0] = 0
+print(b)
+
+temp = dict()
+temp[1] = [2, 3]
+for key, [num1, num2] in temp.items():
+    print(key, num1, num2)
+
+def periodical_func():
+    print(time.time())
+    
+    threading.Timer(1, periodical_func).start()
+    time.sleep(2)
+    print("sleep over")
+
+# periodical_func()
+
+a = [9, 9]
+a[0] += 1
+print(a)
+
+print(max(1, 2, 3, 4))
+print('l' in ['l', 'o'])
+
+bigger = 5 > 3
+print(not bigger)
+
+eval("0 / 0")
