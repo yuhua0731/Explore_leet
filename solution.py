@@ -2184,3 +2184,270 @@ class Solution:
                 dp[j] = dp[j] + dp[j - 1] if obstacleGrid[i][j] == 0 else 0
             print(dp)
         return dp[-1]
+
+    def frequencySort(self, s: str) -> str:
+        occur = collections.Counter(s)
+        ans = ""
+        for ch, count in reversed(sorted(occur.items(), key=lambda x: x[1])):
+            ans += ch * count
+        return ans
+
+    def longestPalindrome(self, s: str) -> str:
+        # dp
+        n = len(s)
+        ans = s[0]
+        dp = [[-float('inf')] * (n + 1) for _ in range(n)]
+        for i in range(n): 
+            dp[i][i] = 0
+            dp[i][i + 1] = 1
+        for i in range(2, n + 1):
+            for left in range(n - i + 1):
+                right = left + i
+                if s[left] == s[right - 1]: 
+                    dp[left][right] = dp[left + 1][right - 1] + 2
+                    if dp[left][right] > len(ans): ans = s[left:right]
+        return ans
+
+    def longestPalindromeSubseq(self, s: str) -> int:
+        # dp
+        n = len(s)
+        dp = [[0] * (n + 1) for _ in range(n)]
+        for i in range(n): 
+            dp[i][i + 1] = 1
+        for i in range(2, n + 1):
+            for left in range(n - i + 1):
+                right = left + i
+                if s[left] == s[right - 1]: 
+                    dp[left][right] = dp[left + 1][right - 1] + 2
+                else:
+                    dp[left][right] = max(dp[left + 1][right], dp[left][right - 1])
+        print(dp)
+        return max([max(i) for i in dp])
+
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        # dp
+        dp = [float('inf')] * (amount + 1)
+        dp[0] = 0
+        for i in range(1, amount + 1):
+            dp[i] = min([dp[i]] + [1 + dp[i - coin] for coin in coins if i - coin >= 0])
+        return dp[-1] if dp[-1] != float('inf') else -1
+
+    def change(self, amount: int, coins: List[int]) -> int:
+        # 需要计算所有不同组合，值得注意的是：如果我们先遍历amount，在遍历coins，会导致同一个组合被重复计算
+        # 例如：参数为6, [2, 4]，dp[6] = dp[4] + dp[2] = 2 + 1 = 3
+        # 4 = 4 = 2 + 2 -> 均进行+2操作 -> 6 = 4 + 2 = 2 + 2 + 2
+        # 2 = 2 -> 均进行+4操作 -> 6 = 2 + 4
+        # 这里重复计算了2 + 4的组合
+        #
+        # 因此，我们考虑另一种遍历方式，首先遍历coins，再遍历amount。这样同一面值的coin的个数永远不会被重复计算
+        # 例如：参数为6, [2, 4]，初始化dp = [1, 0, 0, 0, 0, 0, 0]
+        # 先遍历硬币2 dp = [1, 0, 1, 0, 1, 0, 1]
+        # 在遍历硬币4 dp = [1, 0, 1, 0, 2, 0, 2] 最终结果为2，正确
+        # dp
+        dp = [1] + [0] * amount
+        for c in coins:
+            for i in range(c, amount + 1):
+                dp[i] += dp[i - c]
+        return dp[-1]
+
+    def sortColors(self, nums: List[int]) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        count = collections.Counter(nums)
+        idx = 0
+        for value, count[value] in sorted(count.keys()):
+            for i in count[value]:
+                nums[idx] = value
+                idx += 1
+        return nums
+    
+    def threeSum(self, nums: List[int]) -> List[List[int]]:
+        # traverse first number, then we can get target sum of the other two numbers
+        # use left, right to find all combinations
+        n = len(nums)
+        nums.sort()
+        ans = list()
+        for i in range(n):
+            if i > 0 and nums[i] == nums[i - 1]: continue
+            target = 0 - nums[i]
+            left, right = i + 1, n - 1
+            while left < right:
+                if left > i + 1 and nums[left] == nums[left - 1]: left += 1
+                elif right < n - 1 and nums[right] == nums[right + 1]: right -= 1
+                elif nums[left] + nums[right] == target: 
+                    ans.append([nums[i], nums[left], nums[right]])
+                    left += 1
+                    right -= 1
+                elif nums[left] + nums[right] > target:
+                    right -= 1
+                else:
+                    left += 1
+        return ans
+
+    def orangesRotting(self, grid: List[List[int]]) -> int:
+        # frash orange will become rotten if it is adjacent to a rotten orange
+        # beats over 97% in time
+        rotten = list()
+        frash = set()
+        m, n = len(grid), len(grid[0])
+        for i in range(m):
+            for j in range(n):
+                if grid[i][j] == 2: rotten.append((i, j))
+                if grid[i][j] == 1: frash.add((i, j))
+        
+        dir = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+        ans = 0
+        while frash:
+            if not rotten: return -1
+            amount = len(rotten)
+            for i in range(amount):
+                curr = rotten[i]
+                for x, y in dir:
+                    x_, y_ = x + curr[0], y + curr[1]
+                    if (x_, y_) in frash:
+                        frash.remove((x_, y_))
+                        rotten.append((x_, y_))
+            rotten = rotten[amount:]
+            ans += 1
+        return ans
+
+    def countValidWords(self, sentence: str) -> int:
+        words = sentence.split(' ')
+        ans = 0
+        for w in words:
+            if w:
+                n = len(w)
+                dash_count = 0
+                for i in range(n):
+                    if w[i] == '-': 
+                        if 0 < i < n - 1 and w[i - 1].isalpha() and w[i + 1].isalpha():
+                            dash_count += 1
+                        else: 
+                            ans -= 1
+                            break
+                    if w[i].isdigit() or (w[i] in [',', '!', '.'] and i != n - 1) or dash_count > 1: 
+                        ans -= 1
+                        break
+                ans += 1
+        return ans
+
+    def nextBeautifulNumber(self, n: int) -> int:
+        # digit i has an occurance i
+        all_number = set()
+        all_poss = ["1", "22", "122", "333", "1333", "4444", "14444", "22333", "55555", "155555", "122333", "224444", "666666"]
+        def find_all(num_dict, pre):
+            if max(num_dict.values()) == 0: 
+                [all_number.add(p) for p in pre]
+            for k, v in num_dict.items():
+                if v > 0:
+                    num_dict[k] -= 1
+                    temp = set()
+                    for p in pre:
+                        temp.add(p + k)
+                    find_all(num_dict, temp)
+                    num_dict[k] += 1
+        for poss in all_poss:
+            find_all(collections.Counter(poss), [""])
+        all_number.add("1224444")
+        all_number = sorted([int(i) for i in all_number])
+
+        left, right = 0, len(all_number) - 1
+        while left < right:
+            mid = left + (right - left) // 2
+            if all_number[mid] <= n:
+                left = mid + 1
+            if all_number[mid] > n:
+                right = mid
+        return all_number[left]
+
+    def countHighestScoreNodes(self, parents: List[int]) -> int:
+        # remove one node
+        # first, we need to know total number of nodes
+        # then, we need to calculate subtrees of this node
+        n = len(parents)
+        global ans, max_prod
+        ans, max_prod = 0, 0
+
+        # convert parents to node - children dict
+        tree = collections.defaultdict(list)
+        for i in range(n):
+            tree[parents[i]].append(i)
+
+        def find_subtree(node):
+            global ans, max_prod
+            children = tree[node]
+            amount = 1
+            prod = 1
+            for ch in children:
+                count = find_subtree(ch)
+                amount += count
+                prod *= max(count, 1)
+            prod *= max(n - amount, 1)
+            if prod > max_prod:
+                max_prod = prod
+                ans = 1
+            elif prod == max_prod: ans += 1
+            return amount
+        find_subtree(0)
+        return ans
+
+    def minimumTime(self, n: int, relations: List[List[int]], time: List[int]) -> int:
+        # form a nextcourse, precourse dict
+        course_dep = collections.defaultdict(list)
+        final_course = set([i + 1 for i in range(n)])
+        for pre, next in relations:
+            course_dep[next].append(pre)
+            if pre in final_course: 
+                final_course.remove(pre)
+        global ans
+        ans = 0
+
+        visited = collections.defaultdict(int)
+        def count_next(course, month):
+            # prune it if this course has been visited with a bigger cost
+            if month <= visited[course]: return
+            visited[course] = month
+            global ans
+            if not course_dep[course]: 
+                ans = max(ans, month)
+                return
+            for c in course_dep[course]:
+                count_next(c, month + time[c - 1])
+        for c in final_course:
+            # DFS
+            count_next(c, time[c - 1])
+        return ans
+
+    def solveChess(self, board: List[List[str]]) -> None:
+        """
+        Do not return anything, modify board in-place instead.
+        """
+        # chess game
+        # for boarder cells, they are not counted as lost points
+        m, n = len(board), len(board[0])
+        remain = set()
+        next = list()
+        for i in range(m):
+            for j in range(n):
+                if board[i][j] == 'O':
+                    remain.add((i, j))
+                    if i in [0, m - 1] or j in [0, n - 1]: next.append((i, j))
+        dir = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+        while next:
+            next = list(set(next))
+            ne = len(next)
+            for _ in range(ne):
+                (x, y) = next.pop()
+                remain.discard((x, y))
+                for i, j in dir:
+                    x_, y_ = x + i, y + j
+                    if m > x_ >= 0 <= y_ < n and board[x_][y_] == 'O' and (x_, y_) in remain:
+                        next.append((x_, y_))
+        for i, j in remain: board[i][j] = 'X'
+        return board
+        # leetcode trick: it will get result from original address
+        # if we re-point board to board_, the original board does not change value
+
+    
+
