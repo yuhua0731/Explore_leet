@@ -2449,5 +2449,200 @@ class Solution:
         # leetcode trick: it will get result from original address
         # if we re-point board to board_, the original board does not change value
 
-    
+    def nodesBetweenCriticalPoints(self, head: ListNode) -> List[int]:
+        minD, maxD = float('inf'), -1
+        critical = list()
+        if not head: return [-1, -1]
+        pre = head.val
+        curr = head.next
+        idx = 1
+        while curr and curr.next:
+            if pre < curr.val > curr.next.val or pre > curr.val < curr.next.val:
+                critical.append(idx)
+                if len(critical) > 1:
+                    minD = min(minD, idx - critical[-2])
+                    maxD = idx - critical[0]
+            pre = curr.val
+            curr = curr.next
+            idx += 1
+        if len(critical) < 2: return [-1, -1]
+        return[minD, maxD]
 
+    def minimumOperations(self, nums: List[int], start: int, goal: int) -> int:
+        visited = set()
+        next = list()
+        next.append((start, 0))
+        while next:
+            (curr, step) = next.pop(0)
+            step += 1
+            for i in nums:
+                temp = [curr + i, curr - i, curr ^ i]
+                for t in temp:
+                    if t == goal: return step
+                    if 0 <= t <= 1000 and t not in visited:
+                        visited.add(t)
+                        next.append((t, step))
+        return -1
+
+    def possiblyEquals(self, s1: str, s2: str) -> bool:
+        # correct but TLE :(
+        # all_comb = set()
+        # global ans
+        # ans = False
+        # visited = set()
+        # def compare_decode(ss1, ss2):
+        #     sp1, sp2 = ss1.split(',')[1:], ss2.split(',')[1:]
+        #     letter1, letter2 = dict(), dict()
+        #     idx1 = idx2 = 0
+        #     for c in sp1:
+        #         if c.isalpha():
+        #             letter1[idx1] = c
+        #         else:
+        #             idx1 += int(c)
+        #     for c in sp2:
+        #         if c.isalpha():
+        #             letter2[idx2] = c
+        #         else:
+        #             idx2 += int(c)
+        #     if idx1 != idx2: return False
+        #     for k, v in letter1.items():
+        #         if k in letter2 and v != letter2[k]: return False
+        #     return True
+
+        # def find_next(s: str, idx: int, pre_num: int, pre_str: str):
+        #     global ans
+        #     if ans: return
+        #     if idx == len(s):
+        #         res = pre_str + (f',{pre_num}' if pre_num > 0 else '')
+        #         if second: 
+        #             if res in visited: return
+        #             ans = any(compare_decode(res, i) for i in all_comb)
+        #             visited.add(res)
+        #         else: all_comb.add(res)
+        #         return
+        #     curr = s[idx]
+        #     if curr.isalpha(): find_next(s, idx + 1, 0, pre_str + (f',{pre_num},' if pre_num > 0 else ',') + curr) # letter
+        #     else: # number
+        #         # two decode ways
+        #         if pre_num != 0: # we can only split string into non-empty substrings
+        #             find_next(s, idx + 1, pre_num * 10 + int(curr), pre_str) # concatenate current digit to previous number
+        #         if int(curr) != 0:
+        #             find_next(s, idx + 1, int(curr), pre_str + (f',{pre_num}' if pre_num > 0 else '')) # start a new number
+
+        # second = False
+        # find_next(s1, 0, 0, "")
+        # print(all_comb)
+        # second = True
+        # find_next(s2, 0, 0, "")
+        # return ans
+
+        # from discussion
+        # DP
+        def calc_length(s): 
+            """Return possible length."""
+            # given a number, return all possible lengths it can be decoded
+            # for example, 25 can be decoded to 7 and 25
+            ans = {int(s)}
+            for i in range(1, len(s)): 
+                ans |= {x + y for x in calc_length(s[:i]) for y in calc_length(s[i:])} # merge two lists without duplicate items
+            return ans
+        
+        @functools.cache
+        def find_next(i, j, diff): # idx of s1, idx of s2, diff is the amount len(s2.decode) - len(s1.decode)
+            """Return True if s1[i:] matches s2[j:] with given differences."""
+            if i == len(s1) and j == len(s2): return diff == 0 # reached end, with no different left
+            if i < len(s1) and s1[i].isdigit():
+                # s1[i] is a digit, we need to find the whole number and record all possible lengths it can be decoded
+                ii = i
+                while ii < len(s1) and s1[ii].isdigit(): ii += 1
+                # s1[i:ii] is the whole number
+                # gg(s1[i:ii]) returns a list consists of all possible lengths
+                for x in calc_length(s1[i:ii]):
+                    if find_next(ii, j, diff - x): return True 
+            elif j < len(s2) and s2[j].isdigit(): 
+                # same thing to s2
+                jj = j 
+                while jj < len(s2) and s2[jj].isdigit(): jj += 1
+                for x in calc_length(s2[j:jj]):
+                    if find_next(i, jj, diff + x): return True 
+            elif diff == 0:
+                # first, they have the same length
+                # then, s1[i] and s2[j] are letters
+                # further more, they are the same letter
+                # then we can move both of them one index forward
+                if i < len(s1) and j < len(s2) and s1[i] == s2[j]: return find_next(i + 1, j + 1, 0)
+            elif diff > 0: 
+                # diff > 0: len(s2.decode) - len(s1.decode), s1 should be added more length to chase s2
+                # since current item is alpha, it has length of 1
+                # we simply decrease diff by 1, and move one step forward of s1
+                if i < len(s1): return find_next(i + 1, j, diff - 1)
+            else: 
+                # diff < 0
+                if j < len(s2): return find_next(i, j + 1, diff + 1)
+            return False # return False if all conditions are not accepted
+            
+        return find_next(0, 0, 0)
+        
+    def sumNumbers(self, root: TreeNode) -> int:
+        global ans
+        ans = 0
+        def find_leaf(node: TreeNode, pre: int):
+            global ans
+            if not node.left and not node.right: 
+                ans += pre * 10 + node.val
+                return
+            pre *= 10
+            pre += node.val
+            if node.left: find_leaf(node.left, pre)
+            if node.right: find_leaf(node.right, pre)
+            return
+        find_leaf(root, 0)
+        return ans
+
+    # study plan: two pointers
+    def moveZeroes(self, nums: List[int]) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        n = len(nums)
+        nonzero_index = list()
+        zero_count = 0
+        for i in nums:
+            if i == 0:
+                zero_count += 1
+            else:
+                nonzero_index.append(i)
+        
+        nums[:] = nonzero_index + [0] * (n - len(nonzero_index))
+
+    def twoSum(self, numbers: List[int], target: int) -> List[int]:
+        # exactly one solution is garanteed
+        left, right = 0, len(numbers) - 1
+        while left < right:
+            curr = numbers[left] + numbers[right]
+            if curr == target: return [left + 1, right + 1]
+            if curr < target: left += 1
+            else: right -= 1
+        return [1, 1]
+
+    def sumOfLeftLeaves(self, root: TreeNode) -> int:
+        # sum up all left leaves(not node!!! we count it only if it is a leaf and it is left child)
+        def find_left(node: TreeNode, left: bool):
+            if not node.left and not node.right:
+                return 0 if not left else node.val
+            return (find_left(node.left, True) if node.left else 0) + (find_left(node.right, False) if node.right else 0)
+
+        return find_left(root, False)
+
+    def reverseString(self, s: List[str]) -> None:
+        """
+        Do not return anything, modify s in-place instead.
+        """
+        left, right = 0, len(s) - 1
+        while left < right:
+            s[left], s[right] = s[right], s[left]
+            left += 1
+            right -= 1
+    
+    def reverseWords(self, s: str) -> str:
+        return ' '.join([i[::-1] for i in s.split(' ')])

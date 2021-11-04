@@ -110,6 +110,13 @@ a.remove('') # remove one matched element at one time
 # using list.remove()
 while '' in a:
     a.remove('')
+```
+### merge lists without duplicates 
+when you want append some elements to a list without causing duplicate items, try this
+```python
+ans = {1, 2} 
+ans |= {2, 3} # ans = {1, 2, 3}
+``` 
 
 # form a new list
 a = [i for i in a if i]
