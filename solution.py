@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-from typing import List
+from typing import List, Tuple
 import csv
 import time
 import random
 import collections
+from collections import Counter
 import math
 import functools
 import itertools
+from itertools import chain, product
 import heapq
 from trie import Trie
 
@@ -86,6 +88,14 @@ class NumArray:
         # sum to right - sum to (left - 1)
         # left & right are inclusive
         return self.part[right + 1] - self.part[left]
+
+
+class Node:
+    def __init__(self, val: int = 0, left: 'Node' = None, right: 'Node' = None, next: 'Node' = None):
+        self.val = val
+        self.left = left
+        self.right = right
+        self.next = next
 
 
 class Solution:
@@ -2646,3 +2656,459 @@ class Solution:
     
     def reverseWords(self, s: str) -> str:
         return ' '.join([i[::-1] for i in s.split(' ')])
+
+    def kthDistinct(self, arr: List[str], k: int) -> str:
+        count = collections.Counter(arr)
+        for a in arr:
+            if count[a] == 1:
+                k -= 1
+                if k == 0: return a
+        return ""
+
+    def maxTwoEvents(self, events: List[List[int]]) -> int:
+        # dp
+        # events.sort(key=lambda x: x[1]) # sort with end time
+        # dp = [[0] * 3] # [attend 0 event, 1 event, 2 events]
+        # idx = 0
+        # curr_event = events[idx]
+        # for i in range(1, events[-1][1] + 1):
+        #     dp.append(dp[-1])
+        #     if i == curr_event[1]:
+        #         # current event is ended
+        #         # update dp
+        #         while i == curr_event[1]:
+        #             dp[-1] = [dp[-1][0], max(dp[-1][1], curr_event[2]), max(dp[-1][2], dp[curr_event[0] - 1][1] + curr_event[2])]
+        #             idx += 1
+        #             if idx == len(events): break
+        #             curr_event = events[idx]
+        # return max(dp[-1])
+        # one more constraint: you can take at most two events
+        
+        # using heap
+        events.sort(key=lambda x: x[0]) # sort with start time
+
+        hq = []
+        pop_off_max = 0
+        ans = 0
+        for e in events:
+            while hq and hq[0][0] < e[0]:
+                pop_off_max = max(pop_off_max, heapq.heappop(hq)[1])
+            ans = max(pop_off_max + e[2], ans)
+            heapq.heappush(hq, e[1:])
+        return ans
+
+    def platesBetweenCandles(self, s: str, queries: List[List[int]]) -> List[int]:
+        n = len(s)
+        candle = []
+        for i in range(n):
+            if s[i] == '|': candle.append(i)
+
+        def find_index(k, r: bool):
+            left, right = 0, len(candle) - 1
+            while left <= right:
+                mid = left + (right - left) // 2
+                if candle[mid] > k:
+                    right = mid - 1
+                elif candle[mid] < k:
+                    left = mid + 1
+                else: return mid if not r else mid + 1
+            return left
+        ans = []
+        for x, y in queries:
+            start = find_index(x, False)
+            end = find_index(y, True) - 1
+            if start > end: ans.append(0)
+            else: ans.append(candle[end] - candle[start] - (end - start))
+        return ans
+
+    def arrangeCoins(self, n: int) -> int:
+        ans = 0
+        while n > ans:
+            n -= ans + 1
+            ans += 1
+        return ans
+    
+    def middleNode(self, head: ListNode) -> ListNode:
+        mid = curr = head
+        while curr and curr.next:
+            curr = curr.next.next
+            mid = mid.next
+        return mid            
+
+    def removeNthFromEnd(self, head: ListNode, n: int) -> ListNode:
+        curr = head
+        while n > 0:
+            curr = curr.next
+            n -= 1
+        if not curr:
+            return head.next
+        else:
+            curr = curr.next
+            pre = head
+            remove = pre.next
+        while curr:
+            curr = curr.next
+            pre = pre.next
+            remove = remove.next
+        # pre -> remove -> remove.next
+        # we need to delete 'remove' node
+        pre.next = remove.next
+        return head
+        
+    def mergeTrees(self, root1: TreeNode, root2: TreeNode) -> TreeNode:
+        def merge_sub(node1, node2):
+            if not node1: return node2
+            if not node2: return node1
+            node1.val += node2.val
+            node1.left = merge_sub(node1.left, node2.left)
+            node1.right = merge_sub(node1.right, node2.right)
+            return node1
+        
+        return merge_sub(root1, root2)
+
+    def connect(self, root: 'Node') -> 'Node':
+        pre = []
+        def search_sub(node, level):
+            if not node: return
+            if level == len(pre): pre.append(node)
+            else:
+                pre[level].next = node
+                pre[level] = node
+            search_sub(node.left, level + 1)
+            search_sub(node.right, level + 1)
+        
+        search_sub(root, 0)
+        return root
+
+    def countVowelSubstrings(self, word: str) -> int:
+        # consist only vowel chars and all present
+        vowel = {'a': 0, 'e': 0, 'i': 0, 'o': 0, 'u': 0}
+        curr = list()
+        ans = 0
+        for c in word:
+            print(curr)
+            if c in vowel:
+                for cu in curr:
+                    cu[c] += 1
+                    if min(cu.values()) > 0: ans += 1
+                vowel_ = vowel.copy()
+                vowel_[c] += 1
+                curr.append(vowel_)
+            else:
+                curr.clear()
+        return ans
+
+    def countVowels(self, word: str) -> int:
+        n = len(word)
+        ans = 0
+        for i in range(n):
+            if word[i] in ['a', 'e', 'i', 'o', 'u']:
+                ans += (i + 1) * (n - i) # left end: 0 ~ i; right end: i + 1 ~ n
+        return ans
+
+    def minimizedMaximum(self, n: int, quantities: List[int]) -> int:
+        # if n == 1: return quantities[0]
+        # m = len(quantities)
+        # if n == m: return max(quantities)
+        # quantities.sort(reverse=True)
+        # perfect = math.ceil(sum(quantities) / n)
+
+        # temp_n = n
+        # idx = 0
+        # while idx < m:
+        #     if temp_n < m - idx:
+        #         perfect += 1
+        #         idx = 0
+        #         temp_n = n
+        #     else:
+        #         count = math.ceil(quantities[idx] / perfect)
+        #         if count > temp_n:
+        #             perfect += 1
+        #             idx = 0
+        #             temp_n = n
+        #         else:
+        #             temp_n -= count
+        #             idx += 1
+        # return perfect
+        # TLE, the point is you are increasing perfect by 1 every time, and it will cost a huge amount of time when you are face a big input array
+        # here, the first thought is using binary search to reach target in O(logN) time complexity
+        left, right = 1, max(quantities)
+        while left < right:
+            mid = left + (right - left) // 2
+            if sum([math.ceil(i / mid) for i in quantities]) <= n:
+                right = mid
+            else:
+                left = mid + 1
+        return left
+        # 3, [2,10,6] | 4, [2,2,8,7] | 22, [25,11,29,6,24,4,29,18,6,13,25,30]
+        
+    def maximalPathQuality(self, values: List[int], edges: List[List[int]], maxTime: int) -> int:
+        # huge problem
+        # start from 0, and end at 0
+        # 1 - brute force
+        # DFS: end until we ran out of time
+        # and record ans when we hit 0
+        global ans
+        ans = 0
+        edge = collections.defaultdict(list)
+        path = [0]
+        for x, y, c in edges:
+            edge[x].append([y, c])
+            edge[y].append([x, c])
+        def move(node, time_left):
+            global ans
+            if node == 0: ans = max(ans, sum([values[i] for i in set(path)]))
+            for i, j in edge[node]:
+                if j <= time_left: 
+                    path.append(i)
+                    move(i, time_left - j)
+                    path.pop()
+        move(0, maxTime)
+        return ans
+
+    def maxProfitII(self, prices: List[int]) -> int:
+        ans = 0
+        prices = [float('inf')] + prices + [-float('inf')]
+        for i in range(1, len(prices) - 1):
+            if prices[i - 1] >= prices[i] < prices[i + 1]: ans -= prices[i]
+            if prices[i - 1] < prices[i] >= prices[i + 1]: ans += prices[i]
+        return ans
+
+    def mergeTwoLists(self, l1: ListNode, l2: ListNode) -> ListNode:
+        def merge(node1, node2):
+            if not node1: return node2
+            if not node2: return node1
+            if node1.val <= node2.val:
+                node1.next = merge(node1.next, node2)
+                return node1
+            else:
+                node2.next = merge(node1, node2.next)
+                return node2
+        
+        return merge(l1, l2)
+
+    def reverseList(self, head: ListNode) -> ListNode:
+        if not head: return head
+        pre, curr, ne = None, head, head.next
+        while curr:
+            curr.next = pre
+            pre = curr
+            curr = ne
+            if ne: ne = ne.next
+        return pre
+
+    def countCombinations(self, pieces: List[str], positions: List[List[int]]) -> int:
+        positions = [tuple(x) for x in positions]
+        ans = set()
+
+        def dfs(pos, dirs, stopped_mask):   
+            if stopped_mask == 0: return # all roles are stoppped
+            ans.add(tuple(pos)) # add current position
+            for active in range(1 << len(dirs)): # len(dirs) = len(pieces) 有几个棋子就有几个行走方向
+                """
+                首先，对于第一次运行到此处的代码，所有棋子的状态应该都是仍在行走中，即stopped_mask全为1
+                接下去，我们需要做的是，遍历棋子是否继续保持行走状态的选项。
+                例如，有2个棋子，在不考虑棋子当前状态的情况下，对于接下去的状态，共有2**2 = 1<<2 = 4种可能性。
+                即：棋子1行走，2行走；棋子1行走，2停止；棋子1停止，2行走；棋子1停止，2停止。
+                如何判断某一种选项是否可行？
+                stopped_mask & active != active
+                如果该等式成立，则表示对于某一个棋子，在stopped_mask中为0状态（停止），而在active中为1状态（行走）。
+                由于一个棋子一旦停止了，无法再次开始行走，所以该选项与当前状态不兼容。
+                即在当前stopped_mask状态下，无法变更到active状态，所以需要跳过该选项。
+                """
+                if stopped_mask & active != active: continue
+                new_pos = list(pos)
+                """
+                原答案中此处使用了异或操作，经过分析，原答案中对active的定义为，下一个状态是否发生变化。
+                即上面排除的情况为，当前状态为0（停止），下一状态发生变化，由于棋子停止后状态无法发生变化，故排除。
+                当前状态1，状态变化1，异或 = 0 
+                当前状态1，状态不变0，异或 = 1
+                当前状态0，状态不变0，异或 = 0
+
+                我们也可以将active直接定义为下一状态的值。
+                即上面排除的情况为，当前状态为0（停止），下一状态为1（行走），同样也不符合要求。
+                由于上面已经把当前状态0，下一个状态1的情况剔除，对于某一个棋子，目前还剩下以下三种情况：
+                当前状态1，下一状态1，与 = 1 
+                当前状态1，下一状态0，与 = 0
+                当前状态0，下一状态0，与 = 0
+                """
+                # new_mask = stopped_mask ^ active
+                new_mask = stopped_mask & active
+
+                # calculate new position for role i
+                for i in range(len(new_pos)):
+                    new_pos[i] = (new_pos[i][0] + dirs[i][0] * ((new_mask >> i) & 1), new_pos[i][1] + dirs[i][1] * ((new_mask >> i) & 1))
+
+                # if two roles run into the same position
+                if len(Counter(new_pos)) < len(dirs): continue
+                # if any index is out of area
+                all_c = list(chain(*new_pos))
+                if min(all_c) <= 0 or max(all_c) > 8: continue
+                # valid move, make next step
+                dfs(new_pos, dirs, new_mask)
+
+        # rook: move 4-direction
+        # queen: move 4-direction and diagonally
+        # bishop: move diagonally
+        poss = {}
+        poss["rook"] = ((1, 0), (-1, 0), (0, 1), (0, -1))
+        poss["bishop"] = ((1, 1), (1, -1), (-1, 1), (-1, -1))
+        poss["queen"] = ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1))
+        for dirs in product(*(poss[i] for i in pieces)): # find all dir combinations
+            dfs(positions, dirs, (1 << len(pieces)) - 1) # 10000 - 1 = 1111
+        return len(ans)
+
+    def minStartValue(self, nums: List[int]) -> int:
+        curr = 0
+        ans = 1
+        for i in nums:
+            curr += i
+            # curr should > 0
+            ans = max(1 - curr, ans)
+        return ans
+    
+    def removeElements(self, head: ListNode, val: int) -> ListNode:
+        # recursion      
+        # def check(curr: ListNode):
+        #     if not curr: return None
+        #     if curr.val == val: return check(curr.next)
+        #     else:
+        #         curr.next = check(curr.next)
+        #         return curr
+        # return check(head)
+        pre_ans = pre = ListNode(-1)
+        pre.next = curr = head
+        while curr:
+            if curr.val == val:
+                pre.next = curr = curr.next
+            else:
+                pre, curr = curr, curr.next
+        return pre_ans.next
+        
+    def climbStairs(self, n: int) -> int:
+        # dp
+        pre_2, pre_1 = 0, 1
+        for _ in range(1, n + 1):
+            curr = pre_2 + pre_1
+            pre_2, pre_1 = pre_1, curr
+        return pre_1
+
+    def largestDivisibleSubset(self, nums: List[int]) -> List[int]:
+        sub = dict()
+        for n in sorted(nums):
+            temp = [n]
+            for key, value in sub.items():
+                if n % key == 0 and len(value) + 1 > len(temp):
+                    # form a new subset
+                    temp = value + [n]
+            sub[n] = temp
+        return sorted(sub.values(), key=lambda x: len(x))[-1]
+    
+    def findKthNumber(self, m: int, n: int, k: int) -> int:
+        def count(x):
+            return sum(min(x // i, n) for i in range(1, m + 1))
+			
+        L, R, mid, ans = 0, m * n, 0, 0
+        while L <= R:
+            mid = (L + R) >> 1
+            if count(mid) < k:
+                L = mid + 1
+            else:
+                R, ans = mid - 1, mid
+        return ans
+
+    def findDisappearedNumbers(self, nums: List[int]) -> List[int]:
+        # without extra space and run in O(n) time
+        nums.append(len(nums) + 1)
+        nums.sort()
+        next_match = 1
+        ans = list()
+        for i in nums:
+            if i < next_match: continue
+            if i > next_match: 
+                for tmp in range(next_match, i):
+                    ans.append(tmp)
+            next_match = i + 1
+        return ans
+
+    def deleteNode(self, root: TreeNode, key: int) -> TreeNode:
+        if not root: return None
+        if root.val == key:
+            if not root.left: return root.right
+            if not root.right: return root.left
+            left_r = root.left
+            while left_r.right:
+                left_r = left_r.right
+            left_r.right = root.right
+            return root.left
+        if root.val > key: root.left = self.deleteNode(root.left, key)
+        else: root.right = self.deleteNode(root.right, key)
+        return root
+        
+    def largestComponentSize(self, nums: List[int]) -> int:
+        # union find
+        n = max(nums)
+        count = Counter()
+        group = [i for i in range(n + 1)]
+        
+        def find(x):
+            if group[x] == x: return x
+            """
+            this line is fucking essential!!! 
+            improved time complexity a lot. 
+            when you try to find root of x, it takes only 1 step to reach the end.
+            """ 
+            group[x] = find(group[x])
+            return group[x]
+
+        def union(x, y):
+            x_group, y_group = find(x), find(y)
+            if x_group != y_group:
+                group[x_group] = y_group
+
+        for a in nums:
+            for num in range(2, int(math.sqrt(a) + 1)):
+                if a % num == 0:
+                    union(a, num)
+                    union(a, a // num)
+                
+        for a in nums: count[find(a)] += 1
+        return max(count.values())
+
+    def searchInsert(self, nums: List[int], target: int) -> int:
+        if target > nums[-1]: return len(nums)
+        left, right = 0, len(nums) - 1
+        while left < right:
+            mid = (left + right) >> 1
+            if nums[mid] == target: return mid
+            if nums[mid] > target: right = mid
+            else: left = mid + 1
+        return left
+
+    def maxSubArray(self, nums: List[int]) -> int:
+        # pre_value = pre_posi = pre_nega = 0
+        # ans = overall_max= -float('inf')
+        # for i in nums:
+        #     if i < 0:
+        #         if pre_value >= 0: ans = max(pre_posi, ans) # +++-
+        #         pre_nega += i
+        #     else:
+        #         if pre_value < 0:
+        #             # ---+
+        #             pre_posi = max(pre_posi + pre_nega, 0)
+        #             pre_nega = 0
+        #         pre_posi += i
+        #     pre_value = i
+        #     overall_max = max(overall_max, i)
+        # ans = max(pre_posi, ans)
+        # if overall_max < 0 and ans == 0: ans = overall_max
+        # return ans
+
+        # dp
+        ans = nums[0]
+        pre_min_sum = curr_sum = 0
+        for i in nums:
+            curr_sum += i
+            ans = max(ans, curr_sum - pre_min_sum)
+            pre_min_sum = min(pre_min_sum, curr_sum)
+        return ans
