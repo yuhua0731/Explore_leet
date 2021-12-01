@@ -1074,7 +1074,7 @@ class Solution:
                 return []
             counts = collections.Counter(sums)
             ele = sums[1] - sums[0]
-            print(sums, ele)
+            # print(sums, ele)
             partA, partB = [], []  # A: all sums consist of ele | B: all sums not cal ele
             clear_flag = False
             for i in sums:
@@ -1396,7 +1396,7 @@ class Solution:
             for factor in get_prime_factors(num):
                 # found a new edge
                 union(factor, num)
-        print(root)
+        # print(root)
         sorted_nums = sorted(nums)
         for snum, num in zip(sorted_nums, nums):
             if find(snum) != find(num):
@@ -2093,7 +2093,7 @@ class Solution:
         for p in prices:
             dp = [0, max(-p, dp[1]), max(dp[1] + p, dp[2]), max(dp[2] - p, dp[3]), max(dp[3] + p, dp[4])]
             ans = max(max(dp), ans)
-            print(dp)
+            # print(dp)
         return ans
 
     def numTrees(self, n: int) -> int:
@@ -2167,8 +2167,8 @@ class Solution:
         for i in range(m):
             for j in range(n):
                 x1, y1, x2, y2 = max(-1, i - k - 1), max(-1, j - k - 1), min(m - 1, i + k), min(n - 1, j + k)
-                print(i, j)
-                print(x1, y1, x2, y2)
+                # print(i, j)
+                # print(x1, y1, x2, y2)
                 ans[i][j] = mat[x2][y2] - (mat[x1][y2] if x1 >= 0 else 0) - (mat[x2][y1] if y1 >= 0 else 0) + (mat[x1][y1] if x1 >= 0 and y1 >= 0 else 0)
         return ans
 
@@ -2192,7 +2192,7 @@ class Solution:
             dp[0] = 1 - obstacleGrid[i][0] if i == 0 else 1 if dp[0] == 1 and obstacleGrid[i][0] == 0 else 0
             for j in range(1, n):
                 dp[j] = dp[j] + dp[j - 1] if obstacleGrid[i][j] == 0 else 0
-            print(dp)
+            # print(dp)
         return dp[-1]
 
     def frequencySort(self, s: str) -> str:
@@ -2231,7 +2231,7 @@ class Solution:
                     dp[left][right] = dp[left + 1][right - 1] + 2
                 else:
                     dp[left][right] = max(dp[left + 1][right], dp[left][right - 1])
-        print(dp)
+        # print(dp)
         return max([max(i) for i in dp])
 
     def coinChange(self, coins: List[int], amount: int) -> int:
@@ -2786,7 +2786,7 @@ class Solution:
         curr = list()
         ans = 0
         for c in word:
-            print(curr)
+            # print(curr)
             if c in vowel:
                 for cu in curr:
                     cu[c] += 1
@@ -3112,3 +3112,178 @@ class Solution:
             ans = max(ans, curr_sum - pre_min_sum)
             pre_min_sum = min(pre_min_sum, curr_sum)
         return ans
+
+    def accountsMerge(self, accounts: List[List[str]]) -> List[List[str]]:
+        # union find
+        # first: we need to find hiding edges from input
+        # if an email exists in both account, then there should be an edge between these two accounts
+        n = len(accounts)
+        graph = [i for i in range(n)] # union find root idx list
+
+        def find(x):
+            if graph[x] != x: graph[x] = find(graph[x])
+            return graph[x]
+
+        def union(x, y):
+            root_x, root_y = find(x), find(y)
+            if root_x != root_y: graph[root_x] = root_y
+
+        email_account = dict() # key = email | value = account list
+        for idx, email in enumerate(accounts):
+            for e in email[1:]:
+                if e in email_account: email_account[e].append(idx)
+                else: email_account[e] = [idx]
+        for value in email_account.values():
+            # if there are more than 1 account share the same email, connect these accounts
+            # value = [0, 1, 2], zip(value, value[1:]) = [[0, 1], [1, 2]]
+            if len(value) > 1: [union(i, j) for i, j in zip(value, value[1:])]
+
+        root_email = collections.defaultdict(set) # key = root account index | value: a set of all emails
+        for account_idx, root in enumerate(graph):
+            root_email[find(root)].update(accounts[account_idx][1:])
+
+        return [accounts[root_idx][0:1] + list(sorted(email_list)) for root_idx, email_list in root_email.items()]
+
+    def searchRange(self, nums: List[int], target: int) -> List[int]:
+        def find(first: bool):
+            left, right, visited = 0, len(nums), False
+            while left < right:
+                mid = (left + right) >> 1
+                if nums[mid] == target: 
+                    visited = True
+                    if first: right = mid
+                    else: left = mid + 1
+                elif nums[mid] > target: right = mid
+                elif nums[mid] < target: left = mid + 1
+            if not visited: return -1
+            return left if first else left - 1
+        return [find(True), find(False)]
+
+    def search(self, nums: List[int], target: int) -> int:
+        # left, right = 0, len(nums) - 1
+        # while left < right:
+        #     mid = (left + right) >> 1
+        #     if nums[left] == target: return left
+        #     if nums[mid] == target: return mid
+        #     if nums[right] == target: return right
+        #     if nums[mid] > target:
+        #         if target < nums[left] < nums[mid]: left = mid + 1
+        #         else: right = mid
+        #     else:
+        #         if nums[mid] < nums[right] < target: right = mid
+        #         else: left = mid + 1
+        # return left if nums[left] == target else -1
+
+        left, right = 0, len(nums)
+        while left < right:
+            mid = (left + right) >> 1
+            temp = nums[mid]
+            if (nums[mid] < nums[0]) != (target < nums[0]): # not on the same side
+                temp = float('inf') if target >= nums[0] else -float('inf')
+            if temp == target: return mid
+            if temp > target: right = mid
+            else: left = mid + 1
+        return -1
+
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        # time complexity: O(m + log(n)) | space complexity: O(1)
+        for row in matrix:
+            if row[0] > target: return False
+            if row[-1] < target: continue
+            left, right = 0, len(row)
+            while left < right:
+                mid = (left + right) >> 1
+                if row[mid] == target: return True
+                if row[mid] > target: right = mid
+                else: left = mid + 1
+        return False
+
+    def maximalRectangle(self, matrix: List[List[str]]) -> int:
+        if not matrix: return 0
+        m, n = len(matrix), len(matrix[0])
+        # for each cell, we need:
+        # height of 1's
+        # index of first 0 from matrix[i][j] to left
+        # index of first 0 from matrix[i][j] to right
+        height_left_right = [[[0] * 3 for _ in range(n)] for _ in range(m)]
+        for i in range(m):
+            lm, rm = -1, n
+            for j in range(n):
+                if matrix[i][j] == '0':
+                    lm = j
+                    continue
+                # set height
+                height_left_right[i][j][0] = 1 if i == 0 else height_left_right[i - 1][j][0] + 1
+                # set left_most
+                height_left_right[i][j][1] = lm
+            for j in range(n - 1, -1, -1):
+                if matrix[i][j] == '0': rm = j
+                else: height_left_right[i][j][2] = rm # set right_most
+        ans = 0
+        for i in range(m):
+            for j in range(n):
+                if matrix[i][j] == '0': continue
+                hm, lm, rm = height_left_right[i][j]
+                for row in range(i + 1 - hm, i):
+                    lm = max(lm, height_left_right[row][j][1])
+                    rm = min(rm, height_left_right[row][j][2])
+                ans = max(ans, hm * (rm - lm - 1))
+        return ans
+
+    def findMin(self, nums: List[int]) -> int:
+        left, right = 0, len(nums) - 1
+        while left < right:
+            mid = (left + right) >> 1
+            if nums[mid] > nums[right]: left = mid + 1
+            else: right = mid
+        return nums[left]
+
+    def findPeakElement(self, nums: List[int]) -> int:
+        # O(logN) time complexity
+        left, right = 0, len(nums) - 1
+        while left < right:
+            mid = (left + right) >> 1
+            mid_ = mid + 1
+            if nums[mid] > nums[mid_]: right = mid
+            else: left = mid_
+        return left
+    
+    def deleteDuplicates(self, head: ListNode) -> ListNode:
+        if not head: return head
+        pre = ListNode(-1)
+        pre.next = curr = head
+        head = pre
+
+        while curr:
+            ne = curr.next
+            if ne and curr.val == ne.val:
+                temp = curr.val
+                while curr and curr.val == temp:
+                    curr = curr.next
+                pre.next = curr
+            else:
+                pre = curr
+                curr = curr.next
+        return head.next
+
+    def threeSum(self, nums: List[int]) -> List[List[int]]:
+        # idx_nums = sorted(enumerate(nums), key=lambda x: x[1])
+        nums.sort()
+        ans = list()
+        for i in range(len(nums)):
+            # prun if this number is the same as the previous one
+            # avoid containing duplicate triplets
+            if i > 0 and nums[i] == nums[i - 1]: continue
+            target = 0 - nums[i]
+            left, right = i + 1, len(nums) - 1
+            while left < right:
+                temp = nums[left] + nums[right]
+                if temp == target: 
+                    ans.append([nums[i], nums[left], nums[right]])
+                    left_visited = nums[left]
+                    while left < len(nums) and nums[left] == left_visited:
+                        left += 1
+                elif temp > target: right -= 1
+                else: left += 1
+        return ans
+

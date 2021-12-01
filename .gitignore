@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# additional files
+.vscode/
+webScraper
+scratch_head
+test.py

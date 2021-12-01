@@ -1,6 +1,6 @@
 # Explore_leet
 
-## 1. heapq in python
+## heapq in python
 
 heap queue, aka priority queue, always keep all elements sorted with smallest element in the first position
 
@@ -20,7 +20,7 @@ heap queue, aka priority queue, always keep all elements sorted with smallest el
 - `merge(*iterables, key=None, reverse=False)` do not know how to use...
 - nlargest/nsmallest: return a list
 
-## 2. pointer operations in python
+## pointer operations in python
 
 this is really confusing to me at the first time, but after thinking about what we do in programming C, all things become extremely clear to me.
 
@@ -78,13 +78,13 @@ l = r
 #     head         pre        jump      l & r
 ```
 
-## 3. Binary Search Tree, BTS for short
+## Binary Search Tree, BTS for short
 
 also called an **ordered**, or **sorted** search tree.
 
 node.val is greater than all values from its left subtree, and less than all values from its right subtree.
 
-## 4. Structural Pattern Matching(PEP 634)
+## Structural Pattern Matching(PEP 634)
 
 new feature in 3.10 pre.
 
@@ -114,7 +114,7 @@ match point:
         print(f"Point is not on the diagonal.")
 ```
 
-## 5. List
+## List
 
 to use `List` type:
 
@@ -144,6 +144,12 @@ a = list(filter(None, a))
 - sequence: sequence which needs to be filtered, it can be sets, lists, tuples, or containers of any iterators.
 - returns: returns an iterator that is already filtered.
 
+#### append a list to another list
+
+```python
+list1.extend(list2)
+```
+
 #### merge lists without duplicates
 
 when you want append some elements to a list without causing duplicate items, try this
@@ -153,21 +159,21 @@ ans = {1, 2}
 ans |= {2, 3} # ans = {1, 2, 3}
 ```
 
-## 6. str
+## str
 
 - reverse a string
 ```python
 a[::-1]
 ```
 
-## 7. default dict
+## default dict
 
 ```python
 d = collections.defaultdict(list)
 d = collections.defaultdict(int)
 ```
 
-## 8. Union-find algorithm
+## Union-find algorithm
 
 #### 947. Most Stones Removed with Same Row or Column
 
@@ -271,7 +277,7 @@ for a in nums: count[find(a)] += 1
 return max(count.values())
 ```
 
-## 9. collections
+## collections
 
 #### Counter
 
@@ -283,7 +289,7 @@ count = collections.Counter(arr)
 # Counter({1: 2, 7: 1})
 ```
 
-## 10. sort with customize functions
+## sort with customize functions
 
 ```python
 arr.sort(key=functools.cmp_to_key(lambda x, y: 1 if abs(x) > abs(y) else -1))
@@ -292,32 +298,36 @@ arr.sort(key=abs) # sort original list
 sorted(arr, key=abs) # do not affect original list
 ```
 
-## 11. conversion among diff types
+## conversion among diverse object types
 
 ```python
+i = 10000
+b = b'\xc2\xda\x7a\x77'
+f = 1.314
+
 # bytes to int
-int.from_bytes(byte_variable, byteorder = 'little', signed=True)
+int.from_bytes(b, byteorder = 'little', signed=True)
 
 # int to bytes
-int_variable.to_bytes(4, byteorder='little')
+i.to_bytes(4, byteorder='little', signed=True)
 
 # bytes to float
-b = b'\xc2\xdatZ'
-
 # native byte order (little-endian on my machine)
 struct.unpack('f', b)[0] # 1.7230105268977664e+16
-
 # big-endian 
 struct.unpack('>f', b)[0] # -109.22724914550781
 
-# bytes to string:
+# decode bytes to string:
 b.decode("utf-8")
 
+# bytes to hex string
+b.hex()
+
 # print 2 decimal places float:
-"{:.2f}".format(float)
+"{:.2f}".format(f)
 ```
 
-## 12. multiple for loops and if in the same statement
+## multiple for loops and if in the same statement
 
 The best way to remember this is that the order of for loop inside the list comprehension is based on the order in which **they appear in traditional loop approach**. Outer most loop comes first, and then the inner loops subsequently.
 
@@ -333,7 +343,7 @@ In general, **if-else statement comes before the first for loop**, and if you ha
 [entry if tag in entry else [] for tag in tags for entry in entries]
 ```
 
-## 13. zip() in python
+## zip() in python
 
 ```python
 a =     [0, 1, 2]
@@ -343,7 +353,7 @@ b =     [1, 2, 0]
 tuple(zip(a, a[1:], b)) = ((0, 1, 1), (1, 2, 2))
 ```
 
-## 14. tuple in dict
+## tuple in dict
 
 - tuple is immutable
 - tuple can be key as well as value in dict
@@ -360,7 +370,7 @@ there are two common ways to modify a tuple:
 {'k': (1, 2, 3)}
 ```
 
-## 15. periodical function
+## periodical function
 
 ```python
 # this function will be called every 2 seconds
@@ -372,20 +382,33 @@ def periodical_func():
 periodical_func() # first call here
 ```
 
-## 16. traverse dict by sorted value
+## traverse dict by sorted value
 
 ```python
 for k, v in sorted(x.items(), key=lambda item: item[1]):
     # your code
 ```
 
-## 17. .remove() .discard() & .pop() in set
+## manage set
 
 - `.remove()` raise an keyError if element does not exist
 - `.discard()` will not raise error
 - `.pop()` pop out an arbitrary element, and will raise an error if set is empty
+- `.union()` returns a new set with all items from both sets
 
-## 18. itertools.chain
+```python
+set3 = set1.union(set2)
+```
+
+- `.update()` inserts the items in set2 into set1
+
+```python
+set1.update(set2)
+```
+
+- Pass
+
+## itertools.chain
 
 It is a function that takes a series of iterables and returns one iterable. It groups all the iterables together and produces a single iterable as output. Its output cannot be used directly and thus explicitly converted into iterables.
 
@@ -410,7 +433,7 @@ numbers = list(chain(odd, even))
 
 just concatenate multiple iterators together without any additional operations.
 
-## 19. itertools.product
+## itertools.product
 
 In the terms of Mathematics Cartesian Product of two sets is defined as the set of all ordered pairs (a, b) where a belongs to A and b belongs to B.
 
@@ -431,7 +454,7 @@ arr2 = [8, 9, 10]
 - **`itertools.product(*iterables)`:**
   It returns the cartesian product of all the iterable provided as the argument. For example, `product(arr1, arr2, arr3)`.
 
-## 20. String literals
+## String literals
 
 - f’’ represented formatted string
 - r’’ represented raw string, which treat backslashes as literal characters
@@ -444,7 +467,7 @@ print(r'/User/huayu/Downloads/')
 print(b'\x00\xff')
 ```
 
-## 21. Jupyter
+## Jupyter
 
 coding notebook, can view realtime variable states
 
@@ -452,7 +475,7 @@ coding notebook, can view realtime variable states
 
 ![image-20211117204543383](/Users/huayu/Library/Application Support/typora-user-images/image-20211117204543383.png)
 
-## 22. pytest
+## pytest
 
 1. mkdir test && cd test
 2. create empty __init\_\_.py file
@@ -466,7 +489,7 @@ def test_function():
     assert variable == result
 ```
 
-## 23. kwarg
+## kwarg
 
 [https://book.pythontips.com/en/latest/args_and_kwargs.html](https://book.pythontips.com/en/latest/args_and_kwargs.html)
 
@@ -494,13 +517,17 @@ b 2
 """
 ```
 
-## 24. count non-zero bit
+## count non-zero bit
 
-Python 3.10 introduce a new function:
-
-[`int.bit_count()`](https://docs.python.org/3.10/library/stdtypes.html#int.bit_count)
+Python 3.10 introduce a new function:[`int.bit_count()`](https://docs.python.org/3.10/library/stdtypes.html#int.bit_count)
 
 This is functionally equivalent to `bin(n).count("1")` but should be [~6 times faster](https://github.com/python/cpython/pull/771#issuecomment-288570744).
+
+## simple command-line http server
+
+```shell
+python3 -m http.server 7777
+```
 
 ## pdf export
 

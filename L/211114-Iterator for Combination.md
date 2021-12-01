@@ -8,7 +8,7 @@ Design the `CombinationIterator` class:
 
 **Example 1:**
 
-```python
+```java
 Input
 ["CombinationIterator", "next", "hasNext", "next", "hasNext", "next", "hasNext"]
 [["abc", 2], [], [], [], [], [], []]
