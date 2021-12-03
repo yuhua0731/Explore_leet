@@ -173,5 +173,8 @@ def main():
     print(solu.findMin(nums = [19,11,13,15,17]))
     print(solu.findPeakElement(nums = [1,2,1,3,5,6,4]))
     print(solu.threeSum(nums = [-2,0,0,2,2]))
+    print(solu.backspaceCompare("y#fo##f", "y#f#o##f"))
+    print(solu.intervalIntersection(firstList = [[0,2],[5,10],[13,23],[24,25]], secondList = [[1,5],[8,12],[15,24],[25,26]]))
+    print(solu.maxArea(height = [1,8,6,2,5,4,8,3,7]))
 if __name__ == "__main__":
     main()

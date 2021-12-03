@@ -3287,3 +3287,48 @@ class Solution:
                 else: left += 1
         return ans
 
+    def oddEvenList(self, head: ListNode) -> ListNode:
+        if not head or not head.next: return head
+        odd = head
+        even = even_head = head.next
+        while even and even.next:
+            odd.next = even.next
+            odd = odd.next
+            even.next = odd.next
+            even = even.next
+        odd.next = even_head
+        return head
+
+    def backspaceCompare(self, s: str, t: str) -> bool:
+        def backspace(st: str) -> str:
+            char_list = list()
+            for c in st:
+                if c == '#':
+                    if char_list: char_list.pop()
+                else: char_list.append(c)
+            return ''.join(char_list)
+        return backspace(s) == backspace(t)
+
+    def intervalIntersection(self, firstList: List[List[int]], secondList: List[List[int]]) -> List[List[int]]:
+        first_idx = second_idx = 0
+        m, n = len(firstList), len(secondList)
+        ans = list()
+        while first_idx < m and second_idx < n:
+            f_start, f_end = firstList[first_idx] 
+            s_start, s_end = secondList[second_idx]
+            if f_end < s_start: first_idx += 1
+            elif s_end < f_start: second_idx += 1
+            else:
+                ans.append([max(f_start, s_start), min(f_end, s_end)])
+                if f_end <= s_end: first_idx += 1
+                if f_end >= s_end: second_idx += 1
+        return ans
+
+    def maxArea(self, height: List[int]) -> int:
+        left, right = 0, len(height) - 1
+        ans = 0
+        while left < right:
+            ans = max(ans, min(height[left], height[right]) * (right - left))
+            if height[left] > height[right]: right -= 1
+            else: left += 1
+        return ans

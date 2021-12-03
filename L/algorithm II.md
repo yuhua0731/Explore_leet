@@ -455,5 +455,126 @@ def threeSum(self, nums: List[int]) -> List[List[int]]:
     return ans
 ```
 
+### 986. Interval List Intersections
+
+You are given two lists of closed intervals, `firstList` and `secondList`, where `firstList[i] = [starti, endi]` and `secondList[j] = [startj, endj]`. Each list of intervals is pairwise **disjoint** and in **sorted order**.
+
+Return *the intersection of these two interval lists*.
+
+A **closed interval** `[a, b]` (with `a <= b`) denotes the set of real numbers `x` with `a <= x <= b`.
+
+The **intersection** of two closed intervals is a set of real numbers that are either empty or represented as a closed interval. For example, the intersection of `[1, 3]` and `[2, 4]` is `[2, 3]`.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2019/01/30/interval1.png)
+
+```
+Input: firstList = [[0,2],[5,10],[13,23],[24,25]], secondList = [[1,5],[8,12],[15,24],[25,26]]
+Output: [[1,2],[5,5],[8,10],[15,23],[24,24],[25,25]]
+```
+
+**Example 2:**
+
+```
+Input: firstList = [[1,3],[5,9]], secondList = []
+Output: []
+```
+
+**Example 3:**
+
+```
+Input: firstList = [], secondList = [[4,8],[10,12]]
+Output: []
+```
+
+**Example 4:**
+
+```
+Input: firstList = [[1,7]], secondList = [[3,10]]
+Output: [[3,7]]
+```
+
+ 
+
+**Constraints:**
+
+- `0 <= firstList.length, secondList.length <= 1000`
+- `firstList.length + secondList.length >= 1`
+- `0 <= starti < endi <= 109`
+- `endi < starti+1`
+- `0 <= startj < endj <= 109`
+- `endj < startj+1`
+
+```python
+def intervalIntersection(self, firstList: List[List[int]], secondList: List[List[int]]) -> List[List[int]]:
+    first_idx = second_idx = 0
+    m, n = len(firstList), len(secondList)
+    ans = list()
+    while first_idx < m and second_idx < n:
+        f_start, f_end = firstList[first_idx] 
+        s_start, s_end = secondList[second_idx]
+        if f_end < s_start: first_idx += 1
+        elif s_end < f_start: second_idx += 1
+        else:
+            ans.append([max(f_start, s_start), min(f_end, s_end)])
+            if f_end <= s_end: first_idx += 1
+            if f_end >= s_end: second_idx += 1
+    return ans
+```
+
+Runtime: 140 ms, faster than 96.74% of Python3 online submissions for Interval List Intersections.
+
+Memory Usage: 15.1 MB, less than 61.94% of Python3 online submissions for Interval List Intersections.
+
+### 11. Container With Most Water
+
+Given `n` non-negative integers `a1, a2, ..., an` , where each represents a point at coordinate `(i, ai)`. `n` vertical lines are drawn such that the two endpoints of the line `i` is at `(i, ai)` and `(i, 0)`. Find two lines, which, together with the x-axis forms a container, such that the container contains the most water.
+
+**Notice** that you may not slant==倾斜== the container.
+
+ 
+
+**Example 1:**
+
+![img](https://s3-lc-upload.s3.amazonaws.com/uploads/2018/07/17/question_11.jpg)
+
+```
+Input: height = [1,8,6,2,5,4,8,3,7]
+Output: 49
+Explanation: The above vertical lines are represented by array [1,8,6,2,5,4,8,3,7]. In this case, the max area of water (blue section) the container can contain is 49.
+```
+
+**Example 2:**
+
+```
+Input: height = [1,1]
+Output: 1
+```
+
+**Example 3:**
+
+```
+Input: height = [4,3,2,1,4]
+Output: 16
+```
+
+**Example 4:**
+
+```
+Input: height = [1,2,1]
+Output: 2
+```
+
+ 
+
+**Constraints:**
+
+- `n == height.length`
+- `2 <= n <= 105`
+- `0 <= height[i] <= 104`
+
 
 
