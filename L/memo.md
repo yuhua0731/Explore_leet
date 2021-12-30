@@ -134,8 +134,11 @@ while '' in a:
 # form a new list
 a = [i for i in a if i]
 
-# using filter
-a = list(filter(None, a))
+# using filter, incredible
+str_list = list(filter(None, str_list))
+str_list = list(filter(bool, str_list))
+str_list = list(filter(len, str_list))
+str_list = list(filter(lambda item: item, str_list))
 ```
 
 #### filter(function, sequence)
@@ -150,13 +153,11 @@ a = list(filter(None, a))
 list1.extend(list2)
 ```
 
-#### merge lists without duplicates
-
-when you want append some elements to a list without causing duplicate items, try this
+#### add operator is compatible with list
 
 ```python
-ans = {1, 2} 
-ans |= {2, 3} # ans = {1, 2, 3}
+ans = list()
+ans += (1, 2), (2, 3)
 ```
 
 ## str
@@ -166,7 +167,55 @@ ans |= {2, 3} # ans = {1, 2, 3}
 a[::-1]
 ```
 
-## default dict
+- str.capitalize() capitalize the first char if isalpha
+
+```python
+a.capitalize()
+```
+
+- str.index(pattern) vs str.find(pattern)
+
+```python
+text = 'No[b]'
+text.index('[b]')
+2
+# raise an valueError if symbol not found in text
+text.index(symbol)
+# return -1 is symbol not found in text
+text.find(symbol)
+# return index of the last occurrance of symbol
+text.rfind(symbol)
+```
+
+- str.isdigit() str.isdecimal() str.isnumeric()
+
+It mainly crops up with various unicode characters, such as ^2^
+
+```python
+c = '\u00B2'
+c.isdecimal()
+False
+c.isdigit()
+True
+```
+
+You can also go further down the careful-unicode-distinction rabbit hole with the `isnumeric` method
+
+```python
+c = '\u00BD' # ½
+c.isdecimal()
+False
+c.isdigit()
+False
+c.isnumeric()
+True
+```
+
+- str.isupper() str.islower()
+
+Return `True` if all cased characters in the string are uppercase/lowercase and there is at least one cased character, `False` otherwise.
+
+## dict
 
 ```python
 d = collections.defaultdict(list)
@@ -293,9 +342,30 @@ count = collections.Counter(arr)
 
 ```python
 arr.sort(key=functools.cmp_to_key(lambda x, y: 1 if abs(x) > abs(y) else -1))
+# more concise
+arr.sort(key=abs)
+
+# multiple sort keys
 arr.sort(key=lambda x: (-x[0], x[1]))
-arr.sort(key=abs) # sort original list
+
+# sort original list
 sorted(arr, key=abs) # do not affect original list
+```
+
+## Lambda one-line function
+
+```python
+x = lambda a : (str)((int)(a * 3000))
+print(x(0.36))
+print(x(10))
+
+key = lambda x, y: 1 if abs(x) > abs(y) else -1
+key = lambda x: (-x[0], x[1])
+
+function_name = lambda input_arg: ans
+# this one-line lambda function is equivalent to the following defination
+def function_name(input_arg):
+    return ans
 ```
 
 ## conversion among diverse object types
@@ -406,7 +476,13 @@ set3 = set1.union(set2)
 set1.update(set2)
 ```
 
-- Pass
+- merge two sets
+
+
+```python
+ans = {1, 2} 
+ans |= {2, 3} # ans = {1, 2, 3}
+```
 
 ## itertools.chain
 
@@ -531,4 +607,342 @@ python3 -m http.server 7777
 
 ## pdf export
 
-选取图像，从pdf中截取矢量图，可以导入画图软件
+选取图像，从pdf中截取矢量图，可以导入画图软件(paid app)
+
+## Another trick of a = 1 if True else 2
+
+```python
+b = 1
+a = 'XO'[b == 1]
+# since b == 1 is True, True is equivalent to 1, 'XO' is a string
+# 'XO'[0] = 'X', 'XO'[1] = 'O'
+```
+
+#### There is a trap in this code syntax:
+
+Think about this line `[a/b, b][b==0]`. This line will generate a string/list/dict/.. whatever object, and calculate results for both conditions even though you will pick up only one of them eventually. Thus, if one of them got error, it will throw an Exception. While if..else.. only run the True part.
+
+But still, this syntax is excellent. And we should always learn new thoughts from others
+
+## regex
+
+- `re.sub`(*pattern*, *repl*, *string*, *count=0*, *flags=0*)[¶](https://docs.python.org/3/library/re.html#re.sub)
+
+Return the string obtained by replacing the leftmost non-overlapping occurrences of *pattern* in *string* by the replacement *repl*. If the pattern isn’t found, *string* is returned unchanged. *repl* can be a `string` or a `function`
+
+```python
+import re
+# replace value="<old_param_value>" to value="<new_param_value>"
+# r'\b' empty matches only when string is not adjacent to a previous character
+line = re.sub(r'\bvalue="[a-zA-Z0-9]*"', rf'value="{post_data[param]}"', line, 0, 0)
+```
+
+- `\b` matches the empty string, but only at the beginning and end of a word. `\b` is defined as the ==boundary== between a `\w` and a `\w` character. It is equivalent to the match whole word option when you are searching for some text.
+- `\d` matches any decimal ==digit==. This is equivalent to [0-9].
+- `\D` matches any character which is ==not== a decimal ==digit==. opposite of `\d`.
+- `\s` matches the ==whitespace== characters.
+
+## match object
+
+`re.search()` & `re.match()` returns a match object
+
+```python
+>>> m = re.match(r"(\w+) (\w+)", "Isaac Newton, physicist")
+>>> m.group(0)       # The entire match
+'Isaac Newton'
+>>> m.group(1)       # The first parenthesized subgroup.
+'Isaac'
+>>> m.group(2)       # The second parenthesized subgroup.
+'Newton'
+>>> m.group(1, 2)    # Multiple arguments give us a tuple.
+('Isaac', 'Newton')
+```
+
+```python
+# start/end index of first match
+temp = 'hello world hello'
+m = re.search('hello', temp)
+m.start()
+0
+m.end()
+5
+```
+
+## Nohup
+
+`-u` not buffering output stream
+
+`>>` append to file, not truncated previous log
+
+```shell
+nohup python3 -u ./test.py > test.log &
+nohup python3 -u sort_test_server.py >> sort_test_server.log 2>&1 &
+```
+
+#### disable stdout buffer
+
+- python
+
+```python
+# in single print line
+print('hello', flush=True)
+# flush stdout buffer
+sys.stdout.flush()
+# using -u when run python script
+nohup python3 -u ./test.py > test.log &
+```
+
+- c
+
+```c
+setvbuf(stdout, NULL, _IONBF, 0);
+```
+
+## subprocess
+
+The child process receives the same SIGINT as your parent process because it's in the same process group. You can put the child in its own process group by calling `os.setpgrp()` in the child process. Popen's `preexec_fn` argument is useful here:
+
+- `preexec_fn=os.setpgrp`: make script to run even when its parent process is killed
+
+```python
+# The child process receives the same SIGINT as your parent process 
+# because it's in the same process group. 
+# You can put the child in its own process group by calling os.setpgrp() in the child process. 
+# Popen's preexec_fn argument is useful here:
+# preexec_fn=os.setpgrp: make script to run even when its parent process is killed
+subprocess.Popen(['nohup', './test_c_api_sdo_retry.elf', nodeid, '2147483647', speed, homing, acc, '>> test_c_api.logg 2>&1 &'],
+        stdout=subprocess.PIPE, # default
+        stderr=open('err.log', 'a'), # redirect to custom file | 'w': write | 'a': append
+        preexec_fn=os.setpgrp)
+
+subprocess.run(['python3 test.py', '-i', nodeid, '>> test.log'])
+```
+
+## get local ip address
+
+```python
+def get_host_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('8.8.8.8', 80))
+        ip = s.getsockname()[0]
+    finally:
+        s.close()
+    return ip
+```
+
+## interesting code style
+
+```python
+target = sum(nums)
+
+# code by junior programmer
+if target % 2: return False
+target //= 2
+
+# code by experienced programmer
+if target & 1: return False
+target >>= 1
+```
+
+## random
+
+```python
+import random
+
+# choose k unique random elements from a nums
+# nums could be a list or a set
+def random.sample(nums, k)
+
+# ex.
+sample([1, 5, 10, 7], 4)
+sample(range(100), 20)
+
+# there is a hiden argument: count = None
+# represents for the count of each element
+sample([1, 10], counts = [3, 2], k = 2)
+# input list = [1, 1, 1, 10, 10]
+```
+
+## Built-in method
+
+Example: count word in string
+
+image macro defination, you can replace `low_count` with `text.lower().split().count`
+
+```python
+# low_count is used as a built-in method
+low_count = text.lower().split().count
+return {w: low_count(w) for w in words}
+```
+
+## map(function, sequence)
+
+```python
+pawn = 'a3'
+c, r = map(ord, pawn)
+time = '13:16'
+h, m = map(int, time.split(':'))
+# replace key with value
+d = dict()
+map(d.get, d.keys())
+```
+
+## Enum class
+
+```python
+from enum import Enum
+class Conveyor_state(Enum):
+    Idle = 1
+    Ready = 2
+    Loading = 3
+    
+Conveyor_state.Idle # Conveyor_state.Idle
+repr(Conveyor_state.Idle) # <Conveyor_state.Idle: 1>
+type(Conveyor_state.Idle) # <enum 'Conveyor_state'>
+isinstance(Conveyor_state.Idle, Conveyor_state) # True
+```
+
+Enumerations support ==iteration==, in definition order:
+
+```python
+for state in Conveyor_state:
+    print(state)
+# Conveyor_state.Idle
+# Conveyor_state.Ready
+# Conveyor_state.Loading
+list(Conveyor_state)
+# [<Conveyor_state.Idle: 1>, <Conveyor_state.Ready: 2>, <Conveyor_state.Loading: 3>]
+```
+
+Enumeration members are ==hashable==, so they can be used in dictionaries and sets.
+
+#### Access to enumeration members and their attributes
+
+- by value `Conveyor_state(1)`
+
+- by name `Conveyor_state.Idle` or `Conveyor_state['Idle']`
+
+Enum members have a property that contains their ==name/value==:
+
+```python
+Conveyor_state.Loading.name # Loading
+Conveyor_state.Loading.value # 3
+```
+
+#### Annotations
+
+- `@enum.unique` Enum members must have unique names while their values can be duplicate, unless you add an annotation ahead of Enum class like the following:
+
+```python
+from enum import Enum, unique
+@unique
+class Mistake(Enum):
+    ONE = 1
+    TWO = 2
+    THREE = 2
+```
+
+#### Automatically assign values to enum members
+
+```python
+from enum import Enum, auto
+class Color(Enum):
+    RED = auto() # this will automatically assign 1 to RED
+    ...
+```
+
+#### One-line
+
+```python
+CS = Enum('Conveyor_state', 'Idle Ready Loading')
+print(list(CS))
+# [<Conveyor_state.Idle: 1>, <Conveyor_state.Ready: 2>, <Conveyor_state.Loading: 3>]
+print(CS(1).name)
+# Idle
+```
+
+## string.Template
+
+```python
+from string import Template
+s = Template('state is $state')
+curr_state = Conveyor_state.Idle
+s.substitute(state=curr_state.name)
+# state is Idle
+
+from datetime import datetime
+s = Template(f'{datetime.now()} state is $state')
+s.substitute(state='idle')
+# '2021-12-24 15:26:36.211590 state is idle'
+```
+
+==safe_substitute== allows you to parse only part of arguments, while substitute will throw an Exception.
+
+```python
+Template('$who likes $what').safe_substitute(d)
+# 'tim likes $what'
+```
+
+- `"identifier"` is restricted to any case-insensitive ASCII ==alphanumeric== string (including underscores) that ==starts== with an ==underscore== or ASCII ==letter==. The first non-identifier character after the `$` character terminates this placeholder specification.
+
+```python
+Template('$_1').substitute(_1=1) # 1
+Template('$_ 1').substitute(_=1) # 1 1
+Template('$1').substitute(1) # ValueError
+Template('$_1').substitute(_=1) # KeyError
+Template('$_1').safe_substitute(_=1) # $_1
+```
+
+## gcd & lcm
+
+$$
+lcm(a,b)=\frac{|a*b|}{gcd(a,b)}
+$$
+
+```python
+math.gcd() # math has this function already
+def gcd(x, y):
+    while y: x, y = y, x % y
+    return x
+
+def lcm(x, y):
+    return abs(x * y) // gcd(x, y)
+```
+
+## next() in loop
+
+```python
+for i in arr:
+	j = next(arr)
+# you can get two elements in one loop, and the pointer to the next element will be updated
+```
+
+## subclass
+
+You need to create the class ==Warrior== , the instances of which will have 2 parameters - health (equal to 50 points) and attack (equal to 5 points), and 1 property - is_alive, which can be True (if warrior's health is > 0) or False (in the other case). In addition you have to create the second unit type - ==Knight==, which should be the subclass of the Warrior but have the increased attack - 7.
+
+```python
+class Warrior:
+    def __init__(self, attack = 5):
+        self.health = 50
+        self.attack = attack
+        self.is_alive = True
+
+class Knight(Warrior):
+    def __init__(self):
+        super().__init__(attack = 7)
+```
+
+## value variable and object
+
+```python
+a = 1 # this is an value variable
+b = a # just copy a's value to b
+class test:
+	def __init__(self):
+		self.a = 1
+a = test()
+b = a # copy a's address to b, they point to the same object
+```
+

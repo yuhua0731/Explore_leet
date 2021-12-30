@@ -103,4 +103,45 @@ print('l' in ['l', 'o'])
 bigger = 5 > 3
 print(not bigger)
 
-eval("0 / 0")
+test = []
+print(not test)
+
+ans = {1, 2}
+ans |= {2, 3}
+print(ans)
+
+
+from enum import Enum
+class Conveyor_state(Enum):
+    Idle = 1
+    Ready = 2
+    Loading = 3
+
+print(Conveyor_state.Idle)
+print(repr(Conveyor_state.Idle))
+print(type(Conveyor_state.Idle))
+print(isinstance(Conveyor_state.Idle, Conveyor_state))
+print(Conveyor_state.Loading.name)
+for state in Conveyor_state:
+    print(state)
+print(list(Conveyor_state))
+
+state = Conveyor_state.Idle
+print(state.name)
+if state == Conveyor_state.Idle:
+    state = Conveyor_state.Loading
+print(state.name)
+state = Conveyor_state(1)
+# equivalent to state = Conveyor_state.Idle
+print(state)
+print(state.name)
+print(state.value)
+
+CS = Enum('Conveyor_state', 'Idle Ready Loading')
+print(list(CS))
+print(CS(1).name)
+
+from string import Template
+s = Template('state is $state')
+curr_state = Conveyor_state.Idle
+print(s.substitute(state=curr_state.name))
