@@ -219,3 +219,813 @@ Explanation: M = 1000, CM = 900, XC = 90 and IV = 4.
 - `s` contains only the characters `('I', 'V', 'X', 'L', 'C', 'D', 'M')`.
 - It is **guaranteed** that `s` is a valid roman numeral in the range `[1, 3999]`.
 
+```python
+def romanToInt(self, s: str) -> int:
+    """
+    special sequences: IV(4) IX(9) XL(40) XC(90) CD(400) CM(900)
+    general chars: I(1) V(5) X(10) L(50) C(100) D(500) M(1000)
+    """
+    # dp
+    pre_2, pre_1 = 0, 0
+    pre_c = ' '
+    special = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000,
+               'IV': 4, 'IX': 9, 'XL': 40, 'XC': 90, 'CD': 400, 'CM': 900}
+    for c in s:
+        if pre_c + c in special:
+            pre_2, pre_1 = pre_1, pre_2 + special[pre_c + c]
+        else:
+            pre_2, pre_1 = pre_1, pre_1 + special[c]
+        pre_c = c
+    return pre_1
+```
+
+### 1834. Single-Threaded CPU
+
+You are given `n` tasks labeled from `0` to `n - 1` represented by a 2D integer array `tasks`, where `tasks[i] = [enqueueTimei, processingTimei]` means that the `ith` task will be available to process at `enqueueTimei` and will take `processingTimei` to finish processing.
+
+You have a single-threaded CPU that can process **at most one** task at a time and will act in the following way:
+
+- If the CPU is idle and there are no available tasks to process, the CPU remains idle.
+- If the CPU is idle and there are available tasks, the CPU will choose the one with the **shortest processing time**. If multiple tasks have the same shortest processing time, it will choose the task with the smallest index.
+- Once a task is started, the CPU will **process the entire task** without stopping.
+- The CPU can finish a task then start a new one instantly.
+
+Return *the order in which the CPU will process the tasks.*
+
+ 
+
+**Example 1:**
+
+```
+Input: tasks = [[1,2],[2,4],[3,2],[4,1]]
+Output: [0,2,3,1]
+Explanation: The events go as follows: 
+- At time = 1, task 0 is available to process. Available tasks = {0}.
+- Also at time = 1, the idle CPU starts processing task 0. Available tasks = {}.
+- At time = 2, task 1 is available to process. Available tasks = {1}.
+- At time = 3, task 2 is available to process. Available tasks = {1, 2}.
+- Also at time = 3, the CPU finishes task 0 and starts processing task 2 as it is the shortest. Available tasks = {1}.
+- At time = 4, task 3 is available to process. Available tasks = {1, 3}.
+- At time = 5, the CPU finishes task 2 and starts processing task 3 as it is the shortest. Available tasks = {1}.
+- At time = 6, the CPU finishes task 3 and starts processing task 1. Available tasks = {}.
+- At time = 10, the CPU finishes task 1 and becomes idle.
+```
+
+**Example 2:**
+
+```
+Input: tasks = [[7,10],[7,12],[7,5],[7,4],[7,2]]
+Output: [4,3,2,0,1]
+Explanation: The events go as follows:
+- At time = 7, all the tasks become available. Available tasks = {0,1,2,3,4}.
+- Also at time = 7, the idle CPU starts processing task 4. Available tasks = {0,1,2,3}.
+- At time = 9, the CPU finishes task 4 and starts processing task 3. Available tasks = {0,1,2}.
+- At time = 13, the CPU finishes task 3 and starts processing task 2. Available tasks = {0,1}.
+- At time = 18, the CPU finishes task 2 and starts processing task 0. Available tasks = {1}.
+- At time = 28, the CPU finishes task 0 and starts processing task 1. Available tasks = {}.
+- At time = 40, the CPU finishes task 1 and becomes idle.
+```
+
+ 
+
+**Constraints:**
+
+- `tasks.length == n`
+- `1 <= n <= 105`
+- `1 <= enqueueTimei, processingTimei <= 109`
+
+My approach:
+
+1. Sort the input list, key = available time, process time, original index
+2. create an heapq: store all available tasks at time i, element = (process time, index)
+3. Pop a task from heapq, and update curr time. return answer list until all tasks has been added into it.
+
+```python
+def getOrder(self, tasks: List[List[int]]) -> List[int]:
+    # heapq element: (process time, index)
+    pq = []
+    tasks = sorted([[task[0], task[1], index] for index, task in enumerate(tasks)])
+    ans = list()
+    curr_time = 0
+    while tasks or pq:
+        # if heapq is empty, we must add the first tasks into it, and update curr_time if needed
+        if not pq: curr_time = max(tasks[0][0], curr_time)
+        while tasks and tasks[0][0] <= curr_time:
+            temp = tasks.pop(0)
+            heapq.heappush(pq, (temp[1], temp[2]))
+        # pq is not empty now
+        # pop out the first task
+        process, index = heapq.heappop(pq)
+        curr_time += process - 1
+        ans.append(index)
+    return ans
+```
+
+### 403. Frog Jump
+
+A frog is crossing a river. The river is divided into some number of units, and at each unit, there may or may not exist a stone. The frog can jump on a stone, but it must not jump into the water.
+
+Given a list of `stones`' positions (in units) in sorted **ascending order**, determine if the frog can cross the river by landing on the last stone. Initially, the frog is on the first stone and assumes the first jump must be `1` unit.
+
+If the frog's last jump was `k` units, its next jump must be either `k - 1`, `k`, or `k + 1` units. The frog can only jump in the ==forward== direction.
+
+ 
+
+**Example 1:**
+
+```
+Input: stones = [0,1,3,5,6,8,12,17]
+Output: true
+Explanation: The frog can jump to the last stone by jumping 1 unit to the 2nd stone, then 2 units to the 3rd stone, then 2 units to the 4th stone, then 3 units to the 6th stone, 4 units to the 7th stone, and 5 units to the 8th stone.
+```
+
+**Example 2:**
+
+```
+Input: stones = [0,1,2,3,4,8,9,11]
+Output: false
+Explanation: There is no way to jump to the last stone as the gap between the 5th and 6th stone is too large.
+```
+
+ 
+
+**Constraints:**
+
+- `2 <= stones.length <= 2000`
+- `0 <= stones[i] <= 2 ** 31 - 1`
+- `stones[0] == 0`
+- `stones` is sorted in a strictly increasing order.
+
+#### My approach:
+
+simulate how frog jumps, using recursion
+
+1. implement a function: take current position and last jump step as input
+2. return true if frog can reach last stone from current state
+3. to improve performance, we pruncate recursion calls with a set called `visited`. If same input combination is detected, return False directly.
+
+```python
+def canCross(self, stones: List[int]) -> bool:
+    visited = set()
+    def jump(curr, k):
+        if (curr, k) in visited: return False
+        visited.add((curr, k))
+        if curr not in stones: return False
+        if curr == stones[-1]: return True
+        # curr position in stones, jump to next place
+        step = [k - 1, k, k + 1]
+        return any(jump(curr + i, i) for i in step)
+    return jump(1, 1) if stones[1] == 1 else False
+```
+
+#### Discussion approach:
+
+Recursion => DP
+
+1. create a 2-D array DP. `dp[i][j]` represents for the possibility of make a j step jump at stones[i] position.
+2. dp array’s size: since we can increase our step by 1 at most every time, for example, frog can jump at most 1 at stone[0], and at most 2 at stones[1], .., when frog reach stones[i], he could jump i + 1 at most, hence, dp can be initialized to `[[0] * (n + 1) for _ in range(n)]`.
+3. iterate on stones, for stones[i], check all stones[j] (j < i), if frog can jump from stones[j] to stones[i].
+4. return `any(dp[-1])`.
+
+```python
+def canCross(self, stones: List[int]) -> bool:
+    # dp
+    n = len(stones)
+    dp = [[0] * (n + 1) for _ in range(n)]
+    dp[0][1] = 1 # frog can only jump 1 step at stones[0] = 0
+    for i in range(1, n):
+        for j in range(i - 1, -1, -1): # from right to left to allow us prune iteration
+            step = stones[i] - stones[j]
+            if step > j + 1: break # frog can jump at most j + 1 step at stones[j]
+            if dp[j][step]: dp[i][step - 1] = dp[i][step] = dp[i][step + 1] = 1
+    return any(dp[-1])
+```
+
+4 times faster than recursion, while still perform terrible in time complexity
+
+### 1801. Number of Orders in the Backlog
+
+You are given a 2D integer array `orders`, where each `orders[i] = [pricei, amounti, orderTypei]` denotes that `amounti` orders have been placed of type `orderTypei` at the price `pricei`. The `orderTypei` is:
+
+- `0` if it is a batch of `buy` orders, or
+- `1` if it is a batch of `sell` orders.
+
+Note that `orders[i]` represents a batch of `amounti` independent orders with the same price and order type. All orders represented by `orders[i]` will be placed before all orders represented by `orders[i+1]` for all valid `i`.
+
+There is a **backlog** that consists of orders that have not been executed. The backlog is initially empty. When an order is placed, the following happens:
+
+- If the order is a `buy` order, you look at the `sell` order with the **smallest** price in the backlog. If that `sell` order's price is **smaller than or equal to** the current `buy` order's price, they will match and be executed, and that `sell` order will be removed from the backlog. Else, the `buy` order is added to the backlog.
+- Vice versa, if the order is a `sell` order, you look at the `buy` order with the **largest** price in the backlog. If that `buy` order's price is **larger than or equal to** the current `sell` order's price, they will match and be executed, and that `buy` order will be removed from the backlog. Else, the `sell` order is added to the backlog.
+
+Return *the total **amount** of orders in the backlog after placing all the orders from the input*. Since this number can be large, return it **modulo** `10 ** 9 + 7`.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2021/03/11/ex1.png)
+
+```
+Input: orders = [[10,5,0],[15,2,1],[25,1,1],[30,4,0]]
+Output: 6
+Explanation: Here is what happens with the orders:
+- 5 orders of type buy with price 10 are placed. There are no sell orders, so the 5 orders are added to the backlog.
+- 2 orders of type sell with price 15 are placed. There are no buy orders with prices larger than or equal to 15, so the 2 orders are added to the backlog.
+- 1 order of type sell with price 25 is placed. There are no buy orders with prices larger than or equal to 25 in the backlog, so this order is added to the backlog.
+- 4 orders of type buy with price 30 are placed. The first 2 orders are matched with the 2 sell orders of the least price, which is 15 and these 2 sell orders are removed from the backlog. The 3rd order is matched with the sell order of the least price, which is 25 and this sell order is removed from the backlog. Then, there are no more sell orders in the backlog, so the 4th order is added to the backlog.
+Finally, the backlog has 5 buy orders with price 10, and 1 buy order with price 30. So the total number of orders in the backlog is 6.
+```
+
+**Example 2:**
+
+![img](https://assets.leetcode.com/uploads/2021/03/11/ex2.png)
+
+```
+Input: orders = [[7,1000000000,1],[15,3,0],[5,999999995,0],[5,1,1]]
+Output: 999999984
+Explanation: Here is what happens with the orders:
+- 109 orders of type sell with price 7 are placed. There are no buy orders, so the 109 orders are added to the backlog.
+- 3 orders of type buy with price 15 are placed. They are matched with the 3 sell orders with the least price which is 7, and those 3 sell orders are removed from the backlog.
+- 999999995 orders of type buy with price 5 are placed. The least price of a sell order is 7, so the 999999995 orders are added to the backlog.
+- 1 order of type sell with price 5 is placed. It is matched with the buy order of the highest price, which is 5, and that buy order is removed from the backlog.
+Finally, the backlog has (1000000000-3) sell orders with price 7, and (999999995-1) buy orders with price 5. So the total number of orders = 1999999991, which is equal to 999999984 % (109 + 7).
+```
+
+ 
+
+**Constraints:**
+
+- `1 <= orders.length <= 105`
+- `orders[i].length == 3`
+- `1 <= pricei, amounti <= 109`
+- `orderTypei` is either `0` or `1`.
+
+```python
+def getNumberOfBacklogOrders(self, orders: List[List[int]]) -> int:
+    # you must obey the original order sequence
+    # heapq
+    # sell's element = (price, amount)
+    # buy's element = (-price, amount)
+    buy, sell = [], []
+    for price, amount, sell_buy in orders:
+        if sell_buy:
+            heapq.heappush(sell, [price, amount])
+        else:
+            heapq.heappush(buy, [-price, amount])
+
+        while buy and sell and -buy[0][0] >= sell[0][0]:
+            k = min(buy[0][1], sell[0][1])
+            buy[0][1] -= k
+            sell[0][1] -= k
+            if buy[0][1] == 0: heapq.heappop(buy)
+            if sell[0][1] == 0: heapq.heappop(sell)
+    return sum(amount for _, amount in buy + sell) % (10 ** 9 + 7)
+```
+
+### 1606. Find Servers That Handled Most Number of Requests
+
+You have `k` servers numbered from `0` to `k-1` that are being used to handle multiple requests simultaneously. Each server has infinite computational capacity but **cannot handle more than one request at a time**. The requests are assigned to servers according to a specific algorithm:
+
+- The `ith` (0-indexed) request arrives.
+- If all servers are busy, the request is dropped (not handled at all).
+- If the `(i % k)th` server is available, assign the request to that server.
+- Otherwise, assign the request to the next available server (wrapping around the list of servers and starting from 0 if necessary). For example, if the `ith` server is busy, try to assign the request to the `(i+1)th` server, then the `(i+2)th` server, and so on.
+
+You are given a **strictly increasing** array `arrival` of positive integers, where `arrival[i]` represents the arrival time of the `ith` request, and another array `load`, where `load[i]` represents the load of the `ith` request (the time it takes to complete). Your goal is to find the **busiest server(s)**. A server is considered **busiest** if it handled the most number of requests successfully among all the servers.
+
+Return *a list containing the IDs (0-indexed) of the **busiest server(s)***. You may return the IDs in any order.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2020/09/08/load-1.png)
+
+```
+Input: k = 3, arrival = [1,2,3,4,5], load = [5,2,3,3,3] 
+Output: [1] 
+Explanation: 
+All of the servers start out available.
+The first 3 requests are handled by the first 3 servers in order.
+Request 3 comes in. Server 0 is busy, so it's assigned to the next available server, which is 1.
+Request 4 comes in. It cannot be handled since all servers are busy, so it is dropped.
+Servers 0 and 2 handled one request each, while server 1 handled two requests. Hence server 1 is the busiest server.
+```
+
+**Example 2:**
+
+```
+Input: k = 3, arrival = [1,2,3,4], load = [1,2,1,2]
+Output: [0]
+Explanation: 
+The first 3 requests are handled by first 3 servers.
+Request 3 comes in. It is handled by server 0 since the server is available.
+Server 0 handled two requests, while servers 1 and 2 handled one request each. Hence server 0 is the busiest server.
+```
+
+**Example 3:**
+
+```
+Input: k = 3, arrival = [1,2,3], load = [10,12,11]
+Output: [0,1,2]
+Explanation: Each server handles a single request, so they are all considered the busiest.
+```
+
+ 
+
+**Constraints:**
+
+- `1 <= k <= 10 ** 5`
+- `1 <= arrival.length, load.length <= 10 ** 5`
+- `arrival.length == load.length`
+- `1 <= arrival[i], load[i] <= 10 ** 9`
+- `arrival` is **strictly increasing**.
+
+#### My approach:
+
+using two lists, and got TLE with huge input size
+
+```python
+def busiestServers(self, k: int, arrival: List[int], load: List[int]) -> List[int]:
+    ans = [0] * k # ans[i] represents for the amount of requests ith server handled
+    free_time = [-1] * k # free_time represents for the time that ith server will be free to take request
+
+    for idx, request in enumerate(zip(arrival, load)):
+        start, end = request[0], sum(request)
+        for i in range(idx, idx + k):
+            i_server = i % k
+            if start >= free_time[i_server]:
+                free_time[i_server] = end
+                ans[i_server] += 1
+                break
+
+    ret = list()
+    most = 0
+    for idx, cnt in enumerate(ans):
+        if cnt > most: most, ret = cnt, [idx]
+        elif cnt == most: ret.append(idx)
+    return ret
+```
+
+#### Discussion:
+
+Instead of using list, think about heap, which keep its elements sorted all the time. and do not require you to loop manually.
+
+##### ==three-heap== version
+
+easy to understand, but have messy code
+
+```python
+def busiestServers(self, k: int, arrival: List[int], load: List[int]) -> List[int]:
+    ans = [0] * k # ans[i] represents for the amount of requests ith server handled
+    busy = [] # heap: servers that currently occupied by a request, element = (free_time, idx)
+    free_behind = [] # heap: servers that currently free to handle request, idx equal or greater than i, element = (idx)
+    free_ahead = [i for i in range(k)] # heap: servers that currently free to handle request, idx less than i
+    for idx, (start, last) in enumerate(zip(arrival, load)):
+        idx %= k
+        if idx == 0:
+            free_behind = free_ahead
+            free_ahead = []
+        while busy and busy[0][0] <= start:
+            _, i = heapq.heappop(busy)
+            if i >= idx: heapq.heappush(free_behind, i)
+            else: heapq.heappush(free_ahead, i)
+        while free_behind and free_behind[0] < idx:
+            heapq.heappush(free_ahead, heapq.heappop(free_behind))
+        use_heap = free_behind if free_behind else free_ahead
+        if use_heap:
+            assign =  heapq.heappop(use_heap)
+            heapq.heappush(busy, (start + last, assign))
+            ans[assign] += 1
+    most = max(ans)
+    return [i for i, cnt in enumerate(ans) if cnt == most]
+```
+
+##### ==two-heap== version
+
+really genius while a little bit hard to understand
+
+```python
+def busiestServers(self, k: int, arrival: List[int], load: List[int]) -> List[int]:
+    # two-heap
+    ans = [0] * k # ans[i] represents for the amount of requests ith server handled
+    busy = [] # heap: servers that currently occupied by a request, element = (free_time, idx)
+    free = [i for i in range(k)] # heap: servers that currently free to handle request, element = (idx)
+    for idx, (start, last) in enumerate(zip(arrival, load)):
+        while busy and busy[0][0] <= start:
+            _, i = heapq.heappop(busy)
+            # instead of push i into free, we record idx + (i - idx) % k here as the server index
+            # believe it or not, this magic expression ensure we sort server in idx % k -> k - 1 -> 0 -> idx % k - 1 order
+            # remainder = - 1 - idx + k * divisor = - 1 + (k * divisor - idx) = - 1 + k - idx % k
+            heapq.heappush(free, idx + (i - idx) % k)
+        if free:
+            assign = heapq.heappop(free) % k
+            heapq.heappush(busy, (start + last, assign))
+            ans[assign] += 1
+    most = max(ans)
+    return [i for i, cnt in enumerate(ans) if cnt == most]
+```
+
+To merge two heaps into one, we cannot simply push index of free server into it. Our goal is: sort server in the following order:
+
+`idx % k —> k - 1 ——(wrap list)——> 0 -> idx % k - 1`
+
+here we use an expression: `idx + (i - idx) % k`, the following table evaluate how it works:
+
+| i           | expression: idx + (i - idx) % k | record in heap free   | order: range(idx, idx + k) |
+| ----------- | ------------------------------- | --------------------- | -------------------------- |
+| idx % k     | idx + (idx % k - idx) % k       | idx                   | idx + k - k                |
+| idx % k + 1 | idx + (idx % k + 1 - idx) % k   | idx + 1               | idx + k - (k - 1)          |
+| k - 1       | idx + (k - 1 - idx) % k         | idx + k - idx % k - 1 | idx + k - (idx % k + 1)    |
+| 0           | idx + (- idx) % k               | idx + k - idx % k     | idx + k - (idx % k)        |
+| idx % k - 1 | idx + (idx % k - 1 - idx) % k   | idx + (- 1) % k       | idx + k - 1                |
+
+Confusing part: `i = k - 1`
+$$
+remainder = (k-1-idx)\%k = (-1-idx)\%k = (-1)\%k+(-idx)\%k\\
+=(k-1)+(k-idx\%k)=k-idx\%k-1
+$$
+
+### 761. Special Binary String
+
+**Special binary strings** are binary strings with the following two properties:
+
+- The number of `0`'s is equal to the number of `1`'s.
+- Every prefix of the binary string has at least as many `1`'s as `0`'s.
+
+You are given a **special binary** string `s`.
+
+A move consists of choosing two consecutive, non-empty, special substrings of `s`, and swapping them. Two strings are consecutive if the last character of the first string is exactly one index before the first character of the second string.
+
+Return *the lexicographically largest resulting string possible after applying the mentioned operations on the string*.
+
+ 
+
+**Example 1:**
+
+```
+Input: s = "11011000"
+Output: "11100100"
+Explanation: The strings "10" [occuring at s[1]] and "1100" [at s[3]] are swapped.
+This is the lexicographically largest string possible after some number of swaps.
+```
+
+**Example 2:**
+
+```
+Input: s = "10"
+Output: "10"
+```
+
+ 
+
+**Constraints:**
+
+- `1 <= s.length <= 50`
+- `s[i]` is either `'0'` or `'1'`.
+- `s` is a special binary string.
+
+#### First Approach:
+
+> 1. 首先，定义==特殊字符串==：拥有同样数量的0和1、从前往后依次延长前缀子字符串，不能出现0比1多的情况。
+> 2. 在输入的字符串中，找到两个连续的、非空的特殊字符串，互换位置，组成新的字符串。
+> 3. 返回能够得到的最大的新字符串。
+>
+> 初始思路：
+>
+> 首先，这个特殊字符串，一定是以1打头的，以0结尾的。
+>
+> 找出所有可能的特殊字符串.
+>
+> 再找出其中连续的，能够成组的.
+>
+> 依次互换位置，返回能够得到的最大的新字符串。
+
+```python
+def makeLargestSpecial(self, s: str) -> str:
+    special = list() # element: (start, end)
+    curr = list() # element: [start_idx, cnt_0, cnt_1]
+    for i in range(len(s)):
+        for j in range(len(curr)):
+            if s[i] == '0':
+                curr[j][1] += 1
+            else:
+                curr[j][2] += 1
+        if s[i] == '1': curr.append([i, 0, 1])
+        curr = [[idx, x, y] for idx, x, y in curr if x <= y]
+        special += [[idx, idx + x + y] for idx, x, y in curr if x == y]
+
+    # find consecutive pairs
+    special.sort()
+    pair = []
+    for i in range(len(special)):
+        for j in range(i + 1, len(special)):
+            if special[i][1] == special[j][0]: pair.append(special[i] + special[j])
+            if special[i][1] < special[j][0]: break
+
+    res = [s]
+    for s1, e1, s2, e2 in pair: heapq.heappush(res, s[:s1] + s[s2:e2] + s[s1:e1] + s[e2:])
+    return heapq.nlargest(1, res)[0]
+```
+
+misunderstood this question..
+
+it doesn’t mention about how many moves we are allowed to do.
+
+Actually, we can do ==as many moves as== we want to find the lexicographically largest string.
+
+> new idea:
+>
+> 1. Split input string into ==as many== special strings as possible. Since input string is a special string. It is guarantted that we can split it into several substrings, and they are all special strings.(note: we must split the whole original string, and make sure all substrings are special strings. For instance, the string to be splited is “110100”, we can only get [“110100”] as result, rather than [“1”, “10”, “10”, “0”] since “1” & “0” are not special strings)
+> 2. Sort all substrings in default order.
+> 3. Join them in reverse order, then return it.
+
+```python
+def makeLargestSpecial(self, s: str) -> str:
+    start = cnt = 0
+    special = list()
+    for i, c in enumerate(s):
+        if c == '1': cnt += 1
+        if c == '0': cnt -= 1
+        if cnt == 0: 
+            special.append(s[start:i + 1])
+            start = i + 1
+            cnt = 0
+    return ''.join(sorted(special)[::-1])
+```
+
+This solution is wrong in some cases
+
+There is one example testcase:
+
+Input: “11011000”
+
+Output: “11011000”
+
+Expect: “11100100”
+
+#### Discussion:
+
+Think about this situation: we have a special string “11011000”, due to our split logic, we cannot further split it any more. However, there are two consecutive special strings “10” & “1100” in it, which can be swapped and should be swapped to get a larger new string.
+
+After viewing Lee’s solution, I learned a solution for this case. Actually, for each special substring `subs`, we should proceed a recursive call for `subs[1:-1]`, making themselves become the lexicographically largest string.
+
+```python
+@cahce
+def makeLargestSpecial(self, s: str) -> str:
+    start = 0
+    cnt = 0
+    special = list()
+    for i, c in enumerate(s):
+        if c == '1': cnt += 1
+        if c == '0': cnt -= 1
+        if cnt == 0: 
+            special.append('1' + self.makeLargestSpecial(s[start + 1:i]) + '0')
+            start = i + 1
+            cnt = 0
+    return ''.join(sorted(special)[::-1])
+```
+
+Provement:
+
+for a special string, it must obey the form “1M0” due to  the defination of special string.
+
+It is also guarantted that the middle part M is also a speical string.
+
+- since “1M0” satisfies the condition that cnt_0 == cnt_1, then M satisfies it obviously
+- since we will stop extending substring once we find that cnt_0 == cnt_1, and we didn’t stop until we reached the last 0 in this substring. We can tell that for each prefix of “1M0”, cnt_1 > cnt_0.
+- after we discarded the first ‘1’, cnt_1 >= cnt_0 is still guarantted for each prefix of M.
+
+Therefore, M is also a special string and we can call `makeLargestSpecial(M)` to get the lexicographically largest string of M.
+
+### 1745. Palindrome Partitioning IV
+
+Given a string `s`, return `true` *if it is possible to split the string* `s` *into three **non-empty** palindromic substrings. Otherwise, return* `false`.
+
+A string is said to be palindrome if it the same string when reversed.
+
+ 
+
+**Example 1:**
+
+```
+Input: s = "abcbdd"
+Output: true
+Explanation: "abcbdd" = "a" + "bcb" + "dd", and all three substrings are palindromes.
+```
+
+**Example 2:**
+
+```
+Input: s = "bcbddxy"
+Output: false
+Explanation: s cannot be split into 3 palindromes.
+```
+
+ 
+
+**Constraints:**
+
+- `3 <= s.length <= 2000`
+- `s` consists only of lowercase English letters.
+
+#### My approach
+
+1. dp map is our fundation.
+2. create a recursive function that help you split the original string into any amount of palindromes.
+3. have fun!
+
+```python
+def checkPartitioning(self, s: str) -> bool:
+    # dp[i][j] = True if s[i:j] is a palindrome
+    n = len(s)
+    dp = [[False] * (n + 1) for _ in range(n + 1)]
+    for diff in range(n + 1):
+        for i in range(n + 1 - diff):
+            j = i + diff
+            if diff <= 1: dp[i][j] = True
+            elif s[i] == s[j - 1]: dp[i][j] = dp[i + 1][j - 1]
+
+    def part(start: int, cnt: int):
+        if start == n: return False
+        if cnt == 1: return dp[start][n]
+        return any(part(i + 1, cnt - 1) for i in range(start, n) if dp[start][i + 1])
+```
+
+### 1476. Subrectangle Queries
+
+Implement the class `SubrectangleQueries` which receives a `rows x cols` rectangle as a matrix of integers in the constructor and supports two methods:
+
+1.` updateSubrectangle(int row1, int col1, int row2, int col2, int newValue)`
+
+- Updates all values with `newValue` in the subrectangle whose upper left coordinate is `(row1,col1)` and bottom right coordinate is `(row2,col2)`.
+
+2.` getValue(int row, int col)`
+
+- Returns the current value of the coordinate `(row,col)` from the rectangle.
+
+ 
+
+**Example 1:**
+
+```
+Input
+["SubrectangleQueries","getValue","updateSubrectangle","getValue","getValue","updateSubrectangle","getValue","getValue"]
+[[[[1,2,1],[4,3,4],[3,2,1],[1,1,1]]],[0,2],[0,0,3,2,5],[0,2],[3,1],[3,0,3,2,10],[3,1],[0,2]]
+Output
+[null,1,null,5,5,null,10,5]
+Explanation
+SubrectangleQueries subrectangleQueries = new SubrectangleQueries([[1,2,1],[4,3,4],[3,2,1],[1,1,1]]);  
+// The initial rectangle (4x3) looks like:
+// 1 2 1
+// 4 3 4
+// 3 2 1
+// 1 1 1
+subrectangleQueries.getValue(0, 2); // return 1
+subrectangleQueries.updateSubrectangle(0, 0, 3, 2, 5);
+// After this update the rectangle looks like:
+// 5 5 5
+// 5 5 5
+// 5 5 5
+// 5 5 5 
+subrectangleQueries.getValue(0, 2); // return 5
+subrectangleQueries.getValue(3, 1); // return 5
+subrectangleQueries.updateSubrectangle(3, 0, 3, 2, 10);
+// After this update the rectangle looks like:
+// 5   5   5
+// 5   5   5
+// 5   5   5
+// 10  10  10 
+subrectangleQueries.getValue(3, 1); // return 10
+subrectangleQueries.getValue(0, 2); // return 5
+```
+
+**Example 2:**
+
+```
+Input
+["SubrectangleQueries","getValue","updateSubrectangle","getValue","getValue","updateSubrectangle","getValue"]
+[[[[1,1,1],[2,2,2],[3,3,3]]],[0,0],[0,0,2,2,100],[0,0],[2,2],[1,1,2,2,20],[2,2]]
+Output
+[null,1,null,100,100,null,20]
+Explanation
+SubrectangleQueries subrectangleQueries = new SubrectangleQueries([[1,1,1],[2,2,2],[3,3,3]]);
+subrectangleQueries.getValue(0, 0); // return 1
+subrectangleQueries.updateSubrectangle(0, 0, 2, 2, 100);
+subrectangleQueries.getValue(0, 0); // return 100
+subrectangleQueries.getValue(2, 2); // return 100
+subrectangleQueries.updateSubrectangle(1, 1, 2, 2, 20);
+subrectangleQueries.getValue(2, 2); // return 20
+```
+
+ 
+
+**Constraints:**
+
+- There will be at most `500` operations considering both methods: `updateSubrectangle` and `getValue`.
+- `1 <= rows, cols <= 100`
+- `rows == rectangle.length`
+- `cols == rectangle[i].length`
+- `0 <= row1 <= row2 < rows`
+- `0 <= col1 <= col2 < cols`
+- `1 <= newValue, rectangle[i][j] <= 10^9`
+- `0 <= row < rows`
+- `0 <= col < cols`
+
+```python
+class SubrectangleQueries:
+
+    def __init__(self, rectangle: List[List[int]]):
+        self.rect = copy.deepcopy(rectangle)
+
+    def updateSubrectangle(self, row1: int, col1: int, row2: int, col2: int, newValue: int) -> None:
+        for i in range(row1, row2 + 1):
+            for j in range(col1, col2 + 1):
+                self.rect[i][j] = newValue
+
+    def getValue(self, row: int, col: int) -> int:
+        return self.rect[row][col]
+
+
+if __name__ == '__main__':
+    # Your SubrectangleQueries object will be instantiated and called as such:
+    rectangle = [[1, 2, 1], [4, 3, 4], [3, 2, 1], [1, 1, 1]]
+    obj = SubrectangleQueries(rectangle)
+    obj.updateSubrectangle(0, 0, 3, 2, 5)
+    print(obj.getValue(0, 2))
+```
+
+### 313. Super Ugly Number
+
+A **super ugly number** is a positive integer whose prime factors are in the array `primes`.
+
+Given an integer `n` and an array of integers `primes`, return *the* `nth` ***super ugly number***.
+
+The `nth` **super ugly number** is **guaranteed** to fit in a **32-bit** signed integer.
+
+ 
+
+**Example 1:**
+
+```
+Input: n = 12, primes = [2,7,13,19]
+Output: 32
+Explanation: [1,2,4,7,8,13,14,16,19,26,28,32] is the sequence of the first 12 super ugly numbers given primes = [2,7,13,19].
+```
+
+**Example 2:**
+
+```
+Input: n = 1, primes = [2,3,5]
+Output: 1
+Explanation: 1 has no prime factors, therefore all of its prime factors are in the array primes = [2,3,5].
+```
+
+ 
+
+**Constraints:**
+
+- `1 <= n <= 10 ** 6`
+- `1 <= primes.length <= 100`
+- `2 <= primes[i] <= 1000`
+- `primes[i]` is **guaranteed** to be a prime number.
+- All the values of `primes` are **unique** and sorted in **ascending order**.
+
+#### First Approach
+
+using heapq, pop ugly numbers one by one.
+
+this solution result in TLE when n is really huge.
+
+```python
+def nthSuperUglyNumber(self, n: int, primes: List[int]) -> int:
+    visited = set()
+    primes_pq = primes.copy()
+    temp = 1
+    for _ in range(1, n):
+        while primes_pq[0] in visited:
+            heapq.heappop(primes_pq)
+        temp = heapq.heappop(primes_pq)
+        visited.add(temp)
+        [heapq.heappush(primes_pq, temp * i) for i in primes]
+    return temp
+```
+
+#### Second Approach
+
+```python
+def nthSuperUglyNumber(self, n: int, primes: List[int]) -> int:	
+    res, heap = [1], [(primes[i], primes[i], 0) for i in range(len(primes))]
+    while len(res) < n:
+        val, prm, idx = heappop(heap)
+        if val <= res[-1]:
+            while val <= res[-1]: idx += 1; val = prm * res[idx]
+        else:
+            res += val,
+            val, idx = prm * res[idx + 1], idx + 1
+        heappush(heap, (val, prm, idx))
+    return res[-1]
+```
+
+
+

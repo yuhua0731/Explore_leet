@@ -927,12 +927,23 @@ class Warrior:
     def __init__(self, attack = 5):
         self.health = 50
         self.attack = attack
-        self.is_alive = True
+    
+    @property
+    def is_alive(self):
+        return self.health > 0
+    
+    def hit(self, other):
+        other.loss(self.attack)
+        
+    def loss(self, attack):
+        self.health -= attack
 
 class Knight(Warrior):
     def __init__(self):
         super().__init__(attack = 7)
 ```
+
+- `@property` annotation: when you add this annotation ahead of a function, you can call it without append brackets to it. For instance, `Alan.is_alive` is acceptable. It is equivalent to `foo = property(foo)`. It return a property object instead of function object, which requires arguments.
 
 ## value variable and object
 
@@ -945,4 +956,21 @@ class test:
 a = test()
 b = a # copy a's address to b, they point to the same object
 ```
+
+## deepcopy
+
+```python
+import copy
+rect = copy.deepcopy(rectangle)
+
+copy.copy(x)
+# Return a shallow copy of x.
+copy.deepcopy(x[, memo])
+# Return a deep copy of x.
+```
+
+- A *shallow copy* constructs a new compound object and then (to the extent possible) inserts *references* into it to the objects found in the original.
+- A *deep copy* constructs a new compound object and then, recursively, inserts *copies* into it of the objects found in the original.
+
+## yield
 
