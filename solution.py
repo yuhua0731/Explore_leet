@@ -4082,26 +4082,31 @@ class Solution:
         pos: 1, 3, 7, 9
         imp: 2, 4, 5, 6, 8, 0
         """
-        if k % 10 in [2, 4, 5, 6, 8, 0]: return -1
+        if k % 10 in [2, 4, 5, 6, 8, 0]:
+            return -1
         visited = set()
         amount = 0
         curr_mod = 0
         while True:
             amount += 1
             curr_mod = (curr_mod * 10 + 1) % k
-            if curr_mod == 0: return amount
-            if curr_mod in visited: return -1
+            if curr_mod == 0:
+                return amount
+            if curr_mod in visited:
+                return -1
             visited.add(curr_mod)
 
     def getOrder(self, tasks: List[List[int]]) -> List[int]:
         # heapq element: (process time, index)
         pq = []
-        tasks = sorted([[task[0], task[1], index] for index, task in enumerate(tasks)])
+        tasks = sorted([[task[0], task[1], index]
+                       for index, task in enumerate(tasks)])
         ans = list()
         curr_time = 0
         while tasks or pq:
             # if heapq is empty, we must add the first tasks into it, and update curr_time if needed
-            if not pq: curr_time = max(tasks[0][0], curr_time)
+            if not pq:
+                curr_time = max(tasks[0][0], curr_time)
             while tasks and tasks[0][0] <= curr_time:
                 temp = tasks.pop(0)
                 heapq.heappush(pq, (temp[1], temp[2]))
@@ -4128,12 +4133,14 @@ class Solution:
         # dp
         n = len(stones)
         dp = [[0] * (n + 1) for _ in range(n)]
-        dp[0][1] = 1 # frog can only jump 1 step at stones[0] = 0
+        dp[0][1] = 1  # frog can only jump 1 step at stones[0] = 0
         for i in range(1, n):
-            for j in range(i - 1, -1, -1): # from right to left to allow us prune iteration
+            for j in range(i - 1, -1, -1):  # from right to left to allow us prune iteration
                 step = stones[i] - stones[j]
-                if step > j + 1: break # frog can jump at most j + 1 step at stones[j]
-                if dp[j][step]: dp[i][step - 1] = dp[i][step] = dp[i][step + 1] = 1
+                if step > j + 1:
+                    break  # frog can jump at most j + 1 step at stones[j]
+                if dp[j][step]:
+                    dp[i][step - 1] = dp[i][step] = dp[i][step + 1] = 1
         return any(dp[-1])
 
     def getNumberOfBacklogOrders(self, orders: List[List[int]]) -> int:
@@ -4147,26 +4154,29 @@ class Solution:
                 heapq.heappush(sell, [price, amount])
             else:
                 heapq.heappush(buy, [-price, amount])
-            
+
             while buy and sell and -buy[0][0] >= sell[0][0]:
                 k = min(buy[0][1], sell[0][1])
                 buy[0][1] -= k
                 sell[0][1] -= k
-                if buy[0][1] == 0: heapq.heappop(buy)
-                if sell[0][1] == 0: heapq.heappop(sell)
+                if buy[0][1] == 0:
+                    heapq.heappop(buy)
+                if sell[0][1] == 0:
+                    heapq.heappop(sell)
         return sum(amount for _, amount in buy + sell) % (10 ** 9 + 7)
 
     def maxAncestorDiff(self, root: TreeNode) -> int:
 
         def find_diff(node: TreeNode, min_anc: int, max_anc: int):
-            if not node: return -1
+            if not node:
+                return -1
             diff = [max(abs(node.val - min_anc), abs(node.val - max_anc))]
             min_anc = min(node.val, min_anc)
             max_anc = max(node.val, max_anc)
             diff.append(find_diff(node.left, min_anc, max_anc))
             diff.append(find_diff(node.right, min_anc, max_anc))
             return max(diff)
-        
+
         return max(find_diff(root.left, root.val, root.val), find_diff(root.right, root.val, root.val))
 
     def insertionSortList(self, head: ListNode) -> ListNode:
@@ -4179,7 +4189,8 @@ class Solution:
                 # remove head.next and insert it somewhere else
                 # point head.next to head.next.next
                 find_pos = pre
-                while find_pos.next.val < to_insert.val: find_pos = find_pos.next
+                while find_pos.next.val < to_insert.val:
+                    find_pos = find_pos.next
                 # insert between find_post and find_pos.next
                 temp = find_pos.next
                 find_pos.next, to_insert.next = to_insert, temp
@@ -4192,7 +4203,7 @@ class Solution:
         # case 2: 找到所有互相喜欢的员工（pairs），以两者为起点，反向延伸找到最长的被喜欢链len = a & b
         # sum(a + b + 2 for all pairs)
         # return max(case 1, case 2)
-        
+
         n = len(favorite)
         cycles = list()
 
@@ -4203,7 +4214,8 @@ class Solution:
 
         # case 1
         for i in range(n):
-            if favorite[i] == -1: continue
+            if favorite[i] == -1:
+                continue
             path = {i: 0}
             while favorite[i] != -1:
                 temp = favorite[i]
@@ -4226,7 +4238,8 @@ class Solution:
 
         max_case1, max_case2 = 0, 0
         for i, size in cycles:
-            if size > 2: max_case1 = max(max_case1, size)
+            if size > 2:
+                max_case1 = max(max_case1, size)
             else:
                 j = [temp for temp in liked[i] if i in liked[temp]][0]
                 max_case2 += extend(i, j) + extend(j, i)
@@ -4251,7 +4264,8 @@ class Solution:
                 pre.append(inv)
                 invite(inv, pre)
             else:
-                for e in pre: visited.add(e)
+                for e in pre:
+                    visited.add(e)
                 start_index = pre.index(inv)
                 ans = max(ans, len(pre) - start_index)
                 print(pre, start_index, len(pre) - start_index)
@@ -4269,9 +4283,10 @@ class Solution:
         return ans
         # [1,0,0,2,1,4,7,8,9,6,7,10,8]
         # 有向有环图
-        
+
     def catMouseGame(self, graph: List[List[int]]) -> int:
         n = len(graph)
+
         @functools.cache
         def move(step, m, c):
             """
@@ -4279,26 +4294,33 @@ class Solution:
             m: mouse's position
             c: cat's position
             """
-            if step == 2 * n: return 0 # there is no winner after 2n steps, then they will end up draw
-            if m == c: return 2 # mouse and cat are in the same position, cat wins
-            if m == 0: return 1 # mouse reaches hole, mouse wins
+            if step == 2 * n:
+                return 0  # there is no winner after 2n steps, then they will end up draw
+            if m == c:
+                return 2  # mouse and cat are in the same position, cat wins
+            if m == 0:
+                return 1  # mouse reaches hole, mouse wins
 
             # move next step
             if step % 2 == 0:
                 # mouse turn
                 # mouse will take the step optimally
                 # once mouse find a chance to win, it will take this step
-                if any(move(step + 1, nxt, c) == 1 for nxt in graph[m]): return 1
+                if any(move(step + 1, nxt, c) == 1 for nxt in graph[m]):
+                    return 1
                 # if there is no chance to win, mouse will look for the draw
-                if any(move(step + 1, nxt, c) == 0 for nxt in graph[m]): return 0
+                if any(move(step + 1, nxt, c) == 0 for nxt in graph[m]):
+                    return 0
                 # if there is no chance to end with either mouse win or draw, then cat will win
                 return 2
             else:
                 # cat turn
-                if any(move(step + 1, m, nxt) == 2 for nxt in graph[c] if nxt != 0): return 2
-                if any(move(step + 1, m, nxt) == 0 for nxt in graph[c] if nxt != 0): return 0
+                if any(move(step + 1, m, nxt) == 2 for nxt in graph[c] if nxt != 0):
+                    return 2
+                if any(move(step + 1, m, nxt) == 0 for nxt in graph[c] if nxt != 0):
+                    return 0
                 return 1
-        return move(0, 1, 2) # game start with mouse at 1 and cat at 2
+        return move(0, 1, 2)  # game start with mouse at 1 and cat at 2
 
     def canMouseWin(self, grid: List[str], catJump: int, mouseJump: int) -> bool:
         # allowed steps:
@@ -4308,17 +4330,20 @@ class Solution:
         mx = my = cx = cy = position = 0
         for i in range(m):
             for j in range(n):
-                if grid[i][j] != '#': position += 1
-                if grid[i][j] == 'M': mx, my = i, j
-                if grid[i][j] == 'C': cx, cy = i, j
-        
+                if grid[i][j] != '#':
+                    position += 1
+                if grid[i][j] == 'M':
+                    mx, my = i, j
+                if grid[i][j] == 'C':
+                    cx, cy = i, j
+
         @functools.cache
         def find_nxt(x, y, jump):
             ans = list()
             for dx, dy in dir:
                 for i in range(jump + 1):
                     nx, ny = x + dx * i, y + dy * i
-                    if m > nx >= 0 <= ny < n and grid[nx][ny] != '#': 
+                    if m > nx >= 0 <= ny < n and grid[nx][ny] != '#':
                         ans.append([nx, ny])
                     else:
                         break
@@ -4326,10 +4351,14 @@ class Solution:
 
         @functools.cache
         def move(step, mx, my, cx, cy):
-            if step > position * 2: return False
-            if mx == cx and my == cy: return False
-            if grid[mx][my] == 'F': return True
-            if grid[cx][cy] == 'F': return False
+            if step > position * 2:
+                return False
+            if mx == cx and my == cy:
+                return False
+            if grid[mx][my] == 'F':
+                return True
+            if grid[cx][cy] == 'F':
+                return False
 
             if step % 2 == 0:
                 # mouse turn
@@ -4337,14 +4366,17 @@ class Solution:
             else:
                 # cat turn
                 return False if any(not move(step + 1, mx, my, x, y) for x, y in find_nxt(cx, cy, catJump)) else True
-        
+
         return move(0, mx, my, cx, cy)
 
     def busiestServers(self, k: int, arrival: List[int], load: List[int]) -> List[int]:
         # two-heap
-        ans = [0] * k # ans[i] represents for the amount of requests ith server handled
-        busy = [] # heap: servers that currently occupied by a request, element = (free_time, idx)
-        free = [i for i in range(k)] # heap: servers that currently free to handle request, element = (idx)
+        # ans[i] represents for the amount of requests ith server handled
+        ans = [0] * k
+        # heap: servers that currently occupied by a request, element = (free_time, idx)
+        busy = []
+        # heap: servers that currently free to handle request, element = (idx)
+        free = [i for i in range(k)]
         for idx, (start, last) in enumerate(zip(arrival, load)):
             while busy and busy[0][0] <= start:
                 _, i = heapq.heappop(busy)
@@ -4367,10 +4399,14 @@ class Solution:
         return [i for i, cnt in enumerate(ans) if cnt == most]
 
         # three-heap
-        ans = [0] * k # ans[i] represents for the amount of requests ith server handled
-        busy = [] # heap: servers that currently occupied by a request, element = (free_time, idx)
-        free_behind = [] # heap: servers that currently free to handle request, idx equal or greater than i, element = (idx)
-        free_ahead = [i for i in range(k)] # heap: servers that currently free to handle request, idx less than i
+        # ans[i] represents for the amount of requests ith server handled
+        ans = [0] * k
+        # heap: servers that currently occupied by a request, element = (free_time, idx)
+        busy = []
+        # heap: servers that currently free to handle request, idx equal or greater than i, element = (idx)
+        free_behind = []
+        # heap: servers that currently free to handle request, idx less than i
+        free_ahead = [i for i in range(k)]
         for idx, (start, last) in enumerate(zip(arrival, load)):
             idx %= k
             if idx == 0:
@@ -4378,22 +4414,26 @@ class Solution:
                 free_ahead = []
             while busy and busy[0][0] <= start:
                 _, i = heapq.heappop(busy)
-                if i >= idx: heapq.heappush(free_behind, i)
-                else: heapq.heappush(free_ahead, i)
+                if i >= idx:
+                    heapq.heappush(free_behind, i)
+                else:
+                    heapq.heappush(free_ahead, i)
             while free_behind and free_behind[0] < idx:
                 heapq.heappush(free_ahead, heapq.heappop(free_behind))
             use_heap = free_behind if free_behind else free_ahead
             if use_heap:
-                assign =  heapq.heappop(use_heap)
+                assign = heapq.heappop(use_heap)
                 heapq.heappush(busy, (start + last, assign))
                 ans[assign] += 1
         most = max(ans)
         return [i for i, cnt in enumerate(ans) if cnt == most]
 
         # no-heap, TLE
-        ans = [0] * k # ans[i] represents for the amount of requests ith server handled
-        free_time = [-1] * k # free_time represents for the time that ith server will be free to take request
-        
+        # ans[i] represents for the amount of requests ith server handled
+        ans = [0] * k
+        # free_time represents for the time that ith server will be free to take request
+        free_time = [-1] * k
+
         for idx, request in enumerate(zip(arrival, load)):
             start, end = request[0], sum(request)
             for i in range(idx, idx + k):
@@ -4402,12 +4442,14 @@ class Solution:
                     free_time[i_server] = end
                     ans[i_server] += 1
                     break
-        
+
         ret = list()
         most = 0
         for idx, cnt in enumerate(ans):
-            if cnt > most: most, ret = cnt, [idx]
-            elif cnt == most: ret.append(idx)
+            if cnt > most:
+                most, ret = cnt, [idx]
+            elif cnt == most:
+                ret.append(idx)
         return ret
 
     def makeLargestSpecial(self, s: str) -> str:
@@ -4415,10 +4457,13 @@ class Solution:
         cnt = 0
         special = list()
         for i, c in enumerate(s):
-            if c == '1': cnt += 1
-            if c == '0': cnt -= 1
-            if cnt == 0: 
-                special.append('1' + self.makeLargestSpecial(s[start + 1:i]) + '0')
+            if c == '1':
+                cnt += 1
+            if c == '0':
+                cnt -= 1
+            if cnt == 0:
+                special.append(
+                    '1' + self.makeLargestSpecial(s[start + 1:i]) + '0')
                 start = i + 1
                 cnt = 0
         return ''.join(sorted(special)[::-1])
@@ -4430,15 +4475,19 @@ class Solution:
         for diff in range(n + 1):
             for i in range(n + 1 - diff):
                 j = i + diff
-                if diff <= 1: dp[i][j] = True
-                elif s[i] == s[j - 1]: dp[i][j] = dp[i + 1][j - 1]
-        
+                if diff <= 1:
+                    dp[i][j] = True
+                elif s[i] == s[j - 1]:
+                    dp[i][j] = dp[i + 1][j - 1]
+
         def find_part(start: int):
             ans = list()
             for i in range(start, n):
-                if dp[start][i + 1]: # is palindrome
-                    if i + 1 < n: ans += [[s[start:i + 1]] + p for p in find_part(i + 1)]
-                    else: ans.append([s[start:i + 1]])
+                if dp[start][i + 1]:  # is palindrome
+                    if i + 1 < n:
+                        ans += [[s[start:i + 1]] + p for p in find_part(i + 1)]
+                    else:
+                        ans.append([s[start:i + 1]])
             return ans
         return find_part(0)
 
@@ -4449,12 +4498,16 @@ class Solution:
         for diff in range(n + 1):
             for i in range(n + 1 - diff):
                 j = i + diff
-                if diff <= 1: dp[i][j] = True
-                elif s[i] == s[j - 1]: dp[i][j] = dp[i + 1][j - 1]
-        
+                if diff <= 1:
+                    dp[i][j] = True
+                elif s[i] == s[j - 1]:
+                    dp[i][j] = dp[i + 1][j - 1]
+
         def part(start: int, cnt: int):
-            if start == n: return False
-            if cnt == 1: return dp[start][n]
+            if start == n:
+                return False
+            if cnt == 1:
+                return dp[start][n]
             return any(part(i + 1, cnt - 1) for i in range(start, n) if dp[start][i + 1])
 
         return part(0, 3)
@@ -4465,17 +4518,19 @@ class Solution:
             if s[i + 1] == '?':
                 r = ord('a')
                 while True:
-                    if chr(r) in [s[i], s[i + 2]]: r += 1
-                    else: 
+                    if chr(r) in [s[i], s[i + 2]]:
+                        r += 1
+                    else:
                         s = s[:i + 1] + chr(r) + s[i + 2:]
                         break
         return s[1:-1]
 
     def nthSuperUglyNumber(self, n: int, primes: List[int]) -> int:
         size = len(primes)
-        ugly = [1] # first ugly number is 1
-        ugly_idx = [0] * size # ugly[ugly_idx[i]] is the multiple number we should use for primes[i]
-        remain = primes.copy() # or primes.copy()
+        ugly = [1]  # first ugly number is 1
+        # ugly[ugly_idx[i]] is the multiple number we should use for primes[i]
+        ugly_idx = [0] * size
+        remain = primes.copy()  # or primes.copy()
         for _ in range(1, n):
             # print(len(remain))
             temp = min(remain)
@@ -4485,7 +4540,7 @@ class Solution:
                     ugly_idx[i] += 1
                     remain[i] = primes[i] * ugly[ugly_idx[i]]
         return ugly[-1]
-        
+
     def carPooling(self, trips: List[List[int]], capacity: int) -> bool:
         # remain = sorted([[fromi, toi, numi] for numi, fromi, toi in trips])
         # travel = []
@@ -4496,7 +4551,6 @@ class Solution:
         #     while travel and travel[0][0] <= fromi:
         #         _, gone = heapq.heappop(travel)
         #         cnt -= gone
-            
         #     while remain and remain[0][0] <= fromi:
         #         _, toi, numi = heapq.heappop(remain)
         #         heapq.heappush(travel, [toi, numi])
@@ -4507,5 +4561,6 @@ class Solution:
 
         for _, change in sorted([x for n, f, t in trips for x in [[f, n], [t, -n]]]):
             capacity -= change
-            if capacity < 0: return False
+            if capacity < 0:
+                return False
         return True
