@@ -1027,5 +1027,241 @@ def nthSuperUglyNumber(self, n: int, primes: List[int]) -> int:
     return res[-1]
 ```
 
+### 1958. Check if Move is Legal
 
+You are given a **0-indexed** `8 x 8` grid `board`, where `board[r][c]` represents the cell `(r, c)` on a game board. On the board, free cells are represented by `'.'`, white cells are represented by `'W'`, and black cells are represented by `'B'`.
 
+Each move in this game consists of choosing a free cell and changing it to the color you are playing as (either white or black). However, a move is only **legal** if, after changing it, the cell becomes the **==endpoint== of a good line** (horizontal, vertical, or diagonal).
+
+A **good line** is a line of **three or more cells (including the endpoints)** where the endpoints of the line are **one color**, and the remaining cells in the middle are the **opposite color** (no cells in the line are free). You can find examples for good lines in the figure below:
+
+![img](https://assets.leetcode.com/uploads/2021/07/22/goodlines5.png)
+
+Given two integers `rMove` and `cMove` and a character `color` representing the color you are playing as (white or black), return `true` *if changing cell* `(rMove, cMove)` *to color* `color` *is a **legal** move, or* `false` *if it is not legal*.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2021/07/10/grid11.png)
+
+```
+Input: board = [[".",".",".","B",".",".",".","."],[".",".",".","W",".",".",".","."],[".",".",".","W",".",".",".","."],[".",".",".","W",".",".",".","."],["W","B","B",".","W","W","W","B"],[".",".",".","B",".",".",".","."],[".",".",".","B",".",".",".","."],[".",".",".","W",".",".",".","."]], rMove = 4, cMove = 3, color = "B"
+Output: true
+Explanation: '.', 'W', and 'B' are represented by the colors blue, white, and black respectively, and cell (rMove, cMove) is marked with an 'X'.
+The two good lines with the chosen cell as an endpoint are annotated above with the red rectangles.
+```
+
+**Example 2:**
+
+![img](https://assets.leetcode.com/uploads/2021/07/10/grid2.png)
+
+```
+Input: board = [[".",".",".",".",".",".",".","."],[".","B",".",".","W",".",".","."],[".",".","W",".",".",".",".","."],[".",".",".","W","B",".",".","."],[".",".",".",".",".",".",".","."],[".",".",".",".","B","W",".","."],[".",".",".",".",".",".","W","."],[".",".",".",".",".",".",".","B"]], rMove = 4, cMove = 4, color = "W"
+Output: false
+Explanation: While there are good lines with the chosen cell as a middle cell, there are no good lines with the chosen cell as an endpoint.
+```
+
+ 
+
+**Constraints:**
+
+- `board.length == board[r].length == 8`
+- `0 <= rMove, cMove < 8`
+- `board[rMove][cMove] == '.'`
+- `color` is either `'B'` or `'W'`.
+
+#### My approach
+
+1. Implement a function called extend, taking original position, extend direction, and endpoint color as argument
+2. since we need to consider 8 directions totally, we just check if any direction in these 8-dir can extend to a good line.
+
+```python
+def checkMove(self, board: List[List[str]], rMove: int, cMove: int, color: str) -> bool:
+    dirs = [[0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [1, -1], [-1, 1], [-1, -1]]
+    # horizontal | vertical | diagonal
+
+    def extend(x, y, dx, dy, end_color):
+        i = 1
+        while True:
+            nx, ny = x + i * dx, y + i * dy
+            if 8 > nx >= 0 <= ny < 8:
+                if board[nx][ny] == '.': return False
+                if board[nx][ny] == end_color:
+                    return False if i == 1 else True
+                i += 1
+            else: return False
+
+    return any(extend(rMove, cMove, i, j, color) for i, j in dirs)
+```
+
+### 1402. Reducing Dishes
+
+A chef has collected data on the `satisfaction` level of his `n` dishes. Chef can cook any dish in 1 unit of time.
+
+**Like-time coefficient** of a dish is defined as the time taken to cook that dish including previous dishes multiplied by its satisfaction level i.e. `time[i] * satisfaction[i]`.
+
+Return *the maximum sum of **like-time coefficient** that the chef can obtain after dishes preparation*.
+
+Dishes can be prepared in **any** order and the chef can discard some dishes to get this maximum value.
+
+ 
+
+**Example 1:**
+
+```
+Input: satisfaction = [-1,-8,0,5,-9]
+Output: 14
+Explanation: After Removing the second and last dish, the maximum total like-time coefficient will be equal to (-1*1 + 0*2 + 5*3 = 14).
+Each dish is prepared in one unit of time.
+```
+
+**Example 2:**
+
+```
+Input: satisfaction = [4,3,2]
+Output: 20
+Explanation: Dishes can be prepared in any order, (2*1 + 3*2 + 4*3 = 20)
+```
+
+**Example 3:**
+
+```
+Input: satisfaction = [-1,-4,-5]
+Output: 0
+Explanation: People do not like the dishes. No dish is prepared.
+```
+
+ 
+
+**Constraints:**
+
+- `n == satisfaction.length`
+- `1 <= n <= 500`
+- `-1000 <= satisfaction[i] <= 1000`
+
+#### My approach
+
+1. Since dishes can be prepared in any order, we don’t need to keep the original list’s order.
+
+2. sort the original list in ==descending== order.
+
+3. iterate sorted list, from bigger number to smaller number.
+
+4. there are two number that we need to keep track on: ==total amount== of all dishes that have been chosen, and the ==Like-time coefficient== that we should return as answer.
+
+   > for instance, we chose dishes from `d0` to `di`, in ==descending== order.
+   >
+   > Total i = sum([d0, d1, .., di])
+   >
+   > Like-time i = sum([d0 * (i + 1), d1 * (i), .., di * 1])
+   >
+   > in next loop, we chose `di+1`, these two number should be updated like this:
+   >
+   > total i+1 = total i + di+1
+   >
+   > Like-time i+1 = sum([d0 * (i + 2), d1 * (i + 1), .., di * 2, di+1 * 1]) = Like-time i + total i+1
+
+```python
+def maxSatisfaction(self, satisfaction: List[int]) -> int:
+    # iterate in reverse order
+    satisfaction = sorted(satisfaction)[::-1]
+    ans = total = 0
+    for sat in satisfaction:
+        total += sat
+        if total > 0: ans += total
+        else: break
+    return ans
+```
+
+### 1807. Evaluate the Bracket Pairs of a String
+
+You are given a string `s` that contains some bracket pairs, with each pair containing a **non-empty** key.
+
+- For example, in the string `"(name)is(age)yearsold"`, there are **two** bracket pairs that contain the keys `"name"` and `"age"`.
+
+You know the values of a wide range of keys. This is represented by a 2D string array `knowledge` where each `knowledge[i] = [keyi, valuei]` indicates that key `keyi` has a value of `valuei`.
+
+You are tasked to evaluate **all** of the bracket pairs. When you evaluate a bracket pair that contains some key `keyi`, you will:
+
+- Replace `keyi` and the bracket pair with the key's corresponding `valuei`.
+- If you do not know the value of the key, you will replace `keyi` and the bracket pair with a question mark `"?"` (without the quotation marks).
+
+Each key will appear at most once in your `knowledge`. There will not be any nested brackets in `s`.
+
+Return *the resulting string after evaluating **all** of the bracket pairs.*
+
+ 
+
+**Example 1:**
+
+```
+Input: s = "(name)is(age)yearsold", knowledge = [["name","bob"],["age","two"]]
+Output: "bobistwoyearsold"
+Explanation:
+The key "name" has a value of "bob", so replace "(name)" with "bob".
+The key "age" has a value of "two", so replace "(age)" with "two".
+```
+
+**Example 2:**
+
+```
+Input: s = "hi(name)", knowledge = [["a","b"]]
+Output: "hi?"
+Explanation: As you do not know the value of the key "name", replace "(name)" with "?".
+```
+
+**Example 3:**
+
+```
+Input: s = "(a)(a)(a)aaa", knowledge = [["a","yes"]]
+Output: "yesyesyesaaa"
+Explanation: The same key can appear multiple times.
+The key "a" has a value of "yes", so replace all occurrences of "(a)" with "yes".
+Notice that the "a"s not in a bracket pair are not evaluated.
+```
+
+ 
+
+**Constraints:**
+
+- `1 <= s.length <= 105`
+- `0 <= knowledge.length <= 105`
+- `knowledge[i].length == 2`
+- `1 <= keyi.length, valuei.length <= 10`
+- `s` consists of lowercase English letters and round brackets `'('` and `')'`.
+- Every open bracket `'('` in `s` will have a corresponding close bracket `')'`.
+- The key in each bracket pair of `s` will be non-empty.
+- There will not be any nested bracket pairs in `s`.
+- `keyi` and `valuei` consist of lowercase English letters.
+- Each `keyi` in `knowledge` is unique.
+
+#### My approach
+
+with re.findall and str.replace
+
+```python
+def evaluate(self, s: str, knowledge: List[List[str]]) -> str:
+    knowledge = {i: j for i, j in knowledge}
+    for key in set(re.findall('\([a-z]+\)', s)):
+        if key[1:-1] in knowledge:
+            s = s.replace(key, knowledge[key[1:-1]])
+        else:
+            s = s.replace(key, '?')
+    return s
+```
+
+terrible time complexity.. 6700ms
+
+```python
+def evaluate(self, s: str, knowledge: List[List[str]]) -> str:
+    knowledge = dict(knowledge)
+    s = s.split('(')
+    for idx, sub in enumerate(s):
+        if ')' not in sub: continue
+        sub = sub.split(')')
+        s[idx] = (knowledge[sub[0]] if sub[0] in knowledge else '?') + sub[1]
+    return ''.join(s)
+```
+
+Better.. 1300ms

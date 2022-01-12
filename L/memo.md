@@ -220,6 +220,11 @@ Return `True` if all cased characters in the string are uppercase/lowercase and 
 ```python
 d = collections.defaultdict(list)
 d = collections.defaultdict(int)
+
+# create dict from a n*2 list
+li = [[1, 2], [2, 4]]
+li_dict = dict(li)
+# {1: 2, 2: 4}
 ```
 
 ## Union-find algorithm
@@ -974,3 +979,109 @@ copy.deepcopy(x[, memo])
 
 ## yield
 
+if a function contains `yield` inside it, it returns a generator, rather than a value or list.
+
+Look at the following code block:
+
+```python
+def func_yield(n):
+    while True:
+        yield n ** 2
+        n += 1
+
+yield_return = func_yield(7) # <class 'generator'>
+while True:
+    curr = next(yield_return)
+    if curr > 100: break
+    print(curr)
+"""output
+49
+64
+81
+100
+"""
+# below is an alternative version of the above code
+yield_return_alter = func_yield(7)
+"""
+note: to iterate from 7 again, you have to initial generator again. once an element is iterated, it will be dropped and cannot be iterated again with the same generator
+this is the main different between yield and return.
+if you return a list. you can iterate it as many times as you want without calling function repeatedly, since these values have already been stored in a memory.
+"""
+for i in yield_return_alter:
+    if i > 80: break
+    print(i)
+"""
+49
+64
+"""
+# last yield value from yield_return is 121
+# last yield value from yield_return_alter is 81
+print(next(yield_return)) # 144
+print(next(yield_return_alter)) # 100
+```
+
+`yield_return` is a generator. func_yield is a function which returns a [generator iterator](dfile:///Users/huayu/Library/Application Support/Dash/DocSets/Python_3/Python 3.docset/Contents/Resources/Documents/doc/glossary.html#term-generator-iterator). It looks like a normal function except that it contains [`yield`](dfile:///Users/huayu/Library/Application Support/Dash/DocSets/Python_3/Python 3.docset/Contents/Resources/Documents/doc/reference/simple_stmts.html#yield) expressions for producing a series of values usable in a for-loop or that can be retrieved one at a time with the [`next()`](dfile:///Users/huayu/Library/Application Support/Dash/DocSets/Python_3/Python 3.docset/Contents/Resources/Documents/doc/library/functions.html#next) function.
+
+I have seen an easy-understand explanation of how yield and next() work: 
+
+1. When you see `next()`, you start run this function
+2. When you meet `yield`, pause this function here and jump out, assigning the yield value to the left part of next().
+3. when you see `next()` again, you resume the pause function until you meet `yield` again.
+
+## Default and keyword args
+
+Non-default argument must be put ==ahead== of default argument when you specify a function.
+
+```python
+def func(default_argu = True, value):
+    return 0
+# SyntaxError: non-default argument follows default argument
+```
+
+Non-keyword argument must be put ahead of keyword argument when you call a function.
+
+the order of keyword arguments does not have to be the same as it is specified in function defination, since we have keyword to help us assign the right values to each argument.
+
+```python
+approximate_size(size=4000, False)
+# SyntaxError: non-keyword arg after keyword arg
+```
+
+## import search path
+
+```python
+import sys
+print(sys.path)
+"""
+['/Users/huayu/hcrobot/yuhua_test/explore_leet', '/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/lib/python39.zip', '/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/lib/python3.9', '/usr/local/Cellar/python@3.9/3.9.9/Frameworks/Python.framework/Versions/3.9/lib/python3.9/lib-dynload', '/Users/huayu/Library/Python/3.9/lib/python/site-packages', '/usr/local/lib/python3.9/site-packages', '/usr/local/Cellar/sip/6.4.0/libexec/lib/python3.9/site-packages']
+"""
+
+import can
+print(can.__file__)
+"""
+/usr/local/lib/python3.9/site-packages/can/__init__.py
+after I copied can directory from site-packages to current folder
+/Users/huayu/hcrobot/yuhua_test/explore_leet/can/__init__.py
+since current folder is the first search path in sys.path
+"""
+```
+
+You can customize import search order by modifying `sys.path`. The effect lasts as long as Python is running.
+
+```python
+import sys
+sys.path.insert(0, 'your-favorite-search-path')
+```
+
+
+
+```mermaid
+graph LR
+	A[Module: re] --> B[functions: re.match]
+	A --> C[properties: re.__file__]
+	B --> D[attributes: re.match.__doc__]
+	B --> E[methods]
+    
+```
+
+###### 

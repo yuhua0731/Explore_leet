@@ -265,8 +265,13 @@ def main():
     print(solu.nthSuperUglyNumber(n=12, primes=[2, 7, 13, 19]))
     print(solu.carPooling(trips=[[2, 1, 5], [3, 3, 7]], capacity=5))
     print(solu.carPooling(
-        trips=[[10, 5, 7], [10, 3, 4], [7, 1, 8], [6, 3, 4]], capacity=24))
-
+        trips=[[10, 5, 7], [10, 3, 4], [7, 1, 8], [6, 3, 4]], capacity=20))
+    print(solu.checkMove(board = [[".",".",".","B",".",".",".","."],[".",".",".","W",".",".",".","."],[".",".",".","W",".",".",".","."],[".",".",".","W",".",".",".","."],["W","B","B",".","W","W","W","B"],[".",".",".","B",".",".",".","."],[".",".",".","B",".",".",".","."],[".",".",".","W",".",".",".","."]], rMove = 4, cMove = 3, color = "B"))
+    print(solu.checkMove(board = [[".",".",".",".",".",".",".","."],[".","B",".",".","W",".",".","."],[".",".","W",".",".",".",".","."],[".",".",".","W","B",".",".","."],[".",".",".",".",".",".",".","."],[".",".",".",".","B","W",".","."],[".",".",".",".",".",".","W","."],[".",".",".",".",".",".",".","B"]], rMove = 4, cMove = 4, color = "W"))
+    print(solu.maxSatisfaction(satisfaction = [-1,-8,0,5,-9]))
+    print(solu.evaluate(s = "(name)is(age)yearsold(ii)", knowledge = [["name","bob"],["age","two"]]))
+    print(solu.possibleToStamp(grid = [[1,0,0,0],[1,0,0,0],[1,0,0,0],[1,0,0,0],[1,0,0,0]], stampHeight = 4, stampWidth = 3))
+    print(solu.possibleToStamp(grid = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]], stampHeight = 2, stampWidth = 2))
 
 if __name__ == "__main__":
     main()

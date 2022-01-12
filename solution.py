@@ -4564,3 +4564,91 @@ class Solution:
             if capacity < 0:
                 return False
         return True
+    
+    def checkMove(self, board: List[List[str]], rMove: int, cMove: int, color: str) -> bool:
+        dirs = [[0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [1, -1], [-1, 1], [-1, -1]]
+        # horizontal | vertical | diagonal
+
+        def extend(x, y, dx, dy, end_color):
+            i = 1
+            while True:
+                nx, ny = x + i * dx, y + i * dy
+                if 8 > nx >= 0 <= ny < 8:
+                    if board[nx][ny] == '.': return False
+                    if board[nx][ny] == end_color:
+                        return False if i == 1 else True
+                    i += 1
+                else: return False
+
+        return any(extend(rMove, cMove, i, j, color) for i, j in dirs)
+
+    def maxSatisfaction(self, satisfaction: List[int]) -> int:
+        # iterate in reverse order
+        satisfaction = sorted(satisfaction)[::-1]
+        ans = total = 0
+        for sat in satisfaction:
+            total += sat
+            if total > 0: ans += total
+            else: break
+        return ans
+
+    def evaluate(self, s: str, knowledge: List[List[str]]) -> str:
+        # knowledge = dict(knowledge)
+        # for key in set(re.findall('\([a-z]+\)', s)):
+        #     if key[1:-1] in knowledge:
+        #         s = s.replace(key, knowledge[key[1:-1]])
+        #     else:
+        #         s = s.replace(key, '?')
+        # return s
+
+        # another approach
+        knowledge = dict(knowledge)
+        s = s.split('(')
+        for idx, sub in enumerate(s):
+            if ')' not in sub: continue
+            sub = sub.split(')')
+            s[idx] = (knowledge[sub[0]] if sub[0] in knowledge else '?') + sub[1]
+        return ''.join(s)
+
+    def sumRootToLeaf(self, root: TreeNode) -> int:
+        # [1,0,1,0,1,0,1]
+        def find_leaf(pre: int, node: TreeNode) -> int:
+            pre = pre * 2 + node.val
+            if not node.left and not node.right:
+                # node is a leaf
+                return pre
+            return (find_leaf(pre, node.left) if node.left else 0) + (find_leaf(pre, node.right) if node.right else 0)
+        
+        return find_leaf(0, root)
+
+    def possibleToStamp(self, grid: List[List[int]], stampHeight: int, stampWidth: int) -> bool:
+        m, n = len(grid), len(grid[0])
+        H, W = stampHeight, stampWidth
+
+        def acc_2d(grid):
+            dp = [[0] * (n + 1) for _ in range(m + 1)] 
+            for c, r in product(range(n), range(m)):
+                dp[r + 1][c + 1] = dp[r + 1][c] + dp[r][c + 1] - dp[r][c] + grid[r][c]
+            return dp
+
+        def sumRegion(mat, r1, c1, r2, c2):
+            return mat[r2 + 1][c2 + 1] - mat[r1][c2 + 1] - mat[r2 + 1][c1] + mat[r1][c1]  
+
+        dp = acc_2d(grid)
+        stamp_grid = [[0] * n for _ in range(m)] 
+        for r, c in product(range(m - H + 1), range(n - W + 1)):
+            if sumRegion(dp, r, c, r + H - 1, c + W - 1) == 0:
+                # all cells in this range are empty
+                # just mark the right-bottom corner cell with 1
+                stamp_grid[r + H - 1][c + W - 1] = 1
+        
+        stamp_prefix = acc_2d(stamp_grid)
+        for r, c in product(range(m), range(n)):
+            # cell is empty and cannot be a right-bottom corner of a stamp
+            if grid[r][c] == 0 and stamp_grid[r][c] == 0:
+                if sumRegion(stamp_prefix, r, c, 
+                            min(r + H - 1, m - 1), 
+                            min(c + W - 1, n - 1)) == 0:
+                    # this cell cannot be covered by any valid right-bottom corner
+                    return False
+        return True
