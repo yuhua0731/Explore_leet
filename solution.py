@@ -4564,9 +4564,10 @@ class Solution:
             if capacity < 0:
                 return False
         return True
-    
+
     def checkMove(self, board: List[List[str]], rMove: int, cMove: int, color: str) -> bool:
-        dirs = [[0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [1, -1], [-1, 1], [-1, -1]]
+        dirs = [[0, 1], [0, -1], [1, 0], [-1, 0],
+                [1, 1], [1, -1], [-1, 1], [-1, -1]]
         # horizontal | vertical | diagonal
 
         def extend(x, y, dx, dy, end_color):
@@ -4574,11 +4575,13 @@ class Solution:
             while True:
                 nx, ny = x + i * dx, y + i * dy
                 if 8 > nx >= 0 <= ny < 8:
-                    if board[nx][ny] == '.': return False
+                    if board[nx][ny] == '.':
+                        return False
                     if board[nx][ny] == end_color:
                         return False if i == 1 else True
                     i += 1
-                else: return False
+                else:
+                    return False
 
         return any(extend(rMove, cMove, i, j, color) for i, j in dirs)
 
@@ -4588,8 +4591,10 @@ class Solution:
         ans = total = 0
         for sat in satisfaction:
             total += sat
-            if total > 0: ans += total
-            else: break
+            if total > 0:
+                ans += total
+            else:
+                break
         return ans
 
     def evaluate(self, s: str, knowledge: List[List[str]]) -> str:
@@ -4605,9 +4610,11 @@ class Solution:
         knowledge = dict(knowledge)
         s = s.split('(')
         for idx, sub in enumerate(s):
-            if ')' not in sub: continue
+            if ')' not in sub:
+                continue
             sub = sub.split(')')
-            s[idx] = (knowledge[sub[0]] if sub[0] in knowledge else '?') + sub[1]
+            s[idx] = (knowledge[sub[0]] if sub[0]
+                      in knowledge else '?') + sub[1]
         return ''.join(s)
 
     def sumRootToLeaf(self, root: TreeNode) -> int:
@@ -4618,7 +4625,7 @@ class Solution:
                 # node is a leaf
                 return pre
             return (find_leaf(pre, node.left) if node.left else 0) + (find_leaf(pre, node.right) if node.right else 0)
-        
+
         return find_leaf(0, root)
 
     def possibleToStamp(self, grid: List[List[int]], stampHeight: int, stampWidth: int) -> bool:
@@ -4626,29 +4633,343 @@ class Solution:
         H, W = stampHeight, stampWidth
 
         def acc_2d(grid):
-            dp = [[0] * (n + 1) for _ in range(m + 1)] 
+            dp = [[0] * (n + 1) for _ in range(m + 1)]
             for c, r in product(range(n), range(m)):
-                dp[r + 1][c + 1] = dp[r + 1][c] + dp[r][c + 1] - dp[r][c] + grid[r][c]
+                dp[r + 1][c + 1] = dp[r + 1][c] + \
+                    dp[r][c + 1] - dp[r][c] + grid[r][c]
             return dp
 
         def sumRegion(mat, r1, c1, r2, c2):
-            return mat[r2 + 1][c2 + 1] - mat[r1][c2 + 1] - mat[r2 + 1][c1] + mat[r1][c1]  
+            return mat[r2 + 1][c2 + 1] - mat[r1][c2 + 1] - mat[r2 + 1][c1] + mat[r1][c1]
 
         dp = acc_2d(grid)
-        stamp_grid = [[0] * n for _ in range(m)] 
+        stamp_grid = [[0] * n for _ in range(m)]
         for r, c in product(range(m - H + 1), range(n - W + 1)):
             if sumRegion(dp, r, c, r + H - 1, c + W - 1) == 0:
                 # all cells in this range are empty
                 # just mark the right-bottom corner cell with 1
                 stamp_grid[r + H - 1][c + W - 1] = 1
-        
+
         stamp_prefix = acc_2d(stamp_grid)
         for r, c in product(range(m), range(n)):
             # cell is empty and cannot be a right-bottom corner of a stamp
             if grid[r][c] == 0 and stamp_grid[r][c] == 0:
-                if sumRegion(stamp_prefix, r, c, 
-                            min(r + H - 1, m - 1), 
-                            min(c + W - 1, n - 1)) == 0:
+                if sumRegion(stamp_prefix, r, c,
+                             min(r + H - 1, m - 1),
+                             min(c + W - 1, n - 1)) == 0:
                     # this cell cannot be covered by any valid right-bottom corner
                     return False
         return True
+
+    def insertIntoBST(self, root: TreeNode, val: int) -> TreeNode:
+        """insert a new node into BST
+
+        Args:
+            root (TreeNode): BST to insert
+            val (int): value of new node
+
+        Returns:
+            TreeNode: new BST
+        """
+        if not root:
+            return TreeNode(val)
+        if root.val > val:
+            root.left = self.insertIntoBST(root.left, val)
+        else:
+            root.right = self.insertIntoBST(root.right, val)
+        return root
+
+    def originalDigits(self, s: str) -> str:
+        # TLE
+        # cnt = collections.Counter(s)
+        # digit = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine']
+        # def extract(cnt, idx):
+        #     if all(i == 0 for i in cnt.values()): return (True, '')
+        #     if idx == 10: return (False, '')
+
+        #     d_cnt = collections.Counter(digit[idx])
+        #     while True:
+        #         for key, value in d_cnt.items():
+        #             cnt[key] -= value
+        #         if min(cnt.values()) >= 0:
+        #             res = extract(cnt.copy(), idx + 1)
+        #             if res[0]: return (True, str(idx) + res[1])
+        #         else:
+        #             for key, value in d_cnt.items():
+        #                 cnt[key] += value
+        #             res = extract(cnt.copy(), idx + 1)
+        #             if res[0]: return (True, res[1])
+
+        # return extract(cnt, 0)[1]
+        """
+        z in zero
+        x in six
+        w in two
+        u in four
+        g in eight
+        h in three
+        o in one
+        f in five
+        i in nine
+        s in seven
+        """
+        ans = ''
+        cnt = collections.Counter(s)
+        digit = [('z', 'zero', 0), ('x', 'six', 6), ('w', 'two', 2), ('u', 'four', 4), ('g', 'eight', 8),
+                 ('h', 'three', 3), ('o', 'one', 1), ('f', 'five', 5), ('i', 'nine', 9), ('s', 'seven', 7)]
+        digit_cnt = [0] * 10
+        for ch, letter, idx in digit:
+            temp = cnt[ch]
+            for c in letter:
+                cnt[c] -= temp
+            digit_cnt[idx] = temp
+        for idx, count in enumerate(digit_cnt):
+            ans += str(idx) * count
+        return ans
+
+    def findMinArrowShots(self, points: List[List[int]]) -> int:
+        """
+        balloons are represented with xstart and xend.
+        arrow shot in [xstart, xend] will burst this balloon.
+
+        Args:
+            points (List[List[int]]): balloons
+
+        Returns:
+            int: minimum number of arrows needed to be shot to burst all balloons
+        """
+
+        # find the biggest non-overlap subset
+        # 1. form a heap queue(pq) from point, which is sorted by end time.
+        # 2. pop the first element from pq, which has the smallest end time. increment answer by 1, and update current end time.
+        # 3. if element's start time is less than or equal to current end time, ignore it since it has already been bursted by previous arrows.
+
+        # pq = sorted([[end, start] for start, end in points])
+        # curr_end = - 2 ** 31 - 1
+        # ans = 0
+        # while pq:
+        #     end, start = heapq.heappop(pq)
+        #     if start > curr_end:
+        #         ans += 1
+        #         curr_end = end
+
+        # return ans
+        # heapq gets worse time complexity???
+
+        points.sort(key=lambda x: x[1])
+        index = count = 0
+        while index < len(points):
+            shot, count = points[index][1], count + 1
+            while index < len(points) and points[index][0] <= shot:
+                index += 1
+        return count
+
+    def dominantIndex(self, nums: List[int]) -> int:
+        """determine if the largest element is at least twice as all other elements
+
+        Args:
+            nums (List[int]): number list
+
+        Returns:
+            int: largest element's index if it satisfies the requirement, or -1 otherwise
+        """
+        if len(nums) == 1:
+            return 0
+        nums = sorted([[v, i] for i, v in enumerate(nums)])
+        return -1 if nums[-1][0] < nums[-2][0] * 2 else nums[-1][1]
+
+    def minSwaps(self, s: str) -> int:
+        n = len(s)
+        cnt = collections.Counter(s)
+        diff = abs(cnt['0'] - cnt['1'])
+        if diff > 1:
+            return -1
+        if diff == 1:
+            if cnt['0'] > cnt['1']:
+                template = [chr(ord('0') + i % 2) for i in range(n)]
+            else:
+                template = [chr(ord('1') - i % 2) for i in range(n)]
+        else:  # diff == 0
+            template = [chr(ord('0') + i % 2) for i in range(n)]
+        ans = sum(i != j for i, j in zip(s, template))
+        return ans // 2 if diff == 1 else min(ans, n - ans) // 2
+
+    def myAtoi(self, s: str) -> int:
+        res = re.search('\A[\s]*[-+]?[0-9]+', s)
+        if not res:
+            return 0
+        ans = int(res.group())
+        return 2 ** 31 - 1 if ans > 2 ** 31 - 1 else -2 ** 31 if ans < -2 ** 31 else ans
+
+    def frogPosition(self, n: int, edges: List[List[int]], t: int, target: int) -> float:
+        """calculate the possibility that after t jumps the frog is on the target vertex
+
+        Args:
+            n (int): total amount of vertices
+            edges (List[List[int]]): 2-d list represents all edges in tree
+            t (int): limit t jumps
+            target (int): specify the target vertex
+
+        Returns:
+            float: the possibility for frog to stay on target, return 0 if frog cannot reach target in t jumps or passed target in less than t jumps and target has no child
+        """
+        tree = collections.defaultdict(list)
+        for i, j in edges:
+            tree[i].append(j)
+            tree[j].append(i)
+        visited = set()
+        curr = {1: 1} # frog is initially on vertex 1, and its possibility is 1/1 after 0 jump
+        for _ in range(t):
+            # frog reached target vertex in less than t jumps
+            if target in curr:
+                # there is still other vertex to jump, frog will not stuck on target
+                if any(c not in visited for c in tree[target]): return 0
+                # there is no vertex to jump, frog will stuck on target
+                else: return 1 / curr[target]
+            temp = dict()
+            for node, possibility in curr.items():
+                visited.add(node)
+                nxt = [c for c in tree[node] if c not in visited]
+                for n in nxt: temp[n] = possibility * len(nxt)
+            curr = temp
+        return 1 / curr[target] if target in curr else 0 # frog failed to reach target within t jumps
+
+    def wordPattern(self, pattern: str, s: str) -> bool:
+        word = dict()
+        word_re = dict()
+        if len(pattern) != len(s.split()): return False
+        for i, j in zip(pattern, s.split()):
+            if i not in word: word[i] = j
+            if j not in word_re: word_re[j] = i
+            if j != word[i] or i != word_re[j]: return False
+        return True
+
+    def smallestStringWithSwaps(self, s: str, pairs: List[List[int]]) -> str:
+        n = len(s)
+        root = [i for i in range(n)]
+        def find(x):
+            if root[x] != x:
+                root[x] = find(root[x])
+            return root[x]
+        
+        def union(x, y):
+            rx, ry = find(x), find(y)
+            if rx != ry:
+                root[rx] = ry
+                
+        for i, j in pairs: 
+            union(i, j)
+        
+        swap = collections.defaultdict(list)
+        for i in range(n):
+            heapq.heappush(swap[find(i)], s[i])
+
+        return ''.join([heapq.heappop(swap[root[i]]) for i in range(n)])
+
+    def calcEquation(self, equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:
+        def find(x):
+            """find the root of node x
+            note: in this problem, our edge is weighted, and we need to record them all
+            OR, we record and update the value of node x if its root is regard as 1(base value)
+        
+            Args:
+                x ([type]): [description]
+
+            Returns:
+                int: return the value that x should be multiplied to after updating its root 
+            """
+            if x not in root: 
+                root[x] = x
+                value[x] = 1
+            if root[x] != x:
+                root[x] = find(root[x])
+            return root[x]
+
+        def union(x, y, v):
+            rx, ry = find(x), find(y)
+            if rx != ry:
+                # merge nodes whose root is rx into ry group
+                ratio = value[y] * v / value[x]
+                for k in value.keys():
+                    if find(k) == rx: value[k] *= ratio
+                root[rx] = ry
+        
+        value = dict()
+        root = dict()
+
+        for (i, j), v in zip(equations, values):
+            union(i, j, v)
+
+        ans = []
+        for x, y in queries:
+            if x not in root or y not in root: ans.append(-1.0)
+            elif find(x) != find(y): ans.append(-1.0)
+            else: ans.append(value[x] / value[y])
+        return ans
+            
+    def canPlaceFlowers(self, flowerbed: List[int], n: int) -> bool:
+        flowerbed = [1, 0] + flowerbed + [0, 1]
+        amount = 0
+        for i in flowerbed:
+            if i == 1:
+                if amount > 0:
+                    n -= (amount - 1) // 2
+                    amount = 0
+                if n <= 0: return True
+            else:
+                amount += 1
+                if (amount - 1) // 2 >= n: return True
+        return False
+
+    def ways(self, pizza: List[str], k: int) -> int:
+        m, n = len(pizza), len(pizza[0])
+        MOD = 10 ** 9 + 7
+
+        # convert pizza to 2d DP matrix
+        # dp[i + 1][j + 1] represents for the amount of apple in the area from (0, 0) to (i, j)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i, j in product(range(m), range(n)):
+            dp[i + 1][j + 1] = dp[i][j + 1] + dp[i + 1][j] - dp[i][j] + (pizza[i][j] == 'A')
+
+        def cnt_apple(sx, sy, ex, ey):
+            return dp[ex + 1][ey + 1] - dp[ex + 1][sy] - dp[sx][ey + 1] + dp[sx][sy]
+
+        @functools.cache
+        def cut(i, j, p) -> int:
+            """cut the remain pizza into p pieces
+
+            Args:
+                i ([type]): remain pizza start from row i
+                j ([type]): remain pizza start from col j
+                k ([type]): cut into p pieces
+            
+            Returns:
+                int: return the value of ways to cut
+            """
+            # remain pizza: (i, j) to (m - 1, n - 1)
+            # first, check if the remain pizza has apple on it
+            if cnt_apple(i, j, m - 1, n - 1) == 0: return 0
+            if p == 1: return 1
+
+            ans = 0
+            # cut horizontally
+            # cut between row - 1 and row
+            ans += sum(cut(row, j, p - 1) for row in range(i + 1, m) if cnt_apple(i, j, row - 1, n - 1) > 0) % MOD
+            # cut vertically
+            # cut between col - 1 and col
+            ans += sum(cut(i, col, p - 1) for col in range(j + 1, n) if cnt_apple(i, j, m - 1, col - 1) > 0) % MOD
+            return ans % MOD
+
+        return cut(0, 0, k)
+
+    def detectCycle(self, head: ListNode) -> ListNode:
+        # regardless of O(1) memory
+        # visited = set() # key = listnode, value = idx
+        # while head:
+        #     if head in visited: return head
+        #     visited.add(head)
+        #     head = head.next
+        # return None
+
+        # O(1) space complexity
+        

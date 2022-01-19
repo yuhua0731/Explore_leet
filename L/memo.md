@@ -1079,9 +1079,28 @@ sys.path.insert(0, 'your-favorite-search-path')
 graph LR
 	A[Module: re] --> B[functions: re.match]
 	A --> C[properties: re.__file__]
-	B --> D[attributes: re.match.__doc__]
+	B --> D[attributes: re.match.__doc__ & re.__name__]
+	A --> D
 	B --> E[methods]
     
 ```
 
-###### 
+## test functions in module
+
+this line must be familiar to you: `if __name__ == '_main_'`. If you want to run current python script directly, you will add this line at the end of class, followed by several function calls.
+
+
+
+modules are objects, and all modules have a built-in attribute `__name__`. A module’s `__name__` depends on how you’re using the module. If you import the module, then
+
+`__name__` is the module’s filename, without a directory path or file extension.
+
+```python
+import humansize
+humansize.__name__
+# 'humansize'
+```
+
+But you can also run the module directly as a standalone program, in which case `__name__` will be a special
+
+default value, `__main__`.

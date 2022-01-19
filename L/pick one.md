@@ -1265,3 +1265,321 @@ def evaluate(self, s: str, knowledge: List[List[str]]) -> str:
 ```
 
 Better.. 1300ms
+
+### 423. Reconstruct Original Digits from English
+
+Given a string `s` containing an out-of-order English representation of digits `0-9`, return *the digits in **ascending** order*.
+
+ 
+
+**Example 1:**
+
+```
+Input: s = "owoztneoer"
+Output: "012"
+```
+
+**Example 2:**
+
+```
+Input: s = "fviefuro"
+Output: "45"
+```
+
+ 
+
+**Constraints:**
+
+- `1 <= s.length <= 105`
+- `s[i]` is one of the characters `["e","g","f","i","h","o","n","s","r","u","t","w","v","x","z"]`.
+- `s` is **guaranteed** to be valid.
+
+```python
+def originalDigits(self, s: str) -> str:
+    # TLE
+    # cnt = collections.Counter(s)
+    # digit = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine']
+    # def extract(cnt, idx):
+    #     if all(i == 0 for i in cnt.values()): return (True, '')
+    #     if idx == 10: return (False, '')
+
+    #     d_cnt = collections.Counter(digit[idx])
+    #     while True:
+    #         for key, value in d_cnt.items():
+    #             cnt[key] -= value
+    #         if min(cnt.values()) >= 0:
+    #             res = extract(cnt.copy(), idx + 1)
+    #             if res[0]: return (True, str(idx) + res[1])
+    #         else:
+    #             for key, value in d_cnt.items():
+    #                 cnt[key] += value
+    #             res = extract(cnt.copy(), idx + 1)
+    #             if res[0]: return (True, res[1])
+
+    # return extract(cnt, 0)[1]
+
+    """
+    z in zero
+    x in six
+    w in two
+    u in four
+    g in eight
+    h in three
+    o in one
+    f in five
+    i in nine
+    s in seven
+    """
+    ans = ''
+    cnt = collections.Counter(s)
+    digit = [('z', 'zero', 0), ('x', 'six', 6), ('w', 'two', 2), ('u', 'four', 4), ('g', 'eight', 8), ('h', 'three', 3), ('o', 'one', 1), ('f', 'five', 5), ('i', 'nine', 9), ('s', 'seven', 7)]
+    digit_cnt = [0] * 10
+    for ch, letter, idx in digit:
+        temp = cnt[ch]
+        for c in letter: cnt[c] -= temp
+        digit_cnt[idx] = temp
+    for idx, count in enumerate(digit_cnt):
+        ans += str(idx) * count
+    return ans
+```
+
+### 2034. Stock Price Fluctuation
+
+You are given a stream of **records** about a particular stock. Each record contains a **timestamp** and the corresponding **price** of the stock at that timestamp.
+
+Unfortunately due to the volatile nature of the stock market, the records do not come in order. Even worse, some records may be incorrect. Another record with the same timestamp may appear later in the stream **correcting** the price of the previous wrong record.
+
+Design an algorithm that:
+
+- **Updates** the price of the stock at a particular timestamp, **correcting** the price from any previous records at the timestamp.
+- Finds the **latest price** of the stock based on the current records. The **latest price** is the price at the latest timestamp recorded.
+- Finds the **maximum price** the stock has been based on the current records.
+- Finds the **minimum price** the stock has been based on the current records.
+
+Implement the `StockPrice` class:
+
+- `StockPrice()` Initializes the object with no price records.
+- `void update(int timestamp, int price)` Updates the `price` of the stock at the given `timestamp`.
+- `int current()` Returns the **latest price** of the stock.
+- `int maximum()` Returns the **maximum price** of the stock.
+- `int minimum()` Returns the **minimum price** of the stock.
+
+ 
+
+**Example 1:**
+
+```
+Input
+["StockPrice", "update", "update", "current", "maximum", "update", "maximum", "update", "minimum"]
+[[], [1, 10], [2, 5], [], [], [1, 3], [], [4, 2], []]
+Output
+[null, null, null, 5, 10, null, 5, null, 2]
+
+Explanation
+StockPrice stockPrice = new StockPrice();
+stockPrice.update(1, 10); // Timestamps are [1] with corresponding prices [10].
+stockPrice.update(2, 5);  // Timestamps are [1,2] with corresponding prices [10,5].
+stockPrice.current();     // return 5, the latest timestamp is 2 with the price being 5.
+stockPrice.maximum();     // return 10, the maximum price is 10 at timestamp 1.
+stockPrice.update(1, 3);  // The previous timestamp 1 had the wrong price, so it is updated to 3.
+                          // Timestamps are [1,2] with corresponding prices [3,5].
+stockPrice.maximum();     // return 5, the maximum price is 5 after the correction.
+stockPrice.update(4, 2);  // Timestamps are [1,2,4] with corresponding prices [3,5,2].
+stockPrice.minimum();     // return 2, the minimum price is 2 at timestamp 4.
+```
+
+ 
+
+**Constraints:**
+
+- `1 <= timestamp, price <= 10 ** 9`
+- At most `10 ** 5` calls will be made **in total** to `update`, `current`, `maximum`, and `minimum`.
+- `current`, `maximum`, and `minimum` will be called **only after** `update` has been called **at least once**.
+
+#### My approach
+
+use two heap queues, one tracks minimum price, the other tracks maximum price.
+
+```python
+import collections
+import heapq
+
+class StockPrice:
+
+    def __init__(self):
+        self.price = collections.defaultdict(int)
+        self.latest = 0
+        self.max_pq = []
+        self.min_pq = []
+
+    def update(self, timestamp: int, price: int) -> None:
+        self.price[timestamp] = price
+        self.latest = max(self.latest, timestamp)
+        heapq.heappush(self.min_pq, (price, timestamp))
+        heapq.heappush(self.max_pq, (-price, timestamp))
+
+    def current(self) -> int:
+        return self.price[self.latest]
+
+    def maximum(self) -> int:
+        while -self.max_pq[0][0] != self.price[self.max_pq[0][1]]:
+            heapq.heappop(self.max_pq)
+        return -self.max_pq[0][0]
+
+    def minimum(self) -> int:
+        while self.min_pq[0][0] != self.price[self.min_pq[0][1]]:
+            heapq.heappop(self.min_pq)
+        return self.min_pq[0][0]
+
+if __name__ == '__main__':
+    # Your StockPrice object will be instantiated and called as such:
+    obj = StockPrice()
+    obj.update(1, 3)
+    print(obj.current())
+    obj.update(3, 5)
+    obj.update(1, 7)
+    print(obj.maximum())
+    print(obj.minimum())
+```
+
+### 1864. Minimum Number of Swaps to Make the Binary String Alternating
+
+Given a binary string `s`, return *the **minimum** number of character swaps to make it **alternating**, or* `-1` *if it is impossible.*
+
+The string is called **alternating** if ==no two adjacent characters are equal==. For example, the strings `"010"` and `"1010"` are alternating, while the string `"0100"` is not.
+
+Any two characters may be swapped, even if they are **not adjacent**.
+
+ 
+
+**Example 1:**
+
+```
+Input: s = "111000"
+Output: 1
+Explanation: Swap positions 1 and 4: "111000" -> "101010"
+The string is now alternating.
+```
+
+**Example 2:**
+
+```
+Input: s = "010"
+Output: 0
+Explanation: The string is already alternating, no swaps are needed.
+```
+
+**Example 3:**
+
+```
+Input: s = "1110"
+Output: -1
+```
+
+ 
+
+**Constraints:**
+
+- `1 <= s.length <= 1000`
+- `s[i]` is either `'0'` or `'1'`.
+
+#### My approach
+
+generate the expected format
+
+1. count 0’s and 1’s amount in original string
+2. if their amounts’ diff is greater than or equal to 2, then it is impossible to make it alternating, return -1
+3. if diff is 1, then there should be an unique target format
+4. if diff is 0, then there should be two different formats, one is started with ‘0’, ans the other is started with ‘1’.
+5. compare target format ans original string, count the different chars, which are going to be swapped.
+
+```python
+def minSwaps(self, s: str) -> int:
+    n = len(s)
+    cnt = collections.Counter(s)
+    diff = abs(cnt['0'] - cnt['1'])
+    if diff > 1: return -1
+    if diff == 1:
+        if cnt['0'] > cnt['1']: template = [chr(ord('0') + i % 2) for i in range(n)]
+        else: template = [chr(ord('1') - i % 2) for i in range(n)]
+    else: # diff == 0
+        template = [chr(ord('0') + i % 2) for i in range(n)]
+    ans = sum(i != j for i, j in zip(s, template))
+    return ans // 2 if diff == 1 else min(ans, n - ans) // 2
+```
+
+### 1377. Frog Position After T Seconds
+
+Given an undirected tree consisting of `n` vertices numbered from `1` to `n`. A frog starts jumping from **vertex 1**. In one second, the frog jumps from its current vertex to another **unvisited** vertex if they are directly connected. The frog can not jump back to a visited vertex. In case the frog can jump to several vertices, it jumps randomly to one of them with the same probability. Otherwise, when the frog can not jump to any unvisited vertex, it jumps forever on the same vertex.
+
+The edges of the undirected tree are given in the array `edges`, where `edges[i] = [ai, bi]` means that exists an edge connecting the vertices `ai` and `bi`.
+
+*Return the probability that after `t` seconds the frog is on the vertex `target`.* Answers within `10 ** -5` of the actual answer will be accepted.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2021/12/21/frog1.jpg)
+
+```
+Input: n = 7, edges = [[1,2],[1,3],[1,7],[2,4],[2,6],[3,5]], t = 2, target = 4
+Output: 0.16666666666666666 
+Explanation: The figure above shows the given graph. The frog starts at vertex 1, jumping with 1/3 probability to the vertex 2 after second 1 and then jumping with 1/2 probability to vertex 4 after second 2. Thus the probability for the frog is on the vertex 4 after 2 seconds is 1/3 * 1/2 = 1/6 = 0.16666666666666666. 
+```
+
+**Example 2:**
+
+**![img](https://assets.leetcode.com/uploads/2021/12/21/frog2.jpg)**
+
+```
+Input: n = 7, edges = [[1,2],[1,3],[1,7],[2,4],[2,6],[3,5]], t = 1, target = 7
+Output: 0.3333333333333333
+Explanation: The figure above shows the given graph. The frog starts at vertex 1, jumping with 1/3 = 0.3333333333333333 probability to the vertex 7 after second 1. 
+```
+
+ 
+
+**Constraints:**
+
+- `1 <= n <= 100`
+- `edges.length == n - 1`
+- `edges[i].length == 2`
+- `1 <= ai, bi <= n`
+- `1 <= t <= 50`
+- `1 <= target <= n`
+
+```python
+def frogPosition(self, n: int, edges: List[List[int]], t: int, target: int) -> float:
+    """calculate the possibility that after t jumps the frog is on the target vertex
+
+    Args:
+        n (int): total amount of vertices
+        edges (List[List[int]]): 2-d list represents all edges in tree
+        t (int): limit t jumps
+        target (int): specify the target vertex
+
+    Returns:
+        float: the possibility for frog to stay on target, return 0 if frog cannot reach target in t jumps or passed target in less than t jumps and target has no child
+    """
+    tree = collections.defaultdict(list)
+    for i, j in edges:
+        tree[i].append(j)
+        tree[j].append(i)
+    visited = set()
+    curr = {1: 1} # frog is initially on vertex 1, and its possibility is 1/1 after 0 jump
+    for _ in range(t):
+        # frog reached target vertex in less than t jumps
+        if target in curr:
+            # there is still other vertex to jump, frog will not stuck on target
+            if any(c not in visited for c in tree[target]): return 0
+            # there is no vertex to jump, frog will stuck on target
+            else: return 1 / curr[target]
+        temp = dict()
+        for node, possibility in curr.items():
+            visited.add(node)
+            nxt = [c for c in tree[node] if c not in visited]
+            for n in nxt: temp[n] = possibility * len(nxt)
+        curr = temp
+    return 1 / curr[target] if target in curr else 0 # frog failed to reach target within t jumps
+```
