@@ -4972,4 +4972,17 @@ class Solution:
         # return None
 
         # O(1) space complexity
+        if not head: return None
+        slow = fast = head
+        first = True
+        while first or slow != fast:
+            first = False
+            if (not fast.next) or (not fast.next.next): return None
+            slow = slow.next
+            fast = fast.next.next
         
+        while slow != head:
+            slow = slow.next
+            head = head.next
+        
+        return head
