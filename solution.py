@@ -4818,48 +4818,58 @@ class Solution:
             tree[i].append(j)
             tree[j].append(i)
         visited = set()
-        curr = {1: 1} # frog is initially on vertex 1, and its possibility is 1/1 after 0 jump
+        # frog is initially on vertex 1, and its possibility is 1/1 after 0 jump
+        curr = {1: 1}
         for _ in range(t):
             # frog reached target vertex in less than t jumps
             if target in curr:
                 # there is still other vertex to jump, frog will not stuck on target
-                if any(c not in visited for c in tree[target]): return 0
+                if any(c not in visited for c in tree[target]):
+                    return 0
                 # there is no vertex to jump, frog will stuck on target
-                else: return 1 / curr[target]
+                else:
+                    return 1 / curr[target]
             temp = dict()
             for node, possibility in curr.items():
                 visited.add(node)
                 nxt = [c for c in tree[node] if c not in visited]
-                for n in nxt: temp[n] = possibility * len(nxt)
+                for n in nxt:
+                    temp[n] = possibility * len(nxt)
             curr = temp
-        return 1 / curr[target] if target in curr else 0 # frog failed to reach target within t jumps
+        # frog failed to reach target within t jumps
+        return 1 / curr[target] if target in curr else 0
 
     def wordPattern(self, pattern: str, s: str) -> bool:
         word = dict()
         word_re = dict()
-        if len(pattern) != len(s.split()): return False
+        if len(pattern) != len(s.split()):
+            return False
         for i, j in zip(pattern, s.split()):
-            if i not in word: word[i] = j
-            if j not in word_re: word_re[j] = i
-            if j != word[i] or i != word_re[j]: return False
+            if i not in word:
+                word[i] = j
+            if j not in word_re:
+                word_re[j] = i
+            if j != word[i] or i != word_re[j]:
+                return False
         return True
 
     def smallestStringWithSwaps(self, s: str, pairs: List[List[int]]) -> str:
         n = len(s)
         root = [i for i in range(n)]
+
         def find(x):
             if root[x] != x:
                 root[x] = find(root[x])
             return root[x]
-        
+
         def union(x, y):
             rx, ry = find(x), find(y)
             if rx != ry:
                 root[rx] = ry
-                
-        for i, j in pairs: 
+
+        for i, j in pairs:
             union(i, j)
-        
+
         swap = collections.defaultdict(list)
         for i in range(n):
             heapq.heappush(swap[find(i)], s[i])
@@ -4871,14 +4881,14 @@ class Solution:
             """find the root of node x
             note: in this problem, our edge is weighted, and we need to record them all
             OR, we record and update the value of node x if its root is regard as 1(base value)
-        
+
             Args:
                 x ([type]): [description]
 
             Returns:
                 int: return the value that x should be multiplied to after updating its root 
             """
-            if x not in root: 
+            if x not in root:
                 root[x] = x
                 value[x] = 1
             if root[x] != x:
@@ -4891,9 +4901,10 @@ class Solution:
                 # merge nodes whose root is rx into ry group
                 ratio = value[y] * v / value[x]
                 for k in value.keys():
-                    if find(k) == rx: value[k] *= ratio
+                    if find(k) == rx:
+                        value[k] *= ratio
                 root[rx] = ry
-        
+
         value = dict()
         root = dict()
 
@@ -4902,11 +4913,14 @@ class Solution:
 
         ans = []
         for x, y in queries:
-            if x not in root or y not in root: ans.append(-1.0)
-            elif find(x) != find(y): ans.append(-1.0)
-            else: ans.append(value[x] / value[y])
+            if x not in root or y not in root:
+                ans.append(-1.0)
+            elif find(x) != find(y):
+                ans.append(-1.0)
+            else:
+                ans.append(value[x] / value[y])
         return ans
-            
+
     def canPlaceFlowers(self, flowerbed: List[int], n: int) -> bool:
         flowerbed = [1, 0] + flowerbed + [0, 1]
         amount = 0
@@ -4915,10 +4929,12 @@ class Solution:
                 if amount > 0:
                     n -= (amount - 1) // 2
                     amount = 0
-                if n <= 0: return True
+                if n <= 0:
+                    return True
             else:
                 amount += 1
-                if (amount - 1) // 2 >= n: return True
+                if (amount - 1) // 2 >= n:
+                    return True
         return False
 
     def ways(self, pizza: List[str], k: int) -> int:
@@ -4929,7 +4945,8 @@ class Solution:
         # dp[i + 1][j + 1] represents for the amount of apple in the area from (0, 0) to (i, j)
         dp = [[0] * (n + 1) for _ in range(m + 1)]
         for i, j in product(range(m), range(n)):
-            dp[i + 1][j + 1] = dp[i][j + 1] + dp[i + 1][j] - dp[i][j] + (pizza[i][j] == 'A')
+            dp[i + 1][j + 1] = dp[i][j + 1] + \
+                dp[i + 1][j] - dp[i][j] + (pizza[i][j] == 'A')
 
         def cnt_apple(sx, sy, ex, ey):
             return dp[ex + 1][ey + 1] - dp[ex + 1][sy] - dp[sx][ey + 1] + dp[sx][sy]
@@ -4942,22 +4959,26 @@ class Solution:
                 i ([type]): remain pizza start from row i
                 j ([type]): remain pizza start from col j
                 k ([type]): cut into p pieces
-            
+
             Returns:
                 int: return the value of ways to cut
             """
             # remain pizza: (i, j) to (m - 1, n - 1)
             # first, check if the remain pizza has apple on it
-            if cnt_apple(i, j, m - 1, n - 1) == 0: return 0
-            if p == 1: return 1
+            if cnt_apple(i, j, m - 1, n - 1) == 0:
+                return 0
+            if p == 1:
+                return 1
 
             ans = 0
             # cut horizontally
             # cut between row - 1 and row
-            ans += sum(cut(row, j, p - 1) for row in range(i + 1, m) if cnt_apple(i, j, row - 1, n - 1) > 0) % MOD
+            ans += sum(cut(row, j, p - 1) for row in range(i + 1, m)
+                       if cnt_apple(i, j, row - 1, n - 1) > 0) % MOD
             # cut vertically
             # cut between col - 1 and col
-            ans += sum(cut(i, col, p - 1) for col in range(j + 1, n) if cnt_apple(i, j, m - 1, col - 1) > 0) % MOD
+            ans += sum(cut(i, col, p - 1) for col in range(j + 1, n)
+                       if cnt_apple(i, j, m - 1, col - 1) > 0) % MOD
             return ans % MOD
 
         return cut(0, 0, k)
@@ -4972,17 +4993,36 @@ class Solution:
         # return None
 
         # O(1) space complexity
-        if not head: return None
+        if not head:
+            return None
         slow = fast = head
         first = True
         while first or slow != fast:
             first = False
-            if (not fast.next) or (not fast.next.next): return None
+            if (not fast.next) or (not fast.next.next):
+                return None
             slow = slow.next
             fast = fast.next.next
-        
+
         while slow != head:
             slow = slow.next
             head = head.next
-        
+
         return head
+
+    def canCompleteCircuit(self, gas: List[int], cost: List[int]) -> int:
+        n = len(gas)
+        move = [i - j for i, j in zip(gas, cost)]
+        # start = 0 end = n
+        # start = -1 end = n - 1
+        curr = start = 0
+        end = start + 1
+        while end - start <= n:
+            curr += move[end - 1]
+            while curr < 0:
+                if start + n < end:
+                    return -1
+                start -= 1
+                curr += move[start]
+            end += 1
+        return start + n if start < 0 else start
