@@ -5026,3 +5026,114 @@ class Solution:
                 curr += move[start]
             end += 1
         return start + n if start < 0 else start
+
+    def getDecimalValue(self, head: ListNode) -> int:
+        """convert binary representation from a linkedlist into decimal integer
+
+        Args:
+            head (ListNode): a linkedlist that represents for a binary number, from MSB to LSB
+
+        Returns:
+            int: the decimal number
+        """
+        ans = 0
+        while head:
+            ans = ans * 2 + head.val
+            head = head.next
+        return ans
+
+    def findRelativeRanks(self, score: List[int]) -> List[str]:
+        """convert elements from a list into their ranks
+
+        Args:
+            score (List[int]): input list consists of scores of athletes
+
+        Returns:
+            List[str]: the ranks number of all athletes, and give medals to the first three ones 
+        """
+        for rank, (_, index) in enumerate(sorted([[s, idx] for idx, s in enumerate(score)], key=lambda x: -x[0])):
+            if rank == 0:
+                score[index] = 'Gold Medal'
+            elif rank == 1: 
+                score[index] = 'Silver Medal'
+            elif rank == 2:
+                score[index] = 'Bronze Medal'
+            else:
+                score[index] = str(rank + 1)
+        return score
+    
+    def minDepth(self, root: TreeNode) -> int:
+        """find the minimum depth of a binary tree
+
+        Args:
+            root (TreeNode): the root node of this tree
+
+        Returns:
+            int: the minimum depth of this tree
+        """
+        if not root: return 0
+        curr = [[1, root]]
+        ans = float('inf')
+        while curr:
+            depth, node = curr.pop(0)
+            if depth >= ans: continue
+            else:
+                if not node.left and not node.right:
+                    ans = min(ans, depth)
+                else:
+                    if node.left: curr.append([depth + 1, node.left])
+                    if node.right: curr.append([depth + 1, node.right])
+        return ans
+
+    def possibleBipartition(self, n: int, dislikes: List[List[int]]) -> bool:
+        group = dict()
+        dislike = dict()
+        for i, j in dislikes:
+            if i not in group and j not in group:
+                # encounter two new people that has not been seem before
+                dislike[i] = j
+                dislike[j] = i
+                group[i] = i
+                group[j] = j
+            elif i in group and j not in group:
+                group[j] = dislike[group[i]]
+            elif i not in group and j in group:
+                group[i] = dislike[group[j]]
+            else:
+                # both can be found be group
+                gi, gj = group[i], group[j]
+                if gi == gj: return False
+                if dislike[gi] == gj: continue
+                else:
+                    # move (gj, dislike[gj]) to (dislike[gi], gi)
+                    for i, g in group.items():
+                        if g == gj:
+                            group[i] = dislike[gi]
+                        elif g == dislike[gj]:
+                            group[i] = gi
+        return True
+
+    def detectCapitalUse(self, word: str) -> bool:
+        return True if word == '' or word.isupper() or word.islower() or word == word.capitalize() else False
+
+    def maximumGood(self, statements: List[List[int]]) -> int:
+        ans = 0
+        n = len(statements)
+        def check(b):
+            for i, p in enumerate(b):
+                if p == '1': 
+                    # person i is good person
+                    for idx, s in enumerate(statements[i]):
+                        # s == 0 && b[idx] = 0
+                        # s == 1 && b[idx] = 1
+                        # s == 2
+                        if s != 2 and s != int(b[idx]): return False
+            return True
+
+        for i in range(2 ** n):
+            bitmask = bin(i)[2:].zfill(n)
+            if check(bitmask):
+                ans = max(ans, bitmask.count('1'))
+        return ans
+
+    

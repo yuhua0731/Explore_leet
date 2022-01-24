@@ -1104,3 +1104,14 @@ humansize.__name__
 But you can also run the module directly as a standalone program, in which case `__name__` will be a special
 
 default value, `__main__`.
+
+## Convert integer to binary
+
+```python
+bin(6) # '0b110'
+bin(6)[2:] # '110'
+bin(6)[2:].zfill(8) # '00000110'
+
+f'{6:08b}' <=> '{0:08b}'.format(6)
+```
+
