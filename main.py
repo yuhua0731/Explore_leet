@@ -294,6 +294,8 @@ def main():
     print(solu.canCompleteCircuit(gas=[2, 3, 4], cost=[3, 4, 3]))
     print(solu.possibleBipartition(n = 4, dislikes = [[1,2],[3,4],[1,3],[1,4]]))
     print(solu.maximumGood(statements = [[2,1,2],[1,2,2],[2,0,2]]))
+    print(solu.duplicateZeros([1,0,2,3,0,4,5,0]))
+    print(solu.superpalindromesInRange(left = "4", right = "1000"))
 
 if __name__ == "__main__":
     main()

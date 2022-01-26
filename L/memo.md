@@ -1115,3 +1115,82 @@ bin(6)[2:].zfill(8) # '00000110'
 f'{6:08b}' <=> '{0:08b}'.format(6)
 ```
 
+## Convert str into char array
+
+```python
+s = 'har '
+list(s) # ['h', 'a', 'r', ' ']
+```
+
+## Deque in python & java
+
+deque is short for “double ended queue”, and is usually pronounced “deck”
+
+double ended version of list in Python
+
+```python
+dq = collections.deque([1, 2, 3])
+# deque share the same functions with list
+dq.popleft() # same as list.pop(0) but much faster
+dq.appendleft()
+dq.extendleft()
+dq.reverse()
+dq.rotate(n = 1) # rotate the deque n steps to the right, or left if n < 0
+```
+
+double ended version of queue in Java
+
+`LinkedList<E>` is an indirect subclass of it
+
+```java
+Deque<String> dq = new LinkedList<String> ();
+dq.addLast(e); // add(e)
+dq.offerLast(e); // offer(e)
+dq.offerFirst(e); // push(e)
+dq.removeFirst(e); // pop(e)
+dq.removeLast(e); // remove(e)
+dq.pollFirst(e);
+dq.peekFirst(e);
+// you have to specify the direction when you make some actions to deque
+```
+
+
+
+
+
+- Reusable and extendable maintainable objects
+- 23 classical patterns
+- Alt + enter on interface
+- java coding with intelliJ
+- Static method can be called without creating an object of this class
+- loose coupling system
+- interface is a contract, they are consists of method definations instead of method body
+- dependency injection framework
+- we should not change the state of other classes directly in main method, which means, property should be private and there should be a public method to modify it
+- ==Encapsulation== principle ↑↑
+- ==Abstraction== principle ↓↓
+- hide unnecessary details, set sub method to private
+- main class will not get effected if we only changed private methods and properties
+- ==Inheritance== 
+- extends 
+- Reuse duplicate codes
+- ==Polymorphism==
+- Abstract method cannot have body, and its class should be annotated as abstract as well
+- implement method body in classes that extends the base class
+- ==UML== unify modeling language
+- relationships: Extends implements composed(property) dependency(reference)
+- 
+- ==memento pattern==
+- setContent, and undo
+- single responsibility principle  SRP
+- Editor —.-.-> EditorState History
+- ==State pattern==
+- State machine, create Enum in Java
+- Allow an object behave differently according to its state
+- abstract class vs interface
+- Canvas Tools brushTool selectTool
+- instead of doing switch-case in main class, use a base class or interface and create several different classes from it, then our main class do not need to care what type of class it is, just name it with base class or interface
+- open close principle, extendable and robust
+- avoiding from ==abusing== those design patterns
+- bad example:
+- if a state is boolean and only have two states: True or False, and this state checker only appears in few places, using state pattern is over engineering

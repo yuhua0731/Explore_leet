@@ -4281,10 +4281,10 @@ class Solution:
             if i not in visited:
                 invite(i, [i])
         return ans
+        
+    def catMouseGame(self, graph: List[List[int]]) -> int:
         # [1,0,0,2,1,4,7,8,9,6,7,10,8]
         # 有向有环图
-
-    def catMouseGame(self, graph: List[List[int]]) -> int:
         n = len(graph)
 
         @functools.cache
@@ -5134,6 +5134,106 @@ class Solution:
             bitmask = bin(i)[2:].zfill(n)
             if check(bitmask):
                 ans = max(ans, bitmask.count('1'))
+        return ans
+
+    def maxScore(self, cardPoints: List[int], k: int) -> int:
+        """return the maximum points you can get by removing k cards, from both sides
+
+        Args:
+            cardPoints (List[int]): represents for the points of each card
+            k (int): amount of cards that you need to take
+
+        Returns:
+            int: the maximum points you can get
+        """
+        # minimize the remain points
+        k = len(cardPoints) - k
+        ans = sum(cardPoints[:k])
+        ret = ans
+        for i in range(1, len(cardPoints) + 1 - k):
+            # sum of cardPoints[i, i + k]
+            # + cardPoints[i + k - 1] - cardPoints[i - 1]
+            ans += cardPoints[i + k - 1] - cardPoints[i - 1]
+            ret = min(ret, ans)
+        return sum(cardPoints) - ret
+
+    def validMountainArray(self, arr: List[int]) -> bool:
+        if len(arr) < 3 or arr[1] <= arr[0]: return False
+        climb = True
+        pre = arr[0]
+        for i in arr[1:]:
+            if i == pre: return False
+            if not climb and i > pre: return False
+            if climb and i < pre: climb = False
+            pre = i
+        return not climb
+
+    def getAllElements(self, root1: TreeNode, root2: TreeNode) -> List[int]:
+        """merge two binary trees
+
+        Args:
+            root1 (TreeNode): Tree 1
+            root2 (TreeNode): Tree 2
+
+        Returns:
+            List[int]: merged Tree in ascending order
+        """
+        ans = []
+        def element(node) -> list:
+            if node: 
+                ans.append(node.val)
+                element(node.left)
+                element(node.right)
+        
+        element(root1)
+        element(root2)
+        return sorted(ans)
+
+    def duplicateZeros(self, arr: List[int]) -> None:
+        """duplicate zeros in list and shift elements to right
+        Do not return anything, modify arr in-place instead.
+        """
+        dq = collections.deque()
+        for i, v in enumerate(arr):
+            dq.append(v)
+            arr[i] = dq.popleft()
+            if v == 0:
+                dq.append(0)
+
+    def superpalindromesInRange(self, left: str, right: str) -> int:
+        """an integer is a super-palindrome if it is a palindrome, and it is also the square of a palindrome.
+
+        Args:
+            left (str): lower bound
+            right (str): upper bound
+
+        Returns:
+            int: number of super-palindromes
+        """
+        left = math.ceil(math.sqrt(int(left)))
+        right = math.floor(math.sqrt(int(right)))
+        ans = 0
+
+        def ispalindrome(num):
+            return str(num) == str(num)[::-1]
+
+        # all digit can only be 0, 1, 2, except for number 3
+        nums = [3]
+        
+        def buildnumbers(pre):
+            if pre < right:
+                pre *= 10
+                nxt = [pre] if pre else []
+                nxt += [pre + 1, pre + 2]
+                for nx in nxt:
+                    nums.append(nx)
+                    buildnumbers(nx)
+
+        buildnumbers(0)
+        for i in nums:
+            if right >= i >= left and ispalindrome(i) and ispalindrome(i ** 2): 
+                print(i, i ** 2)
+                ans += 1
         return ans
 
     

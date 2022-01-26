@@ -134,3 +134,6 @@ webScraper
 scratch_head
 test.py
 .idea
+
+# google drive temp files
+*.driveupload
