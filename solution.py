@@ -10,7 +10,9 @@ import functools
 import itertools
 from itertools import chain, product
 import heapq
+
 from trie import Trie
+from union_find import UnionFind
 import re
 
 
@@ -2341,6 +2343,27 @@ class Solution:
 
     def orangesRotting(self, grid: List[List[int]]) -> int:
         # frash orange will become rotten if it is adjacent to a rotten orange
+        # second approach
+        dir = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+        m, n = len(grid), len(grid[0])
+        ans = 0
+        rotten = collections.deque([[i, j] for i, j in product(range(m), range(n)) if grid[i][j] == 2])
+        cnt = sum([1 for i, j in product(range(m), range(n)) if grid[i][j] == 1])
+
+        while rotten:
+            size = len(rotten)
+            for _ in range(size):
+                x, y = rotten.popleft()
+                for i, j in dir:
+                    xi, yj = x + i, y + j
+                    if m > xi >= 0 <= yj < n and grid[xi][yj] == 1:
+                        grid[xi][yj] = 2
+                        cnt -= 1
+                        rotten.append([xi, yj])
+            if rotten: ans += 1
+
+        return ans if cnt == 0 else -1
+
         # beats over 97% in time
         rotten = list()
         frash = set()
@@ -5236,4 +5259,391 @@ class Solution:
                 ans += 1
         return ans
 
+    def findMaximumXOR(self, nums: List[int]) -> int:
+        class Trie:
+            """
+            this Trie class is design for 32-bit numbers
+            insert method: insert number as 32-bit integer
+            find method: find a number that has the most amount of same bits as the given target
+            """
+            def __init__(self):
+                self.tree = dict()
+
+            def insert(self, num: int) -> None:
+                temp = self.tree
+                for c in bin(num)[2:].zfill(32):
+                    if c not in temp: temp[c] = dict()
+                    temp = temp[c]
+            
+            def find(self, target: int) -> int:
+                ans = 0
+                temp = self.tree
+                for c in bin(target)[2:].zfill(32):
+                    ans <<= 1
+                    if c not in temp: c = '01'[c == '0']
+                    ans += int(c)
+                    temp = temp[c]
+                return ans    
+
+        ans = 0
+        tr = Trie()
+        for n in nums:
+            tr.insert(n)
+        
+        for n in nums:
+            match = tr.find(((1 << 32) - 1) ^ n)
+            ans = max(ans, n ^ match)
+        return ans
+
+    def findTheDifference(self, s: str, t: str) -> str:
+        s = collections.Counter(s)
+        for i in t:
+            if i not in s or s[i] == 0: return i
+            s[i] -= 1
     
+    def findCircleNum(self, isConnected: List[List[int]]) -> int:
+        n = len(isConnected)
+        uf = UnionFind(n)
+        for i in range(n):
+            for j in range(i + 1, n):
+                if isConnected[i][j] == 1:
+                    uf.union(i, j)
+        
+        return uf.getCount()
+    
+    def smallestStringWithSwaps(self, s: str, pairs: List[List[int]]) -> str:
+        n = len(s)
+        uf = UnionFind(n)
+        for i, j in pairs:
+            uf.union(i, j)
+        
+        s = list(s)
+        idx = collections.defaultdict(list)
+        char = collections.defaultdict(list)
+        for i in range(n):
+            root = uf.find(i)
+            idx[root].append(i)
+            char[root].append(s[i])
+        
+        for k in idx.keys():
+            for i, c in zip(sorted(idx[k]), sorted(char[k])):
+                s[i] = c
+        
+        return ''.join(s)
+    
+    def calcEquation(self, equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:
+        root = dict()
+        value = dict()
+
+        # The find function here is the same as that in the disjoint set with path compression.
+        def find(x):
+            if x != root[x]:
+                root[x] = find(root[x])
+            return root[x]
+
+        def union(x, y, k):
+            if x not in root:
+                root[x] = x
+                value[x] = 1
+            if y not in root:
+                root[y] = y
+                value[y] = 1
+            rootX, rootY = find(x), find(y)
+            if rootX != rootY:
+                diff = value[y] * k / value[x]
+                for key in root.keys():
+                    if find(key) == rootX:
+                        value[key] *= diff
+                root[rootX] = rootY
+            
+        def calc(x, y):
+            return -1 if x not in root or y not in root or find(x) != find(y) else value[x] / value[y]
+        
+        for [i, j], k in zip(equations, values):
+            union(i, j, k)
+        
+        return [calc(i, j) for i, j in queries]
+
+    def addDigits(self, num: int) -> int:
+        """repeatedly add all its digits until the result has only one digit
+
+        Args:
+            num (int): given number in range(2 ** 31)
+
+        Returns:
+            int: final number which only has one digit
+        """
+
+        # to solve it in O(1) time
+        # we have to find out the rule of result
+        # for i in range(30):
+        #     while i > 9:
+        #         i = eval('+'.join(list(str(i))))
+        #     print(i, end='')
+        # Output:
+        # 012345678912345678912345678912
+        return 0 if not num else [num % 9, 9][num % 9 == 0]
+
+    def validPath(self, n: int, edges: List[List[int]], source: int, destination: int) -> bool:
+        """find if there is a path from source vertex to the destination vertex
+
+        Args:
+            n (int): Ummm, useless
+            edges (List[List[int]]): [description]
+            source (int): [description]
+            destination (int): [description]
+
+        Returns:
+            bool: [description]
+        """
+
+        # DFS & BFS
+        graph = collections.defaultdict(list)
+
+        for i, j in edges:
+            graph[i].append(j)
+            graph[j].append(i)
+        
+        visited = set()
+        curr = collections.deque([source])
+
+        while curr:
+            # popleft() to implement a BFS solution
+            # while pop() to implement a DFS solution
+            temp = curr.popleft()
+            if temp == destination: return True
+            for i in graph[temp]:
+                if i not in visited:
+                    visited.add(i)
+                    curr.append(i)
+        return False
+
+        # disjoint set
+        uf = UnionFind(n)
+        for i, j in edges:
+            uf.union(i, j)
+        return uf.connected(source, destination)
+    
+    def allPathsSourceTarget(self, graph: List[List[int]]) -> List[List[int]]:
+        """find all paths from source to target
+
+        Args:
+            graph (List[List[int]]): a list of edges in a DAG
+
+        Returns:
+            List[List[int]]: all paths from 0 to n - 1
+        """
+        path = collections.defaultdict(list)
+        n = len(graph)
+        for i in range(n):
+            for j in graph[i]:
+                path[i].append(j)
+
+        ans = []
+        def move(pre, pre_set):
+            if pre[-1] == n - 1:
+                ans.append(pre)
+                return
+            for nxt in path[pre[-1]]:
+                if nxt not in pre_set:
+                    move(pre + [nxt], pre_set | {nxt})
+            
+        move([0], {0})
+        return ans
+    
+    def cloneGraph(self, node: Node) -> Node:
+        """
+        # Definition for a Node.
+        class Node:
+            def __init__(self, val = 0, neighbors = None):
+                self.val = val
+                self.neighbors = neighbors if neighbors is not None else []
+        """
+        if not node: return None
+        cp = {node: Node(node.val, [])}
+        curr = collections.deque([node])
+
+        while curr:
+            temp = curr.popleft()
+            for ne in temp.neighbors:
+                if ne not in cp:
+                    ne_cp = Node(ne.val, [])
+                    cp[ne] = ne_cp
+                    curr.append(ne)
+                cp[temp].neighbors.append(cp[ne])
+        return cp[node]
+
+    def findItinerary(self, tickets: List[List[str]]) -> List[str]:
+        """
+        find the smallest lexical order itinerary for a man who departs from "JFK"
+        all tickets should be used once and only once
+
+        Args:
+            tickets (List[List[str]]): list of tickets
+
+        Returns:
+            List[str]: fly path
+        """
+        path = collections.defaultdict(dict) # key: departure airport | value: dict -> {arrival airport: cnt}
+        for i, j in tickets:
+            if j not in path[i]:
+                path[i][j] = 0
+            path[i][j] += 1
+
+        def fly(curr, cnt):
+            if cnt == 0: return [curr]
+            for k in sorted(path[curr].keys()):
+                if path[curr][k] == 0:
+                    continue
+                path[curr][k] -= 1
+                ret = fly(k, cnt - 1)
+                if ret: return [curr] + ret
+                path[curr][k] += 1
+            return None
+        
+        return fly('JFK', len(tickets))
+
+    def shortestPathBinaryMatrix(self, grid: List[List[int]]) -> int:
+        """find the shortest path from top-left cell to bottom-right cell
+
+        Args:
+            grid (List[List[int]]): map 1 = block & 0 = empty
+
+        Returns:
+            int: length of shortest path
+        """
+        if grid[0][0] == 1: return -1
+        dir = [[0, 1], [0, -1], [-1, -1], [-1, 0], [-1, 1], [1, -1], [1, 0], [1, 1]]
+        pq = [(1, 0, 0)]
+        m, n = len(grid), len(grid[0])
+        while pq:
+            cnt, x, y = heapq.heappop(pq)
+            if x == m - 1 and y == n - 1: return cnt
+            for i, j in dir:
+                xi, yj = x + i, y + j
+                if m > xi >= 0 <= yj < n and grid[xi][yj] == 0:
+                    grid[xi][yj] = 1
+                    heapq.heappush(pq, (cnt + 1, xi, yj))
+        return -1
+    
+    def levelOrder(self, root: Node) -> List[List[int]]:
+        """
+        # Definition for a Node.
+        class Node:
+            def __init__(self, val=None, children=None):
+                self.val = val
+                self.children = children
+        """
+        ans = list()
+        if root: 
+            curr = [root]
+            while curr:
+                ans.append([])
+                temp = list()
+                for i in curr:
+                    ans[-1].append(i.val)
+                    if i.children: temp += i.children
+                curr = temp
+        return ans
+
+    def gridIllumination(self, n: int, lamps: List[List[int]], queries: List[List[int]]) -> List[int]:
+        light_row = collections.defaultdict(int)
+        light_col = collections.defaultdict(int)
+        light_diag = collections.defaultdict(int)
+        light_rever = collections.defaultdict(int)
+
+        dir = [[0, 1], [0, -1], [-1, -1], [-1, 1], [1, 0], [-1, 0], [1, -1], [1, 1]]
+        lamps = {(i, j) for i, j in lamps}
+
+        # since board size is up to 10 ** 9, if we update cell one by one
+        # this turn method will take O(10 ** 9) time, which will result in TLE
+        # optimize time complexity to O(1)
+        # do not update single cell
+        # instead of that, we update row idx, col idx, diagonal indices
+        def turn(x, y, act):
+            light_row[x] += act
+            light_col[y] += act
+            light_diag[y - x + n] += act
+            light_rever[x + y] += act
+
+        for i, j in lamps:
+            turn(i, j, 1)
+
+        ans = list()
+        for i, j in queries:
+            ans.append([0, 1][light_row[i] + light_col[j] + light_diag[j - i + n] + light_rever[i + j] > 0])
+            for x, y in dir + [[0, 0]]:
+                xi, yj = x + i, y + j
+                if (xi, yj) in lamps:
+                    lamps.remove((xi, yj))
+                    turn(xi, yj, -1)
+        return ans
+
+    def findPairs(self, nums: List[int], k: int) -> int:
+        if k == 0: return sum(1 for i in collections.Counter(nums).values() if i > 1)
+        nums = set(nums)
+        visited = set()
+        ans = 0
+        for i in nums:
+            if i - k in visited: ans += 1
+            if i + k in visited: ans += 1
+            visited.add(i)
+
+        return ans
+
+    def countKDifference(self, nums: List[int], k: int) -> int:
+        nums = collections.Counter(nums)
+        visited = collections.defaultdict(int)
+
+        ans = 0
+        for i, cnt in nums.items():
+            if i + k in visited: ans += cnt * visited[i + k]
+            if i - k in visited: ans += cnt * visited[i - k]
+            visited[i] = cnt
+        return ans
+
+    def checkInclusion(self, s1: str, s2: str) -> bool:
+        """check if one of s1's permutation is the substring of s2
+
+        Args:
+            s1 (str): given string 1
+            s2 (str): given string 2
+
+        Returns:
+            bool: return True if we found the permutation
+        """
+        cnt = collections.Counter(s1)
+        start = end = 0
+        print(cnt)
+        while end < len(s2):
+            if s2[end] not in cnt:
+                start = end = end + 1
+                cnt = collections.Counter(s1)
+                continue
+            cnt[s2[end]] -= 1
+            while cnt[s2[end]] < 0:
+                cnt[s2[start]] += 1
+                start += 1
+            if end - start + 1 == len(s1): return True
+            end += 1 
+        return False
+
+    def minimumDifference(self, nums: List[int], k: int) -> int:
+        """pick k numbers from nums
+
+        Args:
+            nums (List[int]): given numbers
+            k (int): pick k elements from nums
+
+        Returns:
+            int: return the minimum possible diff between the smallest and the greatest number 
+        """
+        if k == 1: return 0
+        ans = float('inf')
+        nums.sort()
+        for i, j in zip(nums[k - 1:], nums):
+            ans = min(ans, i - j)
+            if ans == 0: return ans
+        return 
+        
+        

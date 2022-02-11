@@ -1194,3 +1194,63 @@ dq.peekFirst(e);
 - avoiding from ==abusing== those design patterns
 - bad example:
 - if a state is boolean and only have two states: True or False, and this state checker only appears in few places, using state pattern is over engineering
+
+
+
+## 220126 UML
+
+- diagrams to visualize design: structural & behavioral
+- class diagram: inheritance relationships
+- component: composed relationships
+- Deployment diagram: distribute relationships
+- object diagram: show data structure
+- composite diagram: internal structure of a class
+- profile diagram: prototypes
+- Use case diagram:
+- Activity diagram: model computation
+- state machine diagram: permitted states and transform
+- sequence diagram
+- Communication diagram: object collaboration
+- interaction overview diagram: interaction
+- timing diagram: time flows
+
+Examine system in diverse aspects
+
+Class: create objects and depict objects’ initial state and properties, as well as related functions
+
+
+
+#### [class diagram](https://en.wikipedia.org/wiki/Class_diagram)
+
+Square -> class
+
+only class name is mandatory
+
+![image-20220126193622401](image_backup/memo/image-20220126193622401.png)
+
+To specify the visibility of a class member (i.e. any attribute or method), these notations must be placed before the member's name:
+
+| `+`  | Public    |
+| ---- | --------- |
+| `-`  | Private   |
+| `#`  | Protected |
+| `~`  | Package   |
+
+#### relationships between classes/interfaces in UML
+
+![img](image_backup/memo/300px-Uml_classes_en.svg.png)
+
+- Association: A student learns from multiple teathers, and a teacher teaches multiple students
+- inheritance/generation: parent class and child classes
+- Realisation/implementation: interface and object that implement this interface
+- Dependency: one class ==use== object from another class as input parameter
+- Aggregation: a class is formed with multiple classes, but those classes will not be deleted even the aggregated class is deleted (working position <= desk, chair, computer)
+- Composition: same as aggregation, but those classes will be destoried (human body = brain + blood + bones)
+
+
+
+- 封装：隐藏细节，仅暴露精简必要的指令参数。
+- 抽象：抽象类，其实是可以被实例化的，比如`List`是一个抽象类，不能简单地通过`new List<> ();`来实例化。但是在实例化子类时，会先实例化父类（抽象类），比如`List<String> arr = new LinkedList<> ();`。这样创建了继承抽象类的子类对象，也就把其父类（抽象类）给实例化了。
+- 继承：只能继承一个父类，但可以实现多个接口。
+- 实现：接口与抽象类非常类似，但是它不可以被实例化，因为接口压根没有构造函数。
+- 多态：一个在接口或父类的抽象方法，可以以不同的方式进行实现（@override）。
