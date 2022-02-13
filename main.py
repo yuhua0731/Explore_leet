@@ -302,6 +302,7 @@ def main():
     print(solu.shortestPathBinaryMatrix(grid = [[0,0,0],[1,1,0],[1,1,0]]))
     print(solu.gridIllumination(n = 5, lamps = [[0,0],[0,4]], queries = [[0,4],[0,1],[1,4]]))
     print(solu.checkInclusion(s1 = "ab", s2 = "eidbfaooo"))
+    print(solu.minCostConnectPoints(points = [[0,0],[2,2],[3,10],[5,2],[7,0]]))
 
 
 if __name__ == "__main__":

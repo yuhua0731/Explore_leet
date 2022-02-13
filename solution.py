@@ -5646,4 +5646,165 @@ class Solution:
             if ans == 0: return ans
         return 
         
+    def minCostConnectPoints(self, points: List[List[int]]) -> int:
+        """minimum spanning tree
+
+        Args:
+            points (List[List[int]]): a list of all points represents in 2d point format
+
+        Returns:
+            int: cost of the minimum spanning tree
+        """
+        # Prim's algorithm
+        n = len(points)
+        graph = collections.defaultdict(dict) # key: vertex | velue: [connected vertex, cost]
+        # start with an arbitrary vertex, let's choose 0
+        distance = [(0, 0)]
+        visited = set()
+
+        for i in range(n):
+            for j in range(i + 1, n):
+                dis = abs(points[i][0] - points[j][0]) + abs(points[i][1] - points[j][1])
+                graph[i][j] = dis
+                graph[j][i] = dis
         
+        ans = 0
+        # select vertex with the least cost from unselected vertices
+        for _ in range(n):
+            while distance[0][1] in visited:
+                heapq.heappop(distance)
+            cost, vertex = heapq.heappop(distance)
+            visited.add(vertex)
+            ans += cost
+            for nxt, dis in graph[vertex].items():
+                heapq.heappush(distance, (dis, nxt))
+        return ans
+
+        # Kruskal's algorithm
+        n = len(points)
+        edge = [] # heapq, element = [distance, x, y]
+        uf = UnionFind(n)
+
+        for i in range(n):
+             for j in range(i + 1, n):
+                heapq.heappush(edge, [abs(points[i][0] - points[j][0]) + abs(points[i][1] - points[j][1]), i, j])
+        
+        ans = 0
+        for _ in range(n - 1): # we need n - 1 edges to connect n nodes
+            while uf.connected(edge[0][1], edge[0][2]):
+                heapq.heappop(edge)
+            cost, x, y = heapq.heappop(edge)
+            uf.union(x, y)
+            ans += cost
+        return ans
+
+    def networkDelayTime(self, times: List[List[int]], n: int, k: int) -> int:
+        edge = collections.defaultdict(dict)
+        for s, e, t in times:
+            edge[s][e] = t
+        shortest = dict() # key: vertex | value: time
+        for i in range(1, n + 1):
+            shortest[i] = float('inf')
+        shortest[k] = 0
+
+        ans = 0
+        while shortest:
+            v, k = sorted([v, k] for k, v in shortest.items())[0]
+            shortest.pop(k)
+            ans = max(ans, v)
+            for neighbor, cost in edge[k].items():
+                if neighbor in shortest:
+                    shortest[neighbor] = min(shortest[neighbor], v + cost)
+        return ans if ans < float('inf') else -1
+
+    def findCheapestPrice(self, n: int, flights: List[List[int]], src: int, dst: int, k: int) -> int:
+        source = collections.defaultdict(dict)
+        for s, d, cost in flights:
+            source[d][s] = cost
+        
+        dp = [float('inf')] * n
+        dp[src] = 0
+
+        for _ in range(1, k + 2):
+            nxt = dp.copy()
+            for i in range(n):
+                for s, c in source[i].items():
+                    nxt[i] = min(nxt[i], dp[s] + c)
+            dp = nxt
+        return dp[dst] if dp[dst] < float('inf') else -1
+    
+    def minimumEffortPath(self, heights: List[List[int]]) -> int:
+        dir = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+        m, n = len(heights), len(heights[0])
+        def find(k):
+            # check if we can find a path with edges at most cost k
+            curr = collections.deque([[0, 0]])
+            visited = [[False] * n for _ in range(m)]
+            visited[0][0] = True
+            while curr:
+                x, y = curr.popleft()
+                if x == m - 1 and y == n - 1: return True
+                for i, j in dir:
+                    xi, yj = x + i, y + j
+                    if m > xi >= 0 <= yj < n and not visited[xi][yj] and abs(heights[xi][yj] - heights[x][y]) <= k:
+                        visited[xi][yj] = True
+                        curr.append([xi, yj])
+            return False
+
+        left, right = 0, max(max(i) for i in heights) - min(min(i) for i in heights)
+        while left < right:
+            mid = (right + left) >> 1
+            if find(mid):
+                right = mid
+            else:
+                left = mid + 1
+        return left
+
+    def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
+        in_degree = [0] * numCourses
+        visited = set()
+        nxt = collections.defaultdict(list)
+        for c, p in prerequisites:
+            nxt[p].append(c)
+            in_degree[c] += 1
+        
+        ans = list()
+        while len(visited) < numCourses:
+            update = list()
+            for idx, i in enumerate(in_degree):
+                if i == 0 and idx not in visited:
+                    update.append(idx)
+                    visited.add(idx)
+                    for n in nxt[idx]:
+                        in_degree[n] -= 1
+            if not update: return []
+            ans += update
+        return ans
+        
+    def findMinHeightTrees(self, n: int, edges: List[List[int]]) -> List[int]:
+        connect = collections.defaultdict(list)
+
+        for s, t in edges:
+            connect[s].append(t)
+            connect[t].append(s)
+
+        leaves = set()
+        for i in range(n):
+            if len(connect[i]) <= 1:
+                leaves.add(i)
+        
+        left = n
+        while left > 2:
+            left -= len(leaves)
+            nxt = set()
+            while leaves:
+                temp = leaves.pop()
+                neighbor = connect[temp].pop()
+                connect[neighbor].remove(temp)
+                if len(connect[neighbor]) == 1:
+                    nxt.add(neighbor)
+                    
+            leaves = nxt
+        return leaves
+
+    
