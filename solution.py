@@ -14,6 +14,7 @@ import heapq
 from trie import Trie
 from union_find import UnionFind
 import re
+import bisect
 
 
 class ListNode:
@@ -4077,7 +4078,7 @@ class Solution:
         # return [nums[nums[i]] for i in range(len(nums))]
         n = len(nums)
         for i in range(n):
-            nums[i] = n * (nums[nums[i]] % n) + nums[i]
+            nums[i] += n * (nums[nums[i]] % n)
         for i in range(n):
             nums[i] //= n
         return nums
@@ -5806,5 +5807,344 @@ class Solution:
                     
             leaves = nxt
         return leaves
+
+    def lastStoneWeight(self, stones: List[int]) -> int:
+        pq = [-s for s in stones]
+        heapq.heapify(pq)
+        while len(pq) > 1:
+            y, x = -heapq.heappop(pq), -heapq.heappop(pq)
+            if x == y:
+                continue
+            else:
+                heapq.heappush(pq, -(y - x))
+        
+        return 0 if not pq else -pq[0]
+
+    def kWeakestRows(self, mat: List[List[int]], k: int) -> List[int]:
+        # anti-weakest heap
+        # element = (-cnt, -index)
+        pq = []
+        for idx, row in enumerate(mat):
+            cnt = sum(row)
+            if len(pq) < k:
+                heapq.heappush(pq, (-cnt, -idx))
+            else:
+                heapq.heappushpop(pq, (-cnt, -idx))
+        ans = []
+        while pq:
+            ans.append(-heapq.heappop(pq)[1])
+        return ans[::-1]
+            
+    def kthSmallest(self, matrix: List[List[int]], k: int) -> int:
+        # heapq: element = (number, row index, col index)
+        m, n = len(matrix), len(matrix[0])
+        pq = [(matrix[i][0], i, 0) for i in range(m)]
+        heapq.heapify(pq)
+
+        for _ in range(k):
+            i, row, col = heapq.heappop(pq)
+            if col + 1 < n:
+                heapq.heappush(pq, (matrix[row][col + 1], row, col + 1))
+        return i 
+
+    def kClosest(self, points: List[List[int]], k: int) -> List[List[int]]:
+        # anti-closest heapq: element = (distance, x, y)
+        pq = []
+        for x, y in points:
+            if len(pq) < k:
+                heapq.heappush(pq, (-(x ** 2 + y ** 2) ** 0.5, x, y))
+            else:
+                heapq.heappushpop(pq, (-(x ** 2 + y ** 2) ** 0.5, x, y))
+        return [[x, y] for _, x, y in pq]
+
+    def furthestBuilding(self, heights: List[int], bricks: int, ladders: int) -> int:
+        # spend ladders for 'ladders' highest jumps
+        # sum up the rest jumps, if the sum is less than or equal to bricks, then we can reach here
+        jumps = []
+        total_bri = 0
+        n = len(heights)
+        for i in range(n - 1):
+            diff = heights[i + 1] - heights[i]
+            if diff <= 0: continue
+            if len(jumps) < ladders:
+                heapq.heappush(jumps, diff)
+            else:
+                total_bri += heapq.heappushpop(jumps, diff)
+                if total_bri > bricks: return i
+        return n - 1
+    
+    def minCostClimbingStairs(self, cost: List[int]) -> int:
+        # dp
+        dp = [0, 0] # pre_2, pre_1
+        co = cost[:2]
+        for i in range(2, len(cost)):
+            dp = [dp[1], min(pre + c for pre, c in zip(dp, co))]
+            co = [co[1], cost[i]]
+        return min(pre + c for pre, c in zip(dp, co))
+
+    def maximumScore(self, nums: List[int], multipliers: List[int]) -> int:
+        # bottom-up dp
+        # dp[i][j] represents for the max score we can get for input nums[start:end]
+        n = len(nums)
+        m = len(multipliers)
+        dp = [[-float('inf')] * (n + 1) for _ in range(n + 1)]
+        # return dp[0][n]
+        multipliers = [0] * (n - m) + multipliers[::-1]
+
+        for i in range(n + 1): dp[i][i] = 0
+        
+        for diff in range(1, n + 1):
+            for i in range(n):
+                if i + diff > n: break
+                if diff <= n - m: dp[i][i + diff] = 0
+                else:
+                    dp[i][i + diff] = max(dp[i + 1][i + diff] + nums[i] * multipliers[diff - 1], dp[i][i + diff - 1] + nums[i + diff - 1] * multipliers[diff - 1])
+        
+        return dp[0][n]
+
+    def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        m, n = len(text1), len(text2)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(m + 1):
+            dp[i][0] = 0
+        for i in range(n + 1):
+            dp[0][i] = 0
+
+        for i, j in product(range(m), range(n)):
+            if text1[i] == text2[j]:
+                dp[i + 1][j + 1] = 1 + dp[i][j]
+            else:
+                dp[i + 1][j + 1] = max(dp[i][j + 1], dp[i + 1][j])
+        
+        return dp[-1][-1]
+    
+    def maxDepth(self, root: TreeNode) -> int:
+        def depth(node):
+            if not node: return 0
+            else:
+                return 1 + max(depth(node.left), depth(node.right))
+        
+        return depth(root)
+
+    def countOperations(self, num1: int, num2: int) -> int:
+        ans = 0
+        if num1 > num2: num1, num2 = num2, num1
+        while num1 > 0:
+            ans += num2 // num1
+            num1, num2 = num2 % num1, num1
+        return ans
+
+    def minimumOperationsII(self, nums: List[int]) -> int:
+        if len(nums) == 1: return 0
+        # all odd-indexed elements and even ones should be the same
+        odd = collections.Counter([i for idx, i in enumerate(nums) if idx % 2])
+        even = collections.Counter([i for idx, i in enumerate(nums) if idx % 2 == 0])
+        odd[float('inf')] = 0
+        even[float('inf')] = 0
+        odd_pq = [[-cnt, value] for value, cnt in odd.items()]
+        even_pq = [[-cnt, value] for value, cnt in even.items()]
+        heapq.heapify(odd_pq)
+        heapq.heapify(even_pq)
+        if odd_pq[0][1] != even_pq[0][1]: return len(nums) + odd_pq[0][0] + even_pq[0][0]
+        o1, _ = heapq.heappop(odd_pq)
+        o2, _ = heapq.heappop(odd_pq)
+        e1, _ = heapq.heappop(even_pq)
+        e2, _ = heapq.heappop(even_pq)
+        return len(nums) + min(o1 + e2, o2 + e1)
+    
+    def singleNumber(self, nums: List[int]) -> int:
+        visited = set()
+        for i in nums:
+            if i in visited: visited.remove(i)
+            else: visited.add(i)
+        return visited[0]
+    
+    def swapPairs(self, head: ListNode) -> ListNode:
+        ans = ListNode()
+        ans.next = head
+        
+        pre, curr = ans, head
+        while curr and curr.next:
+            nxt, remain = curr.next, curr.next.next
+
+            # swap middle two nodes
+            pre.next = nxt
+            nxt.next = curr
+            curr.next = remain
+
+            # reassign all pointers
+            pre = curr
+            curr = remain
+        return ans.next
+
+    def containsDuplicate(self, nums: List[int]) -> bool:
+        visited = set()
+        for i in nums:
+            if i in visited: return True
+            visited.add(i)
+        return False
+
+    def maxSubArray(self, nums: List[int]) -> int:
+        pre_min = 0
+        ans = nums[0]
+        s = 0
+        for i in nums:
+            s += i
+            ans = max(ans, s - pre_min)
+            pre_min = min(pre_min, s)
+        return ans
+
+    def countPairs(self, deliciousness: List[int]) -> int:
+        MOD = 10 ** 9 + 7
+        cnt = collections.Counter(deliciousness)
+        power = [2 ** i for i in range(22)]
+        ans = 0
+        for k, v in cnt.items():
+            for p in power:
+                if p - k in cnt:
+                    if k == p - k:
+                        ans += cnt[k] * (cnt[k] - 1) // 2
+                    else:
+                        ans += cnt[k] * cnt[p - k]
+                    ans %= MOD
+            cnt[k] = 0
+        return ans
+
+    def maximumUnits(self, boxTypes: List[List[int]], truckSize: int) -> int:
+        boxTypes = [(-j, i) for i, j in boxTypes]
+        heapq.heapify(boxTypes)
+        ans = 0
+        while truckSize and boxTypes:
+            unit, cnt = heapq.heappop(boxTypes)
+            cnt = min(cnt, truckSize)
+            ans += -unit * cnt
+            truckSize -= cnt
+        return ans
+
+    def waysToSplit(self, nums: List[int]) -> int:
+        """
+        split nums into three non-empty contiguous subarrays - named left, mid, right
+        sum(left) < sum(mid) < sum(right)
+        nums:     [--left--] [---------mid----------] [-------right-------]
+        subarrays:      left left + 1   (low <- right right + 1 -> high)
+
+        time complexity = O(NlogN)
+        space complexity = O(1) extra space
+
+        Args:
+            nums (List[int]): input array
+
+        Returns:
+            int: number of split ways 
+        """
+        MOD = 10 ** 9 + 7
+
+        for i in range(1, len(nums)):
+            nums[i] += nums[i - 1]
+        
+        # find the lower boundary for left = idx
+        # binary search: return the smallest index to ensure that sum(mid) >= sum(left)
+        def find_low(idx):
+            start, end = idx + 1, len(nums) - 1
+            while start < end:
+                mid = (start + end) >> 1
+                if nums[mid] - 2 * nums[idx] >= 0:
+                    end = mid
+                else:
+                    start = mid + 1
+            return start
+
+        # find the higher boundary for left = idx
+        # binary searh: return the biggest index to ensure that sum(right) >= sum(mid)
+        def find_high(idx):
+            start, end = idx + 1, len(nums) - 1
+            while start < end:
+                mid = (start + end) >> 1
+                if nums[-1] - nums[mid] >= nums[mid] - nums[idx]:
+                    start = mid + 1
+                else:
+                    end = mid
+            return start
+
+        # [:left + 1] [left + 1:right + 1] [right + 1:]
+        ans = 0
+        for left in range(len(nums)):
+            if nums[-1] - nums[left] < 2 * nums[left]: break
+            ans = (ans + max(0, find_high(left) - find_low(left))) % MOD
+        return ans
+
+    def minOperations(self, target: List[int], arr: List[int]) -> int:
+        h = {a: i for i, a in enumerate(target)}
+        stack = []
+        for a in arr:
+            if a not in h: continue
+            i = bisect.bisect_left(stack, h[a])
+            if i == len(stack):
+                stack.append(h[a])
+            else:
+                stack[i] = h[a]
+        return len(target) - len(stack)
+
+        # TLE
+        # longest common subsequence
+        # len(lcs)
+        # return len(target) - len(lcs)
+        m, n = len(target), len(arr)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i, j in product(range(m), range(n)):
+            dp[i + 1][j + 1] = dp[i][j] + 1 if target[i] == arr[j] else max(dp[i][j + 1], dp[i + 1][j])
+        return m - dp[-1][-1]
+        
+    def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]:
+        # dfs
+        ans = []
+        n = len(candidates)
+        def extend(idx, pre, remain):
+            if remain == 0: 
+                ans.append(pre)
+                return
+            if remain < 0 or idx == n: return
+            extend(idx, pre + [candidates[idx]], remain - candidates[idx])
+            extend(idx + 1, pre, remain)
+
+        extend(0, [], target)
+        return ans
+
+    def twoSum(self, nums: List[int], target: int) -> List[int]:
+        visited = dict()
+        for i, v in enumerate(nums):
+            if target - v in visited:
+                return [visited[target - v], i]
+            visited[v] = i
+
+    def merge(self, nums1: List[int], m: int, nums2: List[int], n: int) -> None:
+        """
+        Do not return anything, modify nums1 in-place instead.
+        """
+        stack = collections.deque([])
+
+        i = j = 0
+        while i < m or j < n:
+            if j == n or (i < m and nums1[i] <= nums2[j]):
+                stack.append(nums1[i])
+                nums1[i] = stack.popleft()
+                i += 1
+            elif i == m or (j < n and nums1[i] > nums2[j]):
+                stack.append(nums2[j])
+                j += 1
+        while i < m + n:
+            nums1[i] = stack.popleft()
+            i += 1
+        
+    def canMeasureWater(self, jug1Capacity: int, jug2Capacity: int, targetCapacity: int) -> bool:
+        if targetCapacity > jug1Capacity + jug2Capacity: return False
+
+        def gcd(x, y):
+            if x > y: x, y = y, x
+            while x > 0:
+                x, y = y % x, x
+            return y
+
+        return targetCapacity % gcd(jug1Capacity, jug2Capacity) == 0
 
     

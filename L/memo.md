@@ -124,6 +124,41 @@ a = ['a', '', '']
 a.remove('') # remove one matched element at one time
 ```
 
+#### append a list to another list
+
+```python
+list1.extend(list2)
+```
+
+#### add operator is compatible with list
+
+```python
+ans = list()
+ans += (1, 2), (2, 3)
+```
+
+#### search for element in a list
+
+```python
+a.index(1) # value error if element is not exist
+# a.find(1) this function is not implemented in list
+```
+
+#### count specific element in a list
+
+```python
+a.count(1)
+```
+
+#### remove an element from list
+
+```python
+del a[1] # by index
+a.remove('a') # by value, value error if not exist
+# only the first occurrence will be removed
+a.pop(index = -1) # pop last element by default, or specific element if an index is passed as argument
+```
+
 #### remove all empty string from a list
 
 ```python
@@ -147,17 +182,43 @@ str_list = list(filter(lambda item: item, str_list))
 - sequence: sequence which needs to be filtered, it can be sets, lists, tuples, or containers of any iterators.
 - returns: returns an iterator that is already filtered.
 
-#### append a list to another list
+## set
+
+- `.remove()` raise an keyError if element does not exist
+- `.discard()` will not raise error
+- `.pop()` pop out an arbitrary element, and will raise an error if set is empty
+- `.update()` inserts the items in set2 into set1
 
 ```python
-list1.extend(list2)
+set1.update(set2)
+set1.add(element)
 ```
 
-#### add operator is compatible with list
+- merge two sets
+
 
 ```python
-ans = list()
-ans += (1, 2), (2, 3)
+ans = {1, 2} 
+ans |= {2, 3} # ans = {1, 2, 3}
+```
+
+- `.union()` returns a new set with all items from both sets
+
+```python
+set3 = set1.union(set2)
+```
+
+- common operations between sets
+
+```python
+# SET1 -> {A {B} C} <- SET2
+set1.union(set2) = A + B + C
+set1.intersection(set2) = B
+set1.difference(set2) = A
+set1.symmetric_difference(set2) = A + C
+
+set1.issubset(set2)
+set1.issuperset(set2)
 ```
 
 ## str
@@ -462,31 +523,6 @@ periodical_func() # first call here
 ```python
 for k, v in sorted(x.items(), key=lambda item: item[1]):
     # your code
-```
-
-## manage set
-
-- `.remove()` raise an keyError if element does not exist
-- `.discard()` will not raise error
-- `.pop()` pop out an arbitrary element, and will raise an error if set is empty
-- `.union()` returns a new set with all items from both sets
-
-```python
-set3 = set1.union(set2)
-```
-
-- `.update()` inserts the items in set2 into set1
-
-```python
-set1.update(set2)
-```
-
-- merge two sets
-
-
-```python
-ans = {1, 2} 
-ans |= {2, 3} # ans = {1, 2, 3}
 ```
 
 ## itertools.chain
@@ -1154,9 +1190,7 @@ dq.peekFirst(e);
 // you have to specify the direction when you make some actions to deque
 ```
 
-
-
-
+## 220124 design pattern
 
 - Reusable and extendable maintainable objects
 - 23 classical patterns
@@ -1254,3 +1288,47 @@ To specify the visibility of a class member (i.e. any attribute or method), thes
 - 继承：只能继承一个父类，但可以实现多个接口。
 - 实现：接口与抽象类非常类似，但是它不可以被实例化，因为接口压根没有构造函数。
 - 多态：一个在接口或父类的抽象方法，可以以不同的方式进行实现（@override）。
+
+## Counter.most_common()
+
+```python
+>>> Counter('abracadabra').most_common(3)
+[('a', 5), ('b', 2), ('r', 2)]
+
+>>> Counter('111').most_common(2)
+[('1', 3)]
+```
+
+## os
+
+```python
+import os
+os.getcwd()
+'/Users/huayu/hcrobot/yuhua_test/explore_leet/scratchpad'
+os.chdir('/Users/huayu/hcrobot/yuhua_test')
+os.getcwd()
+'/Users/huayu/hcrobot/yuhua_test'
+os.path()
+dirname, filename = os.path.split('/Users/huayu/111.py')
+# '/Users/huayu', '111.py'
+shortname, extension = os.path.splitext(filename)
+# '111', '.py'
+```
+
+## bisect
+
+```python
+import bisect
+# initializing list
+li = [1, 3, 4, 4, 4, 6, 7]
+  
+# returns 5 ( right most possible index )
+print (bisect.bisect(li, 4))
+  
+# returns 2 ( left most possible index )
+print (bisect.bisect_left(li, 4))
+  
+# returns 4 ( right most possible index )
+print (bisect.bisect_right(li, 4, 0, 4))
+```
+

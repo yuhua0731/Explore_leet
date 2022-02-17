@@ -303,6 +303,9 @@ def main():
     print(solu.gridIllumination(n = 5, lamps = [[0,0],[0,4]], queries = [[0,4],[0,1],[1,4]]))
     print(solu.checkInclusion(s1 = "ab", s2 = "eidbfaooo"))
     print(solu.minCostConnectPoints(points = [[0,0],[2,2],[3,10],[5,2],[7,0]]))
+    print(solu.minimumOperationsII([1,2,2,2,2]))
+    print(solu.waysToSplit([1,1,1]))
+    print(solu.combinationSum(candidates = [7], target = 7))
 
 
 if __name__ == "__main__":
