@@ -1,6 +1,49 @@
 # Explore_leet
 
-## heapq in python
+## Data type
+
+|           | int                           | string                                                       | hexstring                                  | binary                                      | Bytearray                     | float                             |
+| --------- | ----------------------------- | ------------------------------------------------------------ | ------------------------------------------ | ------------------------------------------- | ----------------------------- | --------------------------------- |
+| int       |                               |                                                              |                                            | [int to binary](#Convert-integer-to-binary) | [int to bytes](#int-to-bytes) |                                   |
+| string    |                               | [str](#str), [literals](#String-literals), [Template](#string.Template) |                                            |                                             |                               |                                   |
+| hexstring |                               |                                                              |                                            |                                             |                               |                                   |
+| binary    |                               |                                                              |                                            |                                             |                               |                                   |
+| bytearray | [bytes to int](#bytes-to-int) | [bytes to string](#decode-bytes-to-string)                   | [bytes to hexstring](#bytes-to-hex-string) |                                             |                               | [bytes to float](#bytes-to-float) |
+| float     |                               | [format float](#float-to-string)                             |                                            |                                             |                               |                                   |
+
+## Data structure
+
+|                             |                                    |
+| --------------------------- | ---------------------------------- |
+| list                        | [list](#list)                      |
+| collections.deque           | [deque](#Deque-in-python-&-java)   |
+| tuple                       | [tuple](#tuple)                    |
+| set                         | [set](#set)                        |
+| dict                        | [dict](#dict)                      |
+| heapq                       | [heapq](#heapq)                    |
+| Enum                        | [Enum](#Enum-class)                |
+| collections.Counter         | [counter](#Counter)                |
+| sortedcontainers.SortedList | [SortedList](#bisect-&-SortedList) |
+
+## Tree data structure
+
+Tree are implemented from list in python
+
+#### basic type: `binary search tree`
+
+- A `full binary tree` (sometimes proper binary tree or 2-tree) is a tree in which every node other than the leaves has two children. 
+
+  [![?](https://web.cecs.pdx.edu/~sheard/course/Cs163/Graphics/FullBinary.jpg)](https://web.cecs.pdx.edu/~sheard/course/Cs163/Doc/FullvsComplete.html)
+
+- A `complete binary tree` is a binary tree in which every level, except possibly the last, is completely filled, and all nodes are as far left as possible. [![?](image_backup/memo/CompleteBinary.jpg)](https://web.cecs.pdx.edu/~sheard/course/Cs163/Doc/FullvsComplete.html)
+
+- [heap](#heapq in python): min heap / max heap, heapq is a complete binary tree
+
+- segment tree
+
+- binary indexed tree(fenwick tree): [2179. Count Good Triplets in an Array](2179. Count Good Triplets in an Array.md)
+
+## heapq
 
 heap queue, aka priority queue, always keep all elements sorted with smallest element in the first position
 
@@ -11,7 +54,14 @@ heap queue, aka priority queue, always keep all elements sorted with smallest el
 
 #### common use functions
 
-- initialize: `h = []` or `h = heapify(list)`
+- initialize: `h = []` or `heapq.heapify(list)`
+
+> here is a trick:
+>
+> heapify is actually sorting all elements in list
+>
+> this method do not return a heapq, on the other hand, it modifies the original list, converting it to a heapq, just like arr.sort()
+
 - `heappush(heap, item)`
 - `heappop(heap)`
 - `heappushpop(heap, item)`: push item first, then pop the smallest item
@@ -440,28 +490,48 @@ def function_name(input_arg):
 i = 10000
 b = b'\xc2\xda\x7a\x77'
 f = 1.314
+```
 
-# bytes to int
+###### bytes to int
+
+```python
 int.from_bytes(b, byteorder = 'little', signed=True)
+```
 
-# int to bytes
+###### int to bytes
+
+```python
 i.to_bytes(4, byteorder='little', signed=True)
+```
 
-# bytes to float
+###### bytes to float
+
+```python
 # native byte order (little-endian on my machine)
 struct.unpack('f', b)[0] # 1.7230105268977664e+16
 # big-endian 
 struct.unpack('>f', b)[0] # -109.22724914550781
+```
 
-# decode bytes to string:
+###### decode bytes to string
+
+```python
 b.decode("utf-8")
+```
 
-# bytes to hex string
+###### bytes to hex string
+
+```python
 b.hex()
+```
 
-# print 2 decimal places float:
+###### float to string
+
+```python
 "{:.2f}".format(f)
 ```
+
+
 
 ## multiple for loops and if in the same statement
 
@@ -489,7 +559,7 @@ b =     [1, 2, 0]
 tuple(zip(a, a[1:], b)) = ((0, 1, 1), (1, 2, 2))
 ```
 
-## tuple in dict
+## tuple
 
 - tuple is immutable
 - tuple can be key as well as value in dict
@@ -1149,6 +1219,12 @@ bin(6)[2:] # '110'
 bin(6)[2:].zfill(8) # '00000110'
 
 f'{6:08b}' <=> '{0:08b}'.format(6)
+# convert negative integer to binary format
+# since integer has unlimit length in python, you have to specify how fat to sign extend
+bin((1 << 32) - 27) # 32-bit binary format of -27
+
+# there is a trick about how to get the LSB of a binary number
+lambda i: (i) & (-i)
 ```
 
 ## Convert str into char array
@@ -1315,7 +1391,7 @@ shortname, extension = os.path.splitext(filename)
 # '111', '.py'
 ```
 
-## bisect
+## bisect & SortedList
 
 ```python
 import bisect
@@ -1331,4 +1407,92 @@ print (bisect.bisect_left(li, 4))
 # returns 4 ( right most possible index )
 print (bisect.bisect_right(li, 4, 0, 4))
 ```
+
+`SortedList` is an implementation of `Sorted Containers`, which is an Apache2 licensed Python sorted collections library.
+
+```python
+from sortedcontainers import SortedList
+
+a = SortedList([])
+a.bisect_left(element)
+# SortedList.bisect_left got accepted while bisect.bisect_left got TLE...
+```
+
+## doctest
+
+```python
+def main():
+    """
+    # Create our localizers
+    >>> e, g = get_localizer(language="English"), get_localizer(language="Greek")
+
+    # Localize some text
+    >>> for msg in "dog parrot cat bear".split():
+    ...     print(e.localize(msg), g.localize(msg))
+    dog σκύλος
+    parrot parrot
+    cat γάτα
+    bear bear
+    """
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
+    
+"""
+doctest.testmod()
+Test examples in docstrings in functions and classes reachable
+    from module m (or the current module if m is not supplied), starting
+    with m.__doc__.
+"""
+```
+
+then you can run this python file like this
+
+```shell
+> python3 factory.py -v
+Trying:
+    e, g = get_localizer(language="English"), get_localizer(language="Greek")
+Expecting nothing
+ok
+Trying:
+    for msg in "dog parrot cat bear".split():
+        print(e.localize(msg), g.localize(msg))
+Expecting:
+    dog σκύλος
+    parrot parrot
+    cat γάτα
+    bear bear
+ok
+7 items had no tests:
+    __main__
+    __main__.EnglishLocalizer
+    __main__.EnglishLocalizer.localize
+    __main__.GreekLocalizer
+    __main__.GreekLocalizer.__init__
+    __main__.GreekLocalizer.localize
+    __main__.get_localizer
+1 items passed all tests:
+   2 tests in __main__.main
+2 tests in 8 items.
+2 passed and 0 failed.
+Test passed.
+```
+
+## Segment tree
+
+Let us consider the following problem to understand Segment Trees.
+We have an array `arr[0 . . . n-1]`. We should be able to 
+
+> **1** Find the sum of elements from index l to r where 0 <= l <= r <= n-1
+> **2** Change value of a specified element of the array to a new value x. We need to do `arr[i] = x` where 0 <= i <= n-1.
+
+A **simple solution** is to run a loop from l to r and calculate the sum of elements in the given range. To update a value, simply do `arr[i] = x`. The first operation takes `O(n)` time and the second operation takes `O(1)` time. 
+
+**Another solution** is to create another array and store sum from start to i at the ith index in this array. The sum of a given range can now be calculated in `O(1)` time, but update operation takes `O(n)` time now. This works well if the number of query operations is large and very few updates.
+What if the number of query and updates are equal? 
+
+**Can we perform both the operations in `O(log n)` time once given the array?** 
+
+We can use a ==Segment Tree== to do both operations in `O(log n)` time.
 

@@ -11,6 +11,8 @@ import itertools
 from itertools import chain, product
 import heapq
 
+from sortedcontainers import SortedList
+
 from trie import Trie
 from union_find import UnionFind
 import re
@@ -6146,5 +6148,139 @@ class Solution:
             return y
 
         return targetCapacity % gcd(jug1Capacity, jug2Capacity) == 0
+
+    def dieSimulator(self, n: int, rollMax: List[int]) -> int:
+        # dp solution
+        MOD = 10 ** 9 + 7
+        dp = [[0] * 6 + [1] for _ in range(n + 1)]
+        # dp[0] is base state, which means we have not roll any dice yet
+
+        for i in range(1, n + 1):
+            for j in range(6):
+                for back in range(rollMax[j]):
+                    if i - 1 - back < 0: break
+                    dp[i][j] = (dp[i][j] + dp[i - 1 - back][-1] - dp[i - 1 - back][j]) % MOD
+            dp[i][-1] = sum(dp[i][:6]) % MOD
+        return dp[-1][-1]
+
+    def removeKdigits(self, num: str, k: int) -> str:
+        """
+             |<--               n               -->|
+        num: '-------------------------------------'
+             |<--   k   -->|<--      n - k      -->|
+                ↑   ↑   ↑
+             push these digits 
+             into stack first 
+             as candidates
+        """
+        # use stack, do not use recursion, since it cost too much time and space
+        n = len(num)
+        stack = []
+        for i, d in enumerate(num[:k]):
+            heapq.heappush(stack, (d, i))
+        
+        ret = ''
+        pre_idx = -1
+        while len(ret) < n - k:
+            heapq.heappush(stack, (num[k + len(ret)], k + len(ret)))
+            while stack[0][1] <= pre_idx:
+                heapq.heappop(stack)
+            d, i = heapq.heappop(stack)
+            ret += d
+            pre_idx = i
+        while len(ret) > 1 and ret[0] == '0':
+            ret = ret[1:]
+        return ret if ret else '0'
+
+        # recursion
+        n = len(num)
+        def pick_one(idx: int, remain: int):
+            """pick the smallest leading digit for remaining digits
+
+            Args:
+                idx (int): the index to search start
+                remain (int): remaining digits we should pick
+            """
+            if remain == 0: return ''
+            # n - idx > remain is guaranteed
+            # pick the smallest leading digit
+
+            # remaining num = num[idx:]
+            # remain digits to pick is remain
+            candidates = num[idx : n - (remain - 1)]
+            digit, nxt_idx = sorted([[v, i] for i, v in enumerate(candidates)])[0]
+            return digit + pick_one(idx + nxt_idx + 1, remain - 1)
+        ret = pick_one(0, n - k)
+        while len(ret) > 1 and ret[0] == '0':
+            ret = ret[1:]
+        return ret if ret else '0'
+
+    def removeCoveredIntervals(self, intervals: List[List[int]]) -> int:
+        intervals.sort(key=lambda x: [x[0], -x[1]])
+        end = -1
+        ans = 0
+        for i, j in intervals:
+            if j <= end: continue
+            end = j
+            ans += 1
+        return ans
+
+    def goodTriplets(self, nums1: List[int], nums2: List[int]) -> int:
+        pre, suf = [], []
+
+        idx = {v: i for i, v in enumerate(nums2)}
+        visited = SortedList()
+        for i in nums1:
+            pre.append(bisect.bisect_left(visited, idx[i]))
+            visited.add(idx[i])
+        visited = SortedList()
+        for i in nums1[::-1]:
+            suf.append(len(visited) - bisect.bisect_left(visited, idx[i]))
+            visited.add(idx[i])
+        suf.reverse()
+
+        return sum(x * y for x, y in zip(pre, suf))
+
+    def titleToNumber(self, columnTitle: str) -> int:
+        ans = 0
+        for i in columnTitle:
+            ans *= 26
+            ans += ord(i) - ord('A') + 1
+        return ans
+
+    def hasCycle(self, head: ListNode) -> bool:
+        if not head or not head.next: return False
+        move, jump = head, head.next
+        while jump and jump.next:
+            if move == jump: return True
+            move = move.next
+            jump = jump.next.next
+        return False
+
+    def mergeTwoLists(self, list1: ListNode, list2: ListNode) -> ListNode:
+        ans = ListNode(-1)
+        curr = ans
+        while list1 and list2:
+            if list1.val < list2.val:
+                curr.next = ListNode(list1.val)
+                list1 = list1.next
+            else:
+                curr.next = ListNode(list2.val)
+                list2 = list2.next
+            curr = curr.next
+        if list1: curr.next = list1
+        if list2: curr.next = list2
+        return ans.next
+
+    def removeElements(self, head: ListNode, val: int) -> ListNode:
+        pre = ans = ListNode(-1)
+        ans.next = head
+        while head:
+            if head.val == val: 
+                pre.next = head.next
+                head = head.next
+            else:
+                pre, head = head, head.next
+        return ans.next
 
     

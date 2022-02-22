@@ -24,3 +24,45 @@
 
 [1444. Number of Ways of Cutting a Pizza](https://leetcode.com/problems/number-of-ways-of-cutting-a-pizza/)
 
+
+
+
+
+Scetion of common types
+
+string
+
+list
+
+set
+
+dict
+
+collections
+
+- Counter
+- defaultdict
+- Deque
+
+itertools
+
+- chain
+- product
+
+conversion among types
+
+Bytes to int
+
+int to bytes
+
+bytes to float
+
+bytes to string
+
+bytes to hexstring
+
+float to i decimal places string
+
+int to binary
+
+string to char array
