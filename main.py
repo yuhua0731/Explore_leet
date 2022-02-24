@@ -312,7 +312,9 @@ def main():
     print(solu.waysToSplit([1, 1, 1]))
     print(solu.combinationSum(candidates=[7], target=7))
     print(solu.dieSimulator(n=2, rollMax=[1, 1, 2, 2, 2, 3]))
-
+    print(solu.isValid('{[]()}'))
+    # print(solu.numberOfWeeks([3,9,7,1,2,3]))
+    print(solu.countSpecialSubsequences(nums = [0,1,2,0,1,2]))
 
 if __name__ == "__main__":
     main()

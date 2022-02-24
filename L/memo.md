@@ -128,7 +128,7 @@ l = r
 #     head         pre        jump      l & r
 ```
 
-## Binary Search Tree, BTS for short
+## Binary Search Tree, BST for short
 
 also called an **ordered**, or **sorted** search tree.
 
@@ -1389,6 +1389,11 @@ dirname, filename = os.path.split('/Users/huayu/111.py')
 # '/Users/huayu', '111.py'
 shortname, extension = os.path.splitext(filename)
 # '111', '.py'
+
+os.stat('scratch.ipynb')
+# os.stat_result(st_mode=33188, st_ino=36951387, st_dev=16777220, st_nlink=1, st_uid=501, st_gid=20, st_size=31062, st_atime=1645522131, st_mtime=1645684611, st_ctime=1645684611)
+os.path.realpath('scratch.ipynb')
+# '/Users/huayu/hcrobot/yuhua_test/explore_leet/scratchpad/scratch.ipynb'
 ```
 
 ## bisect & SortedList
@@ -1416,6 +1421,8 @@ from sortedcontainers import SortedList
 a = SortedList([])
 a.bisect_left(element)
 # SortedList.bisect_left got accepted while bisect.bisect_left got TLE...
+
+# seems like we cannot update existing element in SortedList
 ```
 
 ## doctest
@@ -1484,15 +1491,164 @@ Test passed.
 Let us consider the following problem to understand Segment Trees.
 We have an array `arr[0 . . . n-1]`. We should be able to 
 
-> **1** Find the sum of elements from index l to r where 0 <= l <= r <= n-1
-> **2** Change value of a specified element of the array to a new value x. We need to do `arr[i] = x` where 0 <= i <= n-1.
+> **1** - sum(l, r): Find the sum of elements from index l to r where 0 <= l <= r <= n-1
+> **2** - update(i, x): Change value of a specified element of the array to a new value x. We need to do `arr[i] = x` where 0 <= i <= n-1.
 
-A **simple solution** is to run a loop from l to r and calculate the sum of elements in the given range. To update a value, simply do `arr[i] = x`. The first operation takes `O(n)` time and the second operation takes `O(1)` time. 
+- A **simple solution** is to run a loop from l to r and calculate the sum of elements in the given range. To update a value, simply do `arr[i] = x`. The first operation takes `O(n)` time and the second operation takes `O(1)` time. 
 
-**Another solution** is to create another array and store sum from start to i at the ith index in this array. The sum of a given range can now be calculated in `O(1)` time, but update operation takes `O(n)` time now. This works well if the number of query operations is large and very few updates.
-What if the number of query and updates are equal? 
+- **Another solution** is to create another array and store sum from start to i at the ith index in this array. The sum of a given range can now be calculated in `O(1)` time, but update operation takes `O(n)` time now. This works well if the number of query operations is large and very few updates.
+- We can use a ==Segment Tree== to do both operations in `O(log n)` time.
 
-**Can we perform both the operations in `O(log n)` time once given the array?** 
+| algorithm    | Simple solution | Another solution | segment tree | binary indexed tree |
+| ------------ | --------------- | ---------------- | ------------ | ------------------- |
+| Sum(l, r)    | O(N)            | O(1)             | O(logN)      | O(logN)             |
+| update(i, x) | O(1)            | O(N)             | O(logN)      | O(logN)             |
 
-We can use a ==Segment Tree== to do both operations in `O(log n)` time.
+
+
+here is a segment tree:
+
+![img](image_backup/memo/segment-tree1.png)
+
+> for a given array, we put all elements as leaves of segment tree. Each inner node’s val is the sum of the subtree from this node.
+
+
+
+Segment tree has three main methods:
+
+- ==construction==
+- ==sum==(st, idx, 0, n, start, end)
+- ==update==(st, idx, 0, n, update_idx, update_diff)
+
+>  ==RECURSION== plays the critical role in all three methods
+
+### Construction
+
+given an array
+
+1. Divide arr into ==two halves== if array length is greater than 1
+2. Make a ==recursive== call on both halves
+3. Store the sum of two children in parent node
+
+### sum & update
+
+you may have noticed that there are so many argument for these methods
+
+let’s take a look at their docstring:
+
+```python
+""" A recursive function to get the sum of values
+    in the given range of the array. The following
+    are parameters for this function.
+ 
+    st --> Pointer to segment tree
+    si --> Index of current node in the segment tree.
+           Initially 0 is passed as root is always at index 0
+    ss & se --> Starting and ending indexes of the segment
+                represented by current node, i.e., st[si]
+    qs & qe --> Starting and ending indexes of query range """
+def getSumUtil(st, ss, se, qs, qe, si) :
+```
+
+we have four common argument: segment tree, current index, starting index of current node, ending index of current node.
+
+
+
+as we elaborated previously, for each node in a segment tree, there is a corresponding range. the value of node `i` is the sum of `arr[starti, endi]`. we do not use an extra space to store these corresponding range, instead, we provide range along with node index when we call `sum` and `update`.
+
+![segment-tree-noteone](image_backup/memo/segment-tree-noteone.png)
+
+
+
+## Binary indexed tree
+
+*An alternative solution is ==Binary Indexed Tree==, which also achieves O(Logn) time complexity for both operations. Compared with Segment Tree, Binary Indexed Tree requires less space and is easier to implement.*.
+
+
+
+unlike segment tree, sum method of binary indexed tree always take 0 as starting index, thus, we only need to provide ending index when calling it.
+
+
+
+Binary indexed tree also has three main methods:
+
+- construction
+- sum(x)
+- update(x, val)
+
+> they have much less arguments than segment tree does
+
+### **Construction**
+
+We initialize all the values in BITree[] as 0. Then we call update() for all the indexes, the update() operation is discussed below.
+
+### sum
+
+***getSum(x): Returns the sum of the sub-array arr[0,…,x]*** 
+*// Returns the sum of the sub-array arr[0,…,x] using BITree[0..n], which is constructed from arr[0..n-1]* 
+
+1. Initialize the output sum as 0, the current index as x + 1.
+2. Do following while the current index is greater than 0.
+   1. Add BITree[index] to sum
+   2. Go to the parent of BITree[index]. The ==parent== can be obtained by ==removing the last set bit== from the current index, i.e., index = index – (index & (-index))
+3. Return sum.
+
+![BITSum](image_backup/memo/BITSum.png)
+
+
+
+![binary-indexed-tree-noteone](image_backup/memo/binary-indexed-tree-noteone.png)
+
+### update
+
+***update(x, val): Updates the Binary Indexed Tree (BIT) by performing arr[index] += val*** 
+*// Note that the update(x, val) operation will not change arr[]. It only makes changes to BITree[]* 
+*1) Initialize the current index as x+1.* 
+*2) Do the following while the current index is smaller than or equal to n.* 
+*…a) Add the val to BITree[index]* 
+*…b) Go to next element of BITree[index]. The next element can be obtained by incrementing the last set bit of the current index, i.e., index = index + (index & (-index))*
+
+![BITUpdate1](image_backup/memo/BITUpdate12.png)
+
+
+
+![binary-indexed-tree-update-noteone](image_backup/memo/binary-indexed-tree-update-noteone.png)
+
+![binary-indexed-tree-construction-noteone](image_backup/memo/binary-indexed-tree-construction-noteone.png)
+
+> Q. Why do we use 1-indexed list for binary indexed tree?
+>
+> A. index 0 is a special number, which do not have a LSB, all bits of 0 is 0. Hence we cannot pass 0 as an argument to getSum and update, in another word, we cannot assign 0 as an element’s index.
+
+## glob
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+后台服务器开发工程师
+
+大数据开发工程师
+
+hive spark impala ETL服务
+
+精通SQL
+
+了解Hive，Impala，Spark，HBase等Hadoop相关工具者优先
+
+广告投放算法工程师
+
+数据分析（日志收集及可视化平台）工程师
 

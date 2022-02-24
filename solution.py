@@ -12,6 +12,7 @@ from itertools import chain, product
 import heapq
 
 from sortedcontainers import SortedList
+import sortedcontainers
 
 from trie import Trie
 from union_find import UnionFind
@@ -6283,4 +6284,148 @@ class Solution:
                 pre, head = head, head.next
         return ans.next
 
+    def reverseList(self, head: ListNode) -> ListNode:
+        if not head: return head
+        nxt = head.next
+        head.next = None
+
+        while nxt:
+            temp = nxt.next
+            nxt.next = head
+            head, nxt = nxt, temp
+        return head
+
+    def deleteDuplicates(self, head: ListNode) -> ListNode:
+        if not head: return head
+        curr = head
+
+        while curr:
+            first = curr
+            temp = curr.val
+            while curr and curr.val == temp:
+                curr = curr.next
+            first.next = curr
+        return head
+
+    def sortList(self, head: ListNode) -> ListNode:
+        # merger sort
+        # divide list into two halves
+        if not head or not head.next: return head
+        slow, fast = head, head.next
+        while fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+        # slow is the start node of second half list
+        second = slow.next
+        slow.next = None
+
+        def merge(first, second):
+            dummy = curr = ListNode(-1)
+            while first and second:
+                if first.val < second.val:
+                    curr.next, curr, first = first, first, first.next
+                else:
+                    curr.next, curr, second = second, second, second.next
+            if first: curr.next = first
+            if second: curr.next = second
+            return dummy.next
+
+        return merge(self.sortList(head), self.sortList(second))
+
+        li = []
+        while head:
+            heapq.heappush(li, head.val)
+            head = head.next
+        ans = curr = ListNode(-1)
+        while li:
+            curr.next = ListNode(heapq.heappop(li))
+            curr = curr.next
+        return ans.next
+        
+    def isValid(self, s: str) -> bool:
+        remain = []
+        pair = {'(': ')', '[': ']', '{': '}'}
+        for i in s:
+            if i in '([{':
+                remain.append(i)
+            else:
+                if not remain or i != pair[remain.pop()]: return False
+        return not remain
+
+    def isThree(self, n: int) -> bool:
+        cnt = 0
+        for i in range(1, math.floor(n ** 0.5) + 1):
+            if n % i == 0:
+                cnt += 2 if n // i != i else 1
+            if cnt > 3: return False
+        return cnt == 3
+
+    def numberOfWeeks(self, milestones: List[int]) -> int:
+        w = []
+        for i, m in enumerate(milestones):
+            heapq.heappush(w, (-m, i))
+        
+        ans = 0
+        last = -1
+        while len(w) > 1:
+            miles, idx = heapq.heappop(w)
+            miles2, idx2 = heapq.heappop(w)
+            if last != idx: last = idx2
+            if w:
+                reduce = max(miles2 - w[0][0], 1)
+            else: reduce = miles2
+            miles -= reduce
+            miles2 -= reduce
+            ans += 2 * (-reduce)
+            if miles < 0: heapq.heappush(w, (miles, idx))
+            if miles2 < 0: heapq.heappush(w, (miles2, idx2))
+        if not w: return ans
+        return ans if last == w[0][1] else ans + 1
     
+    def minimumPerimeter(self, neededApples: int) -> int:
+        dp = 0
+        arm = 0
+        while True:
+            dp += 12 * (arm ** 2)
+            if dp >= neededApples: return arm * 8
+            arm += 1
+    
+    def countSpecialSubsequences(self, nums: List[int]) -> int:
+        dp = collections.defaultdict(int)
+        dp[-1] = 1
+        MOD = 10 ** 9 + 7
+        for i in nums:
+            dp[i] = (dp[i - 1] + dp[i] + dp[i]) % MOD
+        return dp[2]
+
+    def minSwaps(self, s: str) -> int:
+        mistake = 0
+        remain = 0
+        for i in s:
+            if i == ']':
+                if remain > 0:
+                    remain -= 1
+                else:
+                    mistake += 1
+            if i == '[':
+                remain += 1
+        mistake += remain
+        return math.ceil(mistake / 4)
+
+    def longestObstacleCourseAtEachPosition(self, obstacles: List[int]) -> List[int]:
+        """find the longest obstacle course at each position
+
+        Args:
+            obstacles (List[int]): input obstacle list
+
+        Returns:
+            List[int]: a list of the longest length of non-decreasing list end with ith element
+        """
+        # bisect_left
+        obs, ans = [], []
+        for i in obstacles:
+            idx = bisect.bisect_right(obs, i)
+            ans.append(idx + 1)
+            if idx == len(obs): obs.append(i)
+            else: obs[idx] = i
+        return ans

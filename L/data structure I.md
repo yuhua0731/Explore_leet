@@ -36,7 +36,7 @@ Output: true
 def containsDuplicate(self, nums: List[int]) -> bool:
     visited = set()
     for i in nums:
-        if i in visited: return True
+        if i in visited: return True	
         visited.add(i)
     return False
 ```
@@ -389,4 +389,204 @@ def removeElements(self, head: ListNode, val: int) -> ListNode:
             pre, head = head, head.next
     return ans.next
 ```
+
+### 206. Reverse Linked List
+
+Given the `head` of a singly linked list, reverse the list, and return *the reversed list*.
+
+ 
+
+**Example 1:**
+
+![img](image_backup/data structure I/rev1ex1.jpg)
+
+```
+Input: head = [1,2,3,4,5]
+Output: [5,4,3,2,1]
+```
+
+**Example 2:**
+
+![img](image_backup/data structure I/rev1ex2.jpg)
+
+```
+Input: head = [1,2]
+Output: [2,1]
+```
+
+**Example 3:**
+
+```
+Input: head = []
+Output: []
+```
+
+ 
+
+**Constraints:**
+
+- The number of nodes in the list is the range `[0, 5000]`.
+- `-5000 <= Node.val <= 5000`
+
+ 
+
+**Follow up:** A linked list can be reversed either iteratively or recursively. Could you implement both?
+
+```python
+def reverseList(self, head: ListNode) -> ListNode:
+    if not head: return head
+    nxt = head.next
+    head.next = None
+
+    while nxt:
+        temp = nxt.next
+        nxt.next = head
+        head, nxt = nxt, temp
+    return head
+```
+
+### 83. Remove Duplicates from Sorted List
+
+Given the `head` of a sorted linked list, *delete all duplicates such that each element appears only once*. Return *the linked list **sorted** as well*.
+
+ 
+
+**Example 1:**
+
+![img](image_backup/data structure I/list1.jpg)
+
+```
+Input: head = [1,1,2]
+Output: [1,2]
+```
+
+**Example 2:**
+
+![img](image_backup/data structure I/list2.jpg)
+
+```
+Input: head = [1,1,2,3,3]
+Output: [1,2,3]
+```
+
+ 
+
+**Constraints:**
+
+- The number of nodes in the list is in the range `[0, 300]`.
+- `-100 <= Node.val <= 100`
+- The list is guaranteed to be **sorted** in ascending order.
+
+```python
+def deleteDuplicates(self, head: ListNode) -> ListNode:
+    if not head: return head
+    curr = head
+
+    while curr:
+        first = curr
+        temp = curr.val
+        while curr and curr.val == temp:
+            curr = curr.next
+        first.next = curr
+    return head
+```
+
+### 20. Valid Parentheses
+
+Given a string `s` containing just the characters `'('`, `')'`, `'{'`, `'}'`, `'['` and `']'`, determine if the input string is valid.
+
+An input string is valid if:
+
+1. Open brackets must be closed by the same type of brackets.
+2. Open brackets must be closed in the correct order.
+
+ 
+
+**Example 1:**
+
+```
+Input: s = "()"
+Output: true
+```
+
+**Example 2:**
+
+```
+Input: s = "()[]{}"
+Output: true
+```
+
+**Example 3:**
+
+```
+Input: s = "(]"
+Output: false
+```
+
+ 
+
+**Constraints:**
+
+- `1 <= s.length <= 104`
+- `s` consists of parentheses only `'()[]{}'`.
+
+```python
+def isValid(self, s: str) -> bool:
+    remain = []
+    pair = {'(': ')', '[': ']', '{': '}'}
+    for i in s:
+        if i in '([{':
+            remain.append(i)
+        else:
+            if not remain or i != pair[remain.pop()]: return False
+    return not remain
+```
+
+### 232. Implement Queue using Stacks
+
+Implement a first in first out (FIFO) queue using only two stacks. The implemented queue should support all the functions of a normal queue (`push`, `peek`, `pop`, and `empty`).
+
+Implement the `MyQueue` class:
+
+- `void push(int x)` Pushes element x to the back of the queue.
+- `int pop()` Removes the element from the front of the queue and returns it.
+- `int peek()` Returns the element at the front of the queue.
+- `boolean empty()` Returns `true` if the queue is empty, `false` otherwise.
+
+**Notes:**
+
+- You must use **only** standard operations of a stack, which means only `push to top`, `peek/pop from top`, `size`, and `is empty` operations are valid.
+- Depending on your language, the stack may not be supported natively. You may simulate a stack using a list or deque (double-ended queue) as long as you use only a stack's standard operations.
+
+ 
+
+**Example 1:**
+
+```
+Input
+["MyQueue", "push", "push", "peek", "pop", "empty"]
+[[], [1], [2], [], [], []]
+Output
+[null, null, null, 1, 1, false]
+
+Explanation
+MyQueue myQueue = new MyQueue();
+myQueue.push(1); // queue is: [1]
+myQueue.push(2); // queue is: [1, 2] (leftmost is front of the queue)
+myQueue.peek(); // return 1
+myQueue.pop(); // return 1, queue is [2]
+myQueue.empty(); // return false
+```
+
+ 
+
+**Constraints:**
+
+- `1 <= x <= 9`
+- At most `100` calls will be made to `push`, `pop`, `peek`, and `empty`.
+- All the calls to `pop` and `peek` are valid.
+
+ 
+
+**Follow-up:** Can you implement the queue such that each operation is **[amortized](https://en.wikipedia.org/wiki/Amortized_analysis)** `O(1)` time complexity? In other words, performing `n` operations will take overall `O(n)` time even if one of those operations may take longer.
 
