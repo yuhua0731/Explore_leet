@@ -590,3 +590,213 @@ myQueue.empty(); // return false
 
 **Follow-up:** Can you implement the queue such that each operation is **[amortized](https://en.wikipedia.org/wiki/Amortized_analysis)** `O(1)` time complexity? In other words, performing `n` operations will take overall `O(n)` time even if one of those operations may take longer.
 
+
+
+
+
+### 101. Symmetric Tree
+
+Given the `root` of a binary tree, *check whether it is a mirror of itself* (i.e., symmetric around its center).
+
+ 
+
+**Example 1:**
+
+![img](image_backup/data structure I/symtree1.jpg)
+
+```
+Input: root = [1,2,2,3,4,4,3]
+Output: true
+```
+
+**Example 2:**
+
+![img](image_backup/data structure I/symtree2.jpg)
+
+```
+Input: root = [1,2,2,null,3,null,3]
+Output: false
+```
+
+ 
+
+**Constraints:**
+
+- The number of nodes in the tree is in the range `[1, 1000]`.
+- `-100 <= Node.val <= 100`
+
+ 
+
+**Follow up:** Could you solve it both recursively and iteratively?
+
+```python
+def isSymmetric(self, root: Optional[TreeNode]) -> bool:
+    # each level should be symmetric
+    stack = deque([[root.left, root.right]])
+    while stack:
+        l, r = stack.popleft()
+        if l == None and r == None: continue
+        if l == None or r == None or l.val != r.val: return False
+        stack.append([l.left, r.right])
+        stack.append([l.right, r.left])
+    return True
+```
+
+### 226. Invert Binary Tree
+
+Given the `root` of a binary tree, invert the tree, and return *its root*.
+
+ 
+
+**Example 1:**
+
+![img](image_backup/data structure I/invert1-tree.jpg)
+
+```
+Input: root = [4,2,7,1,3,6,9]
+Output: [4,7,2,9,6,3,1]
+```
+
+**Example 2:**
+
+![img](image_backup/data structure I/invert2-tree.jpg)
+
+```
+Input: root = [2,1,3]
+Output: [2,3,1]
+```
+
+**Example 3:**
+
+```
+Input: root = []
+Output: []
+```
+
+ 
+
+**Constraints:**
+
+- The number of nodes in the tree is in the range `[0, 100]`.
+- `-100 <= Node.val <= 100`
+
+```python
+def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+    if not root: return root
+    root.left, root.right = self.invertTree(root.right), self.invertTree(root.left)
+    return root
+```
+
+### 700. Search in a Binary Search Tree
+
+You are given the `root` of a binary search tree (BST) and an integer `val`.
+
+Find the node in the BST that the node's value equals `val` and return the subtree rooted with that node. If such a node does not exist, return `null`.
+
+ 
+
+**Example 1:**
+
+![img](image_backup/data structure I/tree1.jpg)
+
+```
+Input: root = [4,2,7,1,3], val = 2
+Output: [2,1,3]
+```
+
+**Example 2:**
+
+![img](image_backup/data structure I/tree2.jpg)
+
+```
+Input: root = [4,2,7,1,3], val = 5
+Output: []
+```
+
+ 
+
+**Constraints:**
+
+- The number of nodes in the tree is in the range `[1, 5000]`.
+- `1 <= Node.val <= 10 ** 7`
+- `root` is a ==binary search tree==.
+- `1 <= val <= 10 ** 7`
+
+```python
+def searchBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]:
+    # iterating, recommanded
+    while root:
+        if root.val > val:
+            root = root.left
+        elif root.val < val:
+            root = root.right
+        else: break
+    return root
+    
+    # recursion
+    if not root: return None
+    if root.val > val: return self.searchBST(root.left, val)
+    if root.val < val: return self.searchBST(root.right, val)
+    return root
+```
+
+### 701. Insert into a Binary Search Tree
+
+You are given the `root` node of a binary search tree (BST) and a `value` to insert into the tree. Return *the root node of the BST after the insertion*. It is **guaranteed** that the new value does not exist in the original BST.
+
+**Notice** that there may exist multiple valid ways for the insertion, as long as the tree remains a BST after insertion. You can return **any of them**.
+
+ 
+
+**Example 1:**
+
+![img](image_backup/data structure I/insertbst.jpg)
+
+```
+Input: root = [4,2,7,1,3], val = 5
+Output: [4,2,7,1,3,5]
+Explanation: Another accepted tree is:
+```
+
+**Example 2:**
+
+```
+Input: root = [40,20,60,10,30,50,70], val = 25
+Output: [40,20,60,10,30,50,70,null,null,25]
+```
+
+**Example 3:**
+
+```
+Input: root = [4,2,7,1,3,null,null,null,null,null,null], val = 5
+Output: [4,2,7,1,3,5]
+```
+
+ 
+
+**Constraints:**
+
+- The number of nodes in the tree will be in the range `[0, 10 ** 4]`.
+- `-10 ** 8 <= Node.val <= 10 ** 8`
+- All the values `Node.val` are **unique**.
+- `-10 ** 8 <= val <= 10 ** 8`
+- It's **guaranteed** that `val` does not exist in the original BST.
+
+```python
+def insertIntoBST(self, root: TreeNode, val: int) -> TreeNode:
+    if not root: return TreeNode(val)
+    temp = root
+    while temp:
+        if temp.val > val:
+            if not temp.left:
+                temp.left = TreeNode(val)
+                break
+            else: temp = temp.left
+        elif temp.val < val:
+            if not temp.right:
+                temp.right = TreeNode(val)
+                break
+            else: temp = temp.right
+    return root
+```
+

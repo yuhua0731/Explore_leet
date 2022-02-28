@@ -643,9 +643,9 @@ arr2 = [8, 9, 10]
 
 ## String literals
 
-- f’’ represented formatted string
-- r’’ represented raw string, which treat backslashes as literal characters
-- b’’ byte string, which produce an instance of the [`bytes`](https://docs.python.org/3/library/stdtypes.html#bytes) type instead of the [`str`](https://docs.python.org/3/library/stdtypes.html#str) type
+- `f'{variable}'` represented formatted string
+- `r''` represented raw string, which treat backslashes as literal characters
+- `b''` byte string, which produce an instance of the [`bytes`](https://docs.python.org/3/library/stdtypes.html#bytes) type instead of the [`str`](https://docs.python.org/3/library/stdtypes.html#str) type
 
 ```python
 a = 1
@@ -1624,17 +1624,79 @@ We initialize all the values in BITree[] as 0. Then we call update() for all the
 
 
 
+## tree traversal order
 
+#### DFS
 
+- Inorder(left, root, right)
 
+```python
+# recursive
+def inorder(root):
+  	return  inorder(root.left) + [root.val] + inorder(root.right) if root else []
 
+# iterating
+def inorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
+    ans = []
+    curr = []
+    # append and pop elements from the end of curr list
+    while True:
+        while root:
+        	curr.append(root.left)
+            root = root.left
+        if not root: return ans
+        temp = curr.pop()
+        ans.append(temp.val)
+        root = temp.right
+    return ans
+```
 
+- Preorder(root, left, right)
 
+```python
+# recursive
+def preorder(root):
+  	return [root.val] + preorder(root.left) + preorder(root.right) if root else []
 
+# iterating
+def preorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
+    if not root: return []
+    ans = []
+    curr = deque([root])
+    while curr:
+        temp = curr.popleft()
+        ans.append(temp.val)
+        if temp.right: curr.appendleft(temp.right)
+        if temp.left: curr.appendleft(temp.left)
+    return ans
+```
 
+- Postorder(left, right, root)
 
+```python
+# recursive
+def postorder(root):
+  	return  postorder(root.left) + postorder(root.right) + [root.val] if root else []
 
+# iterating, this is a reverse order of (root, right, left)
+def postorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
+    if not root: return []
+    ans = []
+    curr = deque([root])
+    while curr:
+        temp = curr.popleft()
+        ans.append(temp.val)
+        if temp.left: curr.appendleft(temp.left)
+        if temp.right: curr.appendleft(temp.right)
+    return ans[::-1]
+```
 
+## operator precedence
+
+```python
+(5 >> 1) + 1 # 3
+5 >> 1 + 1 # 1
+```
 
 
 
@@ -1642,11 +1704,9 @@ We initialize all the values in BITree[] as 0. Then we call update() for all the
 
 大数据开发工程师
 
-hive spark impala ETL服务
+ETL服务 SQL
 
-精通SQL
-
-了解Hive，Impala，Spark，HBase等Hadoop相关工具者优先
+Hive，Impala，Spark，HBase等Hadoop相关工具
 
 广告投放算法工程师
 

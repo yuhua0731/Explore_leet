@@ -6429,3 +6429,131 @@ class Solution:
             if idx == len(obs): obs.append(i)
             else: obs[idx] = i
         return ans
+
+    def compareVersion(self, version1: str, version2: str) -> int:
+        version1 = list(map(int, version1.split('.')))
+        version2 = list(map(int, version2.split('.')))
+        while len(version1) < len(version2): version1.append(0)
+        while len(version2) < len(version1): version2.append(0)
+        for i, j in zip(version1, version2):
+            if i < j: return -1
+            elif i > j: return 1
+        return 0
+        
+    def summaryRanges(self, nums: List[int]) -> List[str]:
+        temp = []
+        ans = []
+        for i in nums + [2 ** 31 + 1]:
+            if not temp: temp.append(i)
+            else:
+                if temp[-1] + 1 == i: temp.append(i)
+                else:
+                    if len(temp) == 1: 
+                        ans.append(str(temp[0]))
+                    else:
+                        ans.append(f'{temp[0]}->{temp[-1]}')
+                    temp = [i]
+        return ans
+
+    def searchBST(self, root: TreeNode, val: int) -> TreeNode:
+        # iterating
+        while root:
+            if root.val > val:
+                root = root.left
+            elif root.val < val:
+                root = root.right
+            else: break
+        return root
+
+        # recursion
+        if not root: return None
+        if root.val > val: return self.searchBST(root.left)
+        if root.val < val: return self.searchBST(root.right)
+        return root
+
+    def insertIntoBST(self, root: TreeNode, val: int) -> TreeNode:
+        if not root: return TreeNode(val)
+        temp = root
+        while temp:
+            if temp.val > val:
+                if not temp.left:
+                    temp.left = TreeNode(val)
+                    break
+                else: temp = temp.left
+            elif temp.val < val:
+                if not temp.right:
+                    temp.right = TreeNode(val)
+                    break
+                else: temp = temp.right
+        return root
+
+    def hammingWeight(self, n: int) -> int:
+        return bin(n).count('1')
+
+    def subtractProductAndSum(self, n: int) -> int:
+        prod, s = 1, 0
+        while n:
+            i = n % 10
+            prod *= i
+            s += i
+            n //= 10
+        return prod - s
+
+    def maxAreaOfIsland(self, grid: List[List[int]]) -> int:
+        ans = 0
+        m, n = len(grid), len(grid[0])
+        dir = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+        def extend(x, y):
+            curr = collections.deque([[x, y]])
+            grid[x][y] = 0
+            cnt = 0
+            while curr:
+                cnt += 1
+                x, y = curr.popleft()
+                for i, j in dir:
+                    xi, yj = x + i, y + j
+                    if m > xi >= 0 <= yj < n and grid[xi][yj] == 1:
+                        grid[xi][yj] = 0
+                        curr.append([xi, yj])
+            return cnt
+        
+        for i, j in product(range(m), range(n)):
+            if grid[i][j] == 1:
+                ans = max(ans, extend(i, j))
+        return ans
+
+    def closedIsland(self, grid: List[List[int]]) -> int:
+        m, n = len(grid), len(grid[0])
+        dir = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+        if m == 1 or n == 1: return 0
+
+        def extend(x, y):
+            curr = collections.deque([[x, y]])
+            grid[x][y] = 1
+            while curr:
+                x, y = curr.popleft()
+                for i, j in dir:
+                    xi, yj = x + i, y + j
+                    if m > xi >= 0 <= yj < n and grid[xi][yj] == 0:
+                        grid[xi][yj] = 1
+                        curr.append([xi, yj])
+
+        for i in range(m):
+            if grid[i][0] == 0:
+                extend(i, 0)
+            if grid[i][n - 1] == 0:
+                extend(i, n - 1)
+        for i in range(n):
+            if grid[0][i] == 0:
+                extend(0, i)
+            if grid[m - 1][i] == 0:
+                extend(m - 1, i)
+        
+        ans = 0
+        for i, j in product(range(m), range(n)):
+            if grid[i][j] == 0:
+                ans += 1
+                extend(i, j)
+        return ans
+            
+        
