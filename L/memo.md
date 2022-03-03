@@ -1,4 +1,4 @@
-# Explore_leet
+# Explore
 
 ## Data type
 
@@ -1270,7 +1270,7 @@ dq.peekFirst(e);
 
 - Reusable and extendable maintainable objects
 - 23 classical patterns
-- Alt + enter on interface
+- ==Alt + enter== on interface
 - java coding with intelliJ
 - Static method can be called without creating an object of this class
 - loose coupling system

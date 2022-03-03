@@ -4,7 +4,7 @@ import csv
 import time
 import random
 import collections
-from collections import Counter
+from collections import Counter, deque
 import math
 import functools
 import itertools
@@ -6556,4 +6556,94 @@ class Solution:
                 extend(i, j)
         return ans
             
+    def countBits(self, n: int) -> List[int]:
+        """count bits from 0 to n
+
+        Args:
+            n (int): upper bound
+
+        Returns:
+            List[int]: ans[i] represents for the bit count of integer i
+        """
+        # dp
+        dp = [0] * (n + 1)
+        for i in range(1, n + 1):
+            dp[i] = 1 + dp[i // 2] if i % 2 else dp[i // 2]
+        return dp
+    
+    def isValidBST(self, root: TreeNode) -> bool:
+        def valid(node):
+            start = end = node.val
+            if node.left: 
+                ls, le = valid(node.left)
+                if le >= node.val:
+                    return [-float('inf'), float('inf')]
+                else: start = ls
+            if node.right:
+                rs, re = valid(node.right)
+                if rs <= node.val:
+                    return [-float('inf'), float('inf')]
+                else: end = re
+            return [start, end]
         
+        return valid(root)[0] > -float('inf')
+
+        def inorder(node):
+            return inorder(node.left) + [node.val] + inorder(node.right) if node else []
+
+        ans = inorder(root)
+        return ans == sorted(ans) and len(set(ans)) == len(ans)
+
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        while root:
+            if root.val == q.val or root.val == p.val: return root
+            pp, qq = p.val < root.val, q.val < root.val
+            if pp != qq: return root
+            if pp and qq: root = root.left
+            else: root = root.right
+
+    def findTarget(self, root: TreeNode, k: int) -> bool:   
+        visited = set()
+        curr = deque([root])
+        while curr:
+            temp = curr.popleft()
+            if k - temp.val in visited: return True
+            visited.add(temp.val)
+            if temp.left: curr.append(temp.left)
+            if temp.right: curr.append(temp.right)
+        return False
+
+    def largestPerimeter(self, nums: List[int]) -> int:
+        nums = sorted(nums, reverse = True)
+        three = deque(nums[:3])
+        nums = deque(nums[3:])
+        while three[0] >= three[1] + three[2]:
+            three.popleft()
+            if not nums: return 0
+            three.append(nums.popleft())
+        return sum(three)
+
+    def nearestValidPoint(self, x: int, y: int, points: List[List[int]]) -> int:
+        ans = -1
+        distance = float('inf')
+        for idx, (i, j) in enumerate(points):
+            if (i == x or y == j) and abs(x - i) + abs(y - j) < distance:
+                distance = abs(x - i) + abs(y - j)
+                ans = idx
+        return ans
+
+    def isSubsequence(self, s: str, t: str) -> bool:
+        i = j = 0
+        while i < len(s) and j < len(t):
+            if s[i] == t[j]: i += 1
+            j += 1
+        return i == len(s)
+
+    def numberOfArithmeticSlices(self, nums: List[int]) -> int:
+        # attention: consecutive elements
+        # dp keep records of the valid arithmetic slices ended with current element
+        dp = ans = 0
+        for i in range(2, len(nums)):
+            dp = [0, dp + 1][nums[i] - nums[i - 1] == nums[i - 1] - nums[i - 2]]
+            ans += dp
+        return ans

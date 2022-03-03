@@ -800,3 +800,172 @@ def insertIntoBST(self, root: TreeNode, val: int) -> TreeNode:
     return root
 ```
 
+### 98. Validate Binary Search Tree
+
+Given the `root` of a binary tree, *determine if it is a valid binary search tree (BST)*.
+
+A **valid BST** is defined as follows:
+
+- The left subtree of a node contains only nodes with keys **less than** the node's key.
+- The right subtree of a node contains only nodes with keys **greater than** the node's key.
+- Both the left and right subtrees must also be binary search trees.
+
+ 
+
+**Example 1:**
+
+![img](image_backup/data structure I/tree1-20220301132107552.jpg)
+
+```
+Input: root = [2,1,3]
+Output: true
+```
+
+**Example 2:**
+
+![img](image_backup/data structure I/tree2-20220301132107864.jpg)
+
+```
+Input: root = [5,1,4,null,null,3,6]
+Output: false
+Explanation: The root node's value is 5 but its right child's value is 4.
+```
+
+ 
+
+**Constraints:**
+
+- The number of nodes in the tree is in the range `[1, 10 ** 4]`.
+- `-2 ** 31 <= Node.val <= 2 ** 31 - 1`
+
+```python
+def isValidBST(self, root: TreeNode) -> bool:
+    def inorder(node):
+        return inorder(node.left) + [node.val] + inorder(node.right) if node else []
+
+    ans = inorder(root)
+    return ans == sorted(ans) and len(set(ans)) == len(ans)
+```
+
+
+
+```python
+def isValidBST(self, root: TreeNode) -> bool:
+    def valid(node):
+        start = end = node.val
+        if node.left: 
+            ls, le = valid(node.left)
+            if le >= node.val:
+                return [-float('inf'), float('inf')]
+            else: start = ls
+        if node.right:
+            rs, re = valid(node.right)
+            if rs <= node.val:
+                return [-float('inf'), float('inf')]
+            else: end = re
+        return [start, end]
+
+    return valid(root)[0] > -float('inf')
+```
+
+### 235. Lowest Common Ancestor of a Binary Search Tree
+
+Given a binary search tree (BST), find the lowest common ancestor (LCA) of two given nodes in the BST.
+
+According to the [definition of LCA on Wikipedia](https://en.wikipedia.org/wiki/Lowest_common_ancestor): “The lowest common ancestor is defined between two nodes `p` and `q` as the lowest node in `T` that has both `p` and `q` as descendants (where we allow **a node to be a descendant of itself**).”
+
+ 
+
+**Example 1:**
+
+![img](image_backup/data structure I/binarysearchtree_improved.png)
+
+```
+Input: root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 8
+Output: 6
+Explanation: The LCA of nodes 2 and 8 is 6.
+```
+
+**Example 2:**
+
+![img](image_backup/data structure I/binarysearchtree_improved.png)
+
+```
+Input: root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 4
+Output: 2
+Explanation: The LCA of nodes 2 and 4 is 2, since a node can be a descendant of itself according to the LCA definition.
+```
+
+**Example 3:**
+
+```
+Input: root = [2,1], p = 2, q = 1
+Output: 2
+```
+
+ 
+
+**Constraints:**
+
+- The number of nodes in the tree is in the range `[2, 105]`.
+- `-109 <= Node.val <= 109`
+- All `Node.val` are **unique**.
+- `p != q`
+- `p` and `q` will exist in the BST.
+
+```python
+def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+    while root:
+        if root.val == q.val or root.val == p.val: return root
+        pp, qq = p.val < root.val, q.val < root.val
+        if pp != qq: return root
+        if pp and qq: root = root.left
+        else: root = root.right
+```
+
+### 653. Two Sum IV - Input is a BST
+
+Given the `root` of a Binary Search Tree and a target number `k`, return *`true` if there exist two elements in the BST such that their sum is equal to the given target*.
+
+ 
+
+**Example 1:**
+
+![img](image_backup/data structure I/sum_tree_1.jpg)
+
+```
+Input: root = [5,3,6,2,4,null,7], k = 9
+Output: true
+```
+
+**Example 2:**
+
+![img](image_backup/data structure I/sum_tree_2.jpg)
+
+```
+Input: root = [5,3,6,2,4,null,7], k = 28
+Output: false
+```
+
+ 
+
+**Constraints:**
+
+- The number of nodes in the tree is in the range `[1, 10 ** 4]`.
+- `-10 ** 4 <= Node.val <= 10 ** 4`
+- `root` is guaranteed to be a **valid** binary search tree.
+- `-10 ** 5 <= k <= 10 ** 5`
+
+```python
+def findTarget(self, root: Optional[TreeNode], k: int) -> bool:
+    visited = set()
+    curr = deque([root])
+    while curr:
+        temp = curr.popleft()
+        if k - temp.val in visited: return True
+        visited.add(temp.val)
+        if temp.left: curr.append(temp.left)
+        if temp.right: curr.append(temp.right)
+    return False
+```
+
