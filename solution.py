@@ -6647,3 +6647,241 @@ class Solution:
             dp = [0, dp + 1][nums[i] - nums[i - 1] == nums[i - 1] - nums[i - 2]]
             ans += dp
         return ans
+
+    def arraySign(self, nums: List[int]) -> int:
+        cnt = 0
+        for i in nums:
+            if i == 0: return 0
+            if i < 0: cnt += 1
+        return -1 if cnt % 2 else 1
+
+    def canMakeArithmeticProgression(self, arr: List[int]) -> bool:
+        arr.sort()
+        diff = arr[1] - arr[0]
+        for i, j in zip(arr, arr[1:]):
+            if j - i != diff: return False
+        return True
+
+    def isHappy(self, n: int) -> bool:
+        visited = set()
+        digit = lambda x: int(x) ** 2
+        while n != 1:
+            n = sum(map(digit, list(str(n))))
+            if n in visited: return False
+            visited.add(n)
+        return True
+
+    def areAlmostEqual(self, s1: str, s2: str) -> bool:
+        return len(s1) == len(s2) and sum(1 for i, j in zip(s1, s2) if i != j) <= 2 and sorted(s1) == sorted(s2)
+
+    def preorder(self, root: 'Node') -> List[int]:
+        curr = [root]
+        ans = []
+        while curr:
+            temp = curr.pop()
+            if not temp: return ans
+            ans.append(temp.val)
+            if temp.children: curr += temp.children[::-1]
+        return ans
+
+    def nextGreaterElement(self, nums1: List[int], nums2: List[int]) -> List[int]:
+        ans = dict()
+        visited = []
+        
+        for x in nums2:
+            # if the last previous element is less than x, we pop it out and set its answer to x
+            # visited is guaranteed to be a non-increasing list
+            while len(visited) and visited[-1] < x:
+                ans[visited.pop()] = x
+            visited.append(x)
+        
+        return [ans[i] if i in ans else -1 for i in nums1]
+         
+    def checkStraightLine(self, coordinates: List[List[int]]) -> bool:
+        n = len(coordinates)
+        x_coord = set(i for i, j in coordinates)
+        if len(x_coord) == 1: return True
+        if len(x_coord) < n: return False
+        slope = set()
+        for (i, j), (x, y) in zip(coordinates, coordinates[1:]):
+            slope.add((y - j) / (x - i))
+            if len(slope) > 1: return False
+        return True
+
+    def numEnclaves(self, grid: List[List[int]]) -> int:
+        m, n = len(grid), len(grid[0])
+        dir = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+        curr = collections.deque([])
+        cnt = 0
+        for i, j in product(range(m), range(n)):
+            if grid[i][j] == 1:
+                if i == 0 or j == 0 or i == m - 1 or j == n - 1:
+                    # boundary
+                    curr.append((i, j))
+                    grid[i][j] = 0
+                cnt += 1
+        
+        while curr:
+            x, y = curr.popleft()
+            cnt -= 1
+            for i, j in dir:
+                xi, yj = x + i, y + j
+                if m > xi >= 0 <= yj < n and grid[xi][yj] == 1:
+                    grid[xi][yj] = 0
+                    curr.append((xi, yj))
+        return cnt
+
+    def countSubIslands(self, grid1: List[List[int]], grid2: List[List[int]]) -> int:
+        """count subIsland from grid2 of grid1
+
+        Args:
+            grid1 (List[List[int]]): the original grid
+            grid2 (List[List[int]]): the grid to search subIslands
+
+        Returns:
+            int: the count of valid subIslands
+        """
+        # search islands in grid2, and determine if it is a sub island of grid1(all corresponding cells in grid1 are lands as well)
+        m, n = len(grid2), len(grid2[0])
+        dir = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+
+        def island(x, y):
+            ans = True
+            curr = collections.deque([(x, y)])
+            grid2[x][y] = 0
+            while curr:
+                x, y = curr.popleft()
+                if grid1[x][y] == 0: ans = False
+                for i, j in dir:
+                    xi, yj = x + i, y + j
+                    if m > xi >= 0 <= yj < n and grid2[xi][yj] == 1:
+                        grid2[xi][yj] = 0
+                        curr.append((xi, yj))
+            return ans
+        
+        return sum(1 for i, j in product(range(m), range(n)) if grid2[i][j] == 1 and island(i, j))
+
+    def maxDistance(self, grid: List[List[int]]) -> int:
+        """find the max distance from a water cell to its nearest land cell
+
+        Args:
+            grid (List[List[int]]): water = 0 | land = 1
+
+        Returns:
+            int: return the max distance, -1 if there is no water not no land
+        """
+        # BFS
+        # we extend land in each loop until there is no water, return the steps we take
+        n = len(grid)
+        dir = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+        curr = []
+        for i, j in product(range(n), range(n)):
+            if grid[i][j] == 1:
+                curr.append((i, j))
+        
+        if not curr or len(curr) == n * n: return -1
+        step = 0
+        while curr:
+            step += 1
+            nxt = []
+            for x, y in curr:
+                for i, j in dir:
+                    xi, yj = x + i, y + j
+                    if n > xi >= 0 <= yj < n and grid[xi][yj] == 0:
+                        grid[xi][yj] = 1
+                        nxt.append((xi, yj))
+            curr = nxt
+        return step - 1
+
+    def pacificAtlantic(self, heights: List[List[int]]) -> List[List[int]]:
+        """water flood from higher cells to adjacent lower cells
+
+        Args:
+            heights (List[List[int]]): an island with height specified to each cell
+
+        Returns:
+            List[List[int]]: return the count of cells that can be flood by both seas
+        """
+        m, n = len(heights), len(heights[0])
+        dir = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+
+        water = collections.defaultdict(int)
+        def drawn(edge):
+            visited = set(edge)
+            while edge:
+                x, y = edge.pop()
+                water[(x, y)] += 1
+                for i, j in dir:
+                    xi, yj = x + i, y + j
+                    if m > xi >= 0 <= yj < n and (xi, yj) not in visited and heights[xi][yj] >= heights[x][y]:
+                        visited.add((xi, yj))
+                        edge.append((xi, yj))
+
+        # pacific: top-left side
+        edge = [(0, 0)]
+        for i in range(1, m):
+            edge.append((i, 0))
+        for i in range(1, n):
+            edge.append((0, i))
+        drawn(edge)
+
+        edge = [(m - 1, n - 1)]
+        for i in range(m - 1):
+            edge.append((i, n - 1))
+        for i in range(n - 1):
+            edge.append((m - 1, i))
+        drawn(edge)
+
+        return [[x, y] for (x, y), cnt in water.items() if cnt == 2]
+
+    def updateMatrix(self, mat: List[List[int]]) -> List[List[int]]:
+        """water flood
+
+        Args:
+            mat (List[List[int]]): 0-1 matrix
+
+        Returns:
+            List[List[int]]: return the disrance of the nearest 0 for each cell
+        """
+        m, n = len(mat), len(mat[0])
+        dir = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+
+        ans = [[0] * n for _ in range(m)]
+        curr = []
+        for i, j in product(range(m), range(n)):
+            if mat[i][j] == 0:
+                curr.append((i, j))
+        
+        step = 0
+        while curr:
+            step += 1
+            nxt = []
+            for (x, y), (i, j) in product(curr, dir):
+                xi, yj = x + i, y + j
+                if m > xi >= 0 <= yj < n and mat[xi][yj] == 1:
+                    mat[xi][yj] = 0
+                    nxt.append((xi, yj))
+                    ans[xi][yj] = step
+            curr = nxt
+        return ans
+
+    def champagneTower(self, poured: int, query_row: int, query_glass: int) -> float:
+        # level 0 -> 1 glass
+        # level 1 -> 2 glasses
+        # ...
+        # level 99 -> 100 glasses
+        res = [poured] # top level
+        for row in range(1, query_row + 1):
+            # append two empty glasses at both sides
+            res = [0] + res + [0]
+            # level i has i + 1 glasses, indexed from 0 to i
+            """
+            level 2         0   1   2   3   4
+            with extra two glasses at both sides
+            level 3           0   1   2   3
+            dp[i + 1][j] = dp[i][j]'s half + dp[i][j + 1]'s half
+            """
+            res = [max(res[i] - 1, 0) / 2.0 + max(res[i + 1] - 1, 0) / 2.0 for i in range(row + 1)]
+        return min(res[query_glass], 1)       
+                        
+    
