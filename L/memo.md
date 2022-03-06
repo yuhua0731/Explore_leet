@@ -1700,15 +1700,17 @@ def postorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
 
 
 
+
+
+
+
+
+
+
+
+
+
 后台服务器开发工程师
 
-大数据开发工程师
-
-ETL服务 SQL
-
 Hive，Impala，Spark，HBase等Hadoop相关工具
-
-广告投放算法工程师
-
-数据分析（日志收集及可视化平台）工程师
 

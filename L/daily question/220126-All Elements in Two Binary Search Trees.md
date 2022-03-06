@@ -4,7 +4,7 @@ Given two binary search trees `root1` and `root2`, return *a list containing all
 
 **Example 1:**
 
-![img](image_backup/220126-/q2-e1.png)
+![img](image_backup/220126-All Elements in Two Binary Search Trees/q2-e1.png)
 
 ```
 Input: root1 = [2,1,4], root2 = [1,0,3]
@@ -13,7 +13,7 @@ Output: [0,1,1,2,3,4]
 
 **Example 2:**
 
-![img](image_backup/220126-/q2-e5-.png)
+![img](image_backup/220126-All Elements in Two Binary Search Trees/q2-e5-.png)
 
 ```
 Input: root1 = [1,null,8], root2 = [8,1]
