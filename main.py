@@ -315,6 +315,8 @@ def main():
     print(solu.isValid('{[]()}'))
     # print(solu.numberOfWeeks([3,9,7,1,2,3]))
     print(solu.countSpecialSubsequences(nums = [0,1,2,0,1,2]))
-
+    print(solu.shortestAlternatingPaths(5, [[3,2],[4,1],[1,4],[2,4]], [[2,3],[0,4],[4,3],[4,4],[4,0],[1,0]])) 
+    print(solu.shortestAlternatingPaths(5, [[2,2],[0,1],[0,3],[0,0],[0,4],[2,1],[2,0],[1,4],[3,4]], [[1,3],[0,0],[0,3],[4,2],[1,0]]))
+    
 if __name__ == "__main__":
     main()

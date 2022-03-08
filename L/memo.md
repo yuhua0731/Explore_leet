@@ -37,7 +37,9 @@ Tree are implemented from list in python
 
 - A `complete binary tree` is a binary tree in which every level, except possibly the last, is completely filled, and all nodes are as far left as possible. [![?](image_backup/memo/CompleteBinary.jpg)](https://web.cecs.pdx.edu/~sheard/course/Cs163/Doc/FullvsComplete.html)
 
-- [heap](#heapq in python): min heap / max heap, heapq is a complete binary tree
+- ### [heap](#heapq):
+
+  min heap / max heap, heapq is a complete binary tree
 
 - segment tree
 
@@ -1622,7 +1624,23 @@ We initialize all the values in BITree[] as 0. Then we call update() for all the
 
 ## glob
 
+The [`glob`](dfile:///Users/huayu/Library/Application Support/Dash/DocSets/Python_3/Python 3.docset/Contents/Resources/Documents/doc/library/glob.html#module-glob) module finds all the pathnames matching a specified pattern according to the rules used by the Unix shell, although results are returned in arbitrary order.
 
+```python
+import glob
+glob.glob('./[0-9].*')
+# ['./1.gif', './2.txt']
+glob.glob('*.gif')
+# ['1.gif', 'card.gif']
+glob.glob('?.gif')
+# ['1.gif']
+glob.glob('**/*.txt', recursive=True)
+# ['2.txt', 'sub/3.txt']
+glob.glob('./**/', recursive=True)
+# ['./', './sub/']
+```
+
+> If *recursive* is true, the pattern “`**`” will match any files and zero or more directories, subdirectories and symbolic links to directories.
 
 ## tree traversal order
 

@@ -569,3 +569,421 @@ def updateMatrix(self, mat: List[List[int]]) -> List[List[int]]:
     return ans
 ```
 
+### 934. Shortest Bridge
+
+You are given an `n x n` binary matrix `grid` where `1` represents land and `0` represents water.
+
+An **island** is a 4-directionally connected group of `1`'s not connected to any other `1`'s. There are **exactly two islands** in `grid`.
+
+You may change `0`'s to `1`'s to connect the two islands to form **one island**.
+
+Return *the smallest number of* `0`*'s you must flip to connect the two islands*.
+
+ 
+
+**Example 1:**
+
+```
+Input: grid = [[0,1],[1,0]]
+Output: 1
+```
+
+**Example 2:**
+
+```
+Input: grid = [[0,1,0],[0,0,0],[0,0,1]]
+Output: 2
+```
+
+**Example 3:**
+
+```
+Input: grid = [[1,1,1,1,1],[1,0,0,0,1],[1,0,1,0,1],[1,0,0,0,1],[1,1,1,1,1]]
+Output: 1
+```
+
+ 
+
+**Constraints:**
+
+- `n == grid.length == grid[i].length`
+- `2 <= n <= 100`
+- `grid[i][j]` is either `0` or `1`.
+- There are exactly two islands in `grid`.
+
+> Initially, lands are represented as 1’s, while water are represented as 0’s
+>
+> we start traverse on all cells, once we find a land, extend it and update all connected land cells to -1, indicating that we have already visited it. return a list of all cells that belong to this island.
+
+- then we can start searching another island from this island
+- record the step we take
+
+```python
+def shortestBridge(self, grid: List[List[int]]) -> int:
+    # shortest distance between two islands
+    n = len(grid)
+    dir = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+
+    # find all land cells and update its value to -1, indicating that we have already visited it
+    def edge(x, y):
+        curr = collections.deque([[x, y]])
+        grid[x][y] = -1
+        ans = []
+        while curr:
+            x, y = curr.popleft()
+            ans.append([x, y])
+            for i, j in dir:
+                xi, yj = x + i, y + j
+                if n > xi >= 0 <= yj < n and grid[xi][yj] == 1:
+                    grid[xi][yj] = -1
+                    curr.append([xi, yj])
+        return ans
+
+    for i, j in product(range(n), range(n)):
+        if grid[i][j] == 1: 
+            e = edge(i, j)
+            break
+
+    # extend land
+    step = 0
+    while e:
+        nxt = []
+        for x, y in e:
+            for i, j in dir:
+                xi, yj = x + i, y + j
+                if n > xi >= 0 <= yj < n:
+                    if grid[xi][yj] == 1: return step
+                    if grid[xi][yj] == 0:
+                        grid[xi][yj] = -1
+                        nxt.append([xi, yj])
+        step += 1
+        e = nxt
+```
+
+### 1376. Time Needed to Inform All Employees
+
+A company has `n` employees with a unique ID for each employee from `0` to `n - 1`. The head of the company is the one with `headID`.
+
+Each employee has one direct manager given in the `manager` array where `manager[i]` is the direct manager of the `i-th` employee, `manager[headID] = -1`. Also, it is guaranteed that the subordination relationships have a tree structure.
+
+The head of the company wants to inform all the company employees of an urgent piece of news. He will inform his direct subordinates, and they will inform their subordinates, and so on until all employees know about the urgent news.
+
+The `i-th` employee needs `informTime[i]` minutes to inform all of his direct subordinates (i.e., After informTime[i] minutes, all his direct subordinates can start spreading the news).
+
+Return *the number of minutes* needed to inform all the employees about the urgent news.
+
+ 
+
+**Example 1:**
+
+```
+Input: n = 1, headID = 0, manager = [-1], informTime = [0]
+Output: 0
+Explanation: The head of the company is the only employee in the company.
+```
+
+**Example 2:**
+
+![img](image_backup/graph theroy/graph.png)
+
+```
+Input: n = 6, headID = 2, manager = [2,2,-1,2,2,2], informTime = [0,0,1,0,0,0]
+Output: 1
+Explanation: The head of the company with id = 2 is the direct manager of all the employees in the company and needs 1 minute to inform them all.
+The tree structure of the employees in the company is shown.
+```
+
+ 
+
+**Constraints:**
+
+- `1 <= n <= 10 ** 5`
+- `0 <= headID < n`
+- `manager.length == n`
+- `0 <= manager[i] < n`
+- `manager[headID] == -1`
+- `informTime.length == n`
+- `0 <= informTime[i] <= 1000`
+- `informTime[i] == 0` if employee `i` has no subordinates.
+- It is **guaranteed** that all the employees can be informed.
+
+```python
+def numOfMinutes(self, n: int, headID: int, manager: List[int], informTime: List[int]) -> int:
+    subs = collections.defaultdict(list)
+    for idx, i in enumerate(manager):
+        subs[i].append(idx)
+
+    curr = deque([[headID, 0]]) # element: id, time to inform
+    ans = 0
+    while curr:
+        emp, time = curr.popleft()
+        ans = max(ans, time)
+        for sub in subs[emp]:
+            curr.append([sub, time + informTime[emp]])
+    return ans
+```
+
+### 802. Find Eventual Safe States
+
+There is a directed graph of `n` nodes with each node labeled from `0` to `n - 1`. The graph is represented by a **0-indexed** 2D integer array `graph` where `graph[i]` is an integer array of nodes adjacent to node `i`, meaning there is an edge from node `i` to each node in `graph[i]`.
+
+A node is a **terminal node** if there are no outgoing edges. A node is a **safe node** if every possible ==path== starting from that node leads to a **terminal node**.
+
+Return *an array containing all the **safe nodes** of the graph*. The answer should be sorted in **ascending** order.
+
+ 
+
+**Example 1:**
+
+![Illustration of graph](image_backup/graph theroy/picture1.png)
+
+```
+Input: graph = [[1,2],[2,3],[5],[0],[5],[],[]]
+Output: [2,4,5,6]
+Explanation: The given graph is shown above.
+Nodes 5 and 6 are terminal nodes as there are no outgoing edges from either of them.
+Every path starting at nodes 2, 4, 5, and 6 all lead to either node 5 or 6.
+```
+
+**Example 2:**
+
+```
+Input: graph = [[1,2,3,4],[1,2],[3,4],[0,4],[]]
+Output: [4]
+Explanation:
+Only node 4 is a terminal node, and every path starting at node 4 leads to node 4.
+```
+
+ 
+
+**Constraints:**
+
+- `n == graph.length`
+- `1 <= n <= 10 ** 4`
+- `0 <= graph[i].length <= n`
+- `0 <= graph[i][j] <= n - 1`
+- `graph[i]` is sorted in a strictly increasing order.
+- The graph may contain self-loops.
+- The number of edges in the graph will be in the range `[1, 4 * 10 ** 4]`.
+
+> notice this sentence:
+>
+> A node is a **safe node** if every possible ==path== starting from that node leads to a **terminal node**.
+>
+> Path = a bunch of contiguous edges
+>
+> 
+>
+> Thus, a node is an unsafe node only if there is a path starting from it contains a self-loop
+
+```python
+def eventualSafeNodes(self, graph: List[List[int]]) -> List[int]:
+    ans = []
+    out = [0] * len(graph)
+    back = collections.defaultdict(list)
+    curr = deque([])
+    for i, node in enumerate(graph):
+        out[i] = len(node)
+        if len(node) == 0: curr.append(i)
+        for j in node:
+            back[j].append(i)
+
+    while curr:
+        i = curr.popleft()
+        ans.append(i)
+        for j in back[i]:
+            out[j] -= 1
+            if out[j] == 0:
+                curr.append(j)
+    return sorted(ans)
+```
+
+### 1129. Shortest Path with Alternating Colors
+
+You are given an integer `n`, the number of nodes in a directed graph where the nodes are labeled from `0` to `n - 1`. Each edge is red or blue in this graph, and there could be self-edges and parallel edges.
+
+You are given two arrays `redEdges` and `blueEdges` where:
+
+- `redEdges[i] = [ai, bi]` indicates that there is a directed red edge from node `ai` to node `bi` in the graph, and
+- `blueEdges[j] = [uj, vj]` indicates that there is a directed blue edge from node `uj` to node `vj` in the graph.
+
+Return an array `answer` of length `n`, where each `answer[x]` is the length of the shortest path from node `0` to node `x` such that the edge colors alternate along the path, or `-1` if such a path does not exist.
+
+ 
+
+**Example 1:**
+
+```
+Input: n = 3, redEdges = [[0,1],[1,2]], blueEdges = []
+Output: [0,1,-1]
+```
+
+**Example 2:**
+
+```
+Input: n = 3, redEdges = [[0,1]], blueEdges = [[2,1]]
+Output: [0,1,-1]
+```
+
+ 
+
+**Constraints:**
+
+- `1 <= n <= 100`
+- `0 <= redEdges.length, blueEdges.length <= 400`
+- `redEdges[i].length == blueEdges[j].length == 2`
+- `0 <= ai, bi, uj, vj < n`
+
+```python
+def shortestAlternatingPaths(self, n: int, redEdges: List[List[int]], blueEdges: List[List[int]]) -> List[int]:
+    # form two graph according to the color of edges
+    graph_red = collections.defaultdict(list)
+    graph_blue = collections.defaultdict(list)
+    for i, j in redEdges:
+        graph_red[i].append(j)
+    for i, j in blueEdges:
+        graph_blue[i].append(j)
+
+    # iteration
+    # we have two choice, start with red edge, or start with blue edge
+    curr = deque([[0, 0, True], [0, 0, False]]) # element = [current_node, steps, previous_edge_color: red = True, blue = False]
+    visited = {(0, True), (0, False)} # element = (node, color), at most 2*n elements
+    ans = [0] + [float('inf')] * (n - 1)
+    while curr and len(visited) < 2 * n:
+        node, step, red = curr.popleft()
+        ans[node] = min(ans[node], step)
+        nxt = graph_blue[node] if red else graph_red[node]
+        for nx in nxt:
+            if (nx, not red) in visited: continue
+            visited.add((nx, not red))
+            curr.append([nx, step + 1, not red])
+    return [i if i < float('inf') else -1 for i in ans]
+```
+
+### 1466. Reorder Routes to Make All Paths Lead to the City Zero
+
+There are `n` cities numbered from `0` to `n - 1` and `n - 1` roads such that there is only one way to travel between two different cities (this network form a tree). Last year, The ministry of transport decided to orient the roads in one direction because they are too narrow.
+
+Roads are represented by `connections` where `connections[i] = [ai, bi]` represents a road from city `ai` to city `bi`.
+
+This year, there will be a big event in the capital (city `0`), and many people want to travel to this city.
+
+Your task consists of reorienting some roads such that each city can visit the city `0`. Return the **minimum** number of edges changed.
+
+It's **guaranteed** that each city can reach city `0` after reorder.
+
+ 
+
+**Example 1:**
+
+![img](image_backup/graph theroy/sample_1_1819.png)
+
+```
+Input: n = 6, connections = [[0,1],[1,3],[2,3],[4,0],[4,5]]
+Output: 3
+Explanation: Change the direction of edges show in red such that each node can reach the node 0 (capital).
+```
+
+**Example 2:**
+
+![img](image_backup/graph theroy/sample_2_1819.png)
+
+```
+Input: n = 5, connections = [[1,0],[1,2],[3,2],[3,4]]
+Output: 2
+Explanation: Change the direction of edges show in red such that each node can reach the node 0 (capital).
+```
+
+**Example 3:**
+
+```
+Input: n = 3, connections = [[1,0],[2,0]]
+Output: 0
+```
+
+ 
+
+**Constraints:**
+
+- `2 <= n <= 5 * 10 ** 4`
+- `connections.length == n - 1`
+- `connections[i].length == 2`
+- `0 <= ai, bi <= n - 1`
+- `ai != bi`
+
+```python
+def minReorder(self, n: int, connections: List[List[int]]) -> int:
+    in_graph = collections.defaultdict(list)
+    out_graph = collections.defaultdict(list)
+
+    for i, j in connections:
+        in_graph[j].append(i)
+        out_graph[i].append(j)
+
+    ans = 0
+    # start from node 0
+    curr = deque([[0, -1]]) # element = [node, pre_node]
+    while curr:
+        node, pre = curr.popleft()
+        for i in in_graph[node] + out_graph[node]:
+            if i == pre: continue
+            curr.append([i, node])
+        ans += len(out_graph[node]) - 1 if pre in out_graph[node] else len(out_graph[node])
+    return ans
+```
+
+### 847. Shortest Path Visiting All Nodes
+
+You have an undirected, connected graph of `n` nodes labeled from `0` to `n - 1`. You are given an array `graph` where `graph[i]` is a list of all the nodes connected with node `i` by an edge.
+
+Return *the length of the shortest path that visits every node*. You may start and stop at any node, you may revisit nodes multiple times, and you may reuse edges.
+
+ 
+
+**Example 1:**
+
+![img](image_backup/graph theroy/shortest1-graph.jpg)
+
+```
+Input: graph = [[1,2,3],[0],[0],[0]]
+Output: 4
+Explanation: One possible path is [1,0,2,0,3]
+```
+
+**Example 2:**
+
+![img](image_backup/graph theroy/shortest2-graph.jpg)
+
+```
+Input: graph = [[1],[0,2,4],[1,3,4],[2],[1,2]]
+Output: 4
+Explanation: One possible path is [0,1,4,2,3]
+```
+
+ 
+
+**Constraints:**
+
+- `n == graph.length`
+- `1 <= n <= 12`
+- `0 <= graph[i].length < n`
+- `graph[i]` does not contain `i`.
+- If `graph[a]` contains `b`, then `graph[b]` contains `a`.
+- The input graph is always connected.
+
+```python
+def shortestPathLength(self, graph: List[List[int]]) -> int:
+    n = len(graph)
+    curr = deque([[1 << i, i, 0] for i in range(n)]) # element = [visited, node, step]
+    state = {(1 << i, i) for i in range(n)}
+    while curr:
+        visited, node, step = curr.popleft()
+        for i in graph[node]:
+            nxt = visited | (1 << i)
+            if (nxt, i) in state: continue
+            state.add((nxt, i))
+            if nxt == (1 << n) - 1: return step + 1
+            curr.append([nxt, i, step + 1])
+    return 0
+```
+

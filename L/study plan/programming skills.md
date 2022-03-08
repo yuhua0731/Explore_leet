@@ -535,3 +535,109 @@ def checkStraightLine(self, coordinates: List[List[int]]) -> bool:
     return True
 ```
 
+### 1309. Decrypt String from Alphabet to Integer Mapping
+
+You are given a string `s` formed by digits and `'#'`. We want to map `s` to English lowercase characters as follows:
+
+- Characters (`'a'` to `'i')` are represented by (`'1'` to `'9'`) respectively.
+- Characters (`'j'` to `'z')` are represented by (`'10#'` to `'26#'`) respectively.
+
+Return *the string formed after mapping*.
+
+The test cases are generated so that a unique mapping will always exist.
+
+ 
+
+**Example 1:**
+
+```
+Input: s = "10#11#12"
+Output: "jkab"
+Explanation: "j" -> "10#" , "k" -> "11#" , "a" -> "1" , "b" -> "2".
+```
+
+**Example 2:**
+
+```
+Input: s = "1326#"
+Output: "acz"
+```
+
+ 
+
+**Constraints:**
+
+- `1 <= s.length <= 1000`
+- `s` consists of digits and the `'#'` letter.
+- `s` will be a valid string such that mapping is always possible.
+
+```python
+def freqAlphabets(self, s: str) -> str:
+    stack = 0
+    ans = ''
+    for i in s:
+        if i == '#':
+            if stack >= 100:
+                single = stack // 100
+                ans += ''.join(list(map(lambda x: chr(ord(x) - ord('1') + ord('a')), str(single))))
+                stack %= 100
+            ans += chr(int(stack) - 10 + ord('j'))
+            stack = 0
+        else:
+            stack = stack * 10 + int(i)
+    if stack:
+        ans += ''.join(list(map(lambda x: chr(ord(x) - ord('1') + ord('a')), str(stack))))
+    return ans
+```
+
+### 953. Verifying an Alien Dictionary
+
+In an alien language, surprisingly, they also use English lowercase letters, but possibly in a different `order`. The `order` of the alphabet is some permutation of lowercase letters.
+
+Given a sequence of `words` written in the alien language, and the `order` of the alphabet, return `true` if and only if the given `words` are sorted lexicographically in this alien language.
+
+ 
+
+**Example 1:**
+
+```
+Input: words = ["hello","leetcode"], order = "hlabcdefgijkmnopqrstuvwxyz"
+Output: true
+Explanation: As 'h' comes before 'l' in this language, then the sequence is sorted.
+```
+
+**Example 2:**
+
+```
+Input: words = ["word","world","row"], order = "worldabcefghijkmnpqstuvxyz"
+Output: false
+Explanation: As 'd' comes after 'l' in this language, then words[0] > words[1], hence the sequence is unsorted.
+```
+
+**Example 3:**
+
+```
+Input: words = ["apple","app"], order = "abcdefghijklmnopqrstuvwxyz"
+Output: false
+Explanation: The first three characters "app" match, and the second string is shorter (in size.) According to lexicographical rules "apple" > "app", because 'l' > '∅', where '∅' is defined as the blank character which is less than any other character (More info).
+```
+
+ 
+
+**Constraints:**
+
+- `1 <= words.length <= 100`
+- `1 <= words[i].length <= 20`
+- `order.length == 26`
+- All characters in `words[i]` and `order` are English lowercase letters.
+
+```python
+def isAlienSorted(self, words: List[str], order: str) -> bool:
+    # generate a mapping dictionary from alien language to human language in earth
+    alien = {i: earth for earth, i in zip([chr(a + ord('a')) for a in range(26)], order)}
+    # translate all words to human readable language using the dictionary above
+    words = list(map(lambda x: ''.join(alien[c] for c in x), words))
+    # sort list to see if the original order is lexicographical
+    return sorted(words) == words
+```
+

@@ -6884,4 +6884,173 @@ class Solution:
             res = [max(res[i] - 1, 0) / 2.0 + max(res[i + 1] - 1, 0) / 2.0 for i in range(row + 1)]
         return min(res[query_glass], 1)       
                         
+    def shortestBridge(self, grid: List[List[int]]) -> int:
+        # shortest distance between two islands
+        n = len(grid)
+        dir = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+
+        # find all land cells and update its value to -1, indicating that we have already visited it
+        def edge(x, y):
+            curr = collections.deque([[x, y]])
+            grid[x][y] = -1
+            ans = []
+            while curr:
+                x, y = curr.popleft()
+                ans.append([x, y])
+                for i, j in dir:
+                    xi, yj = x + i, y + j
+                    if n > xi >= 0 <= yj < n and grid[xi][yj] == 1:
+                        grid[xi][yj] = -1
+                        curr.append([xi, yj])
+            return ans
+
+        for i, j in product(range(n), range(n)):
+            if grid[i][j] == 1: 
+                e = edge(i, j)
+                break
+
+        # extend land
+        step = 0
+        while e:
+            nxt = []
+            for x, y in e:
+                for i, j in dir:
+                    xi, yj = x + i, y + j
+                    if n > xi >= 0 <= yj < n:
+                        if grid[xi][yj] == 1: return step
+                        if grid[xi][yj] == 0:
+                            grid[xi][yj] = -1
+                            nxt.append([xi, yj])
+            step += 1
+            e = nxt
+
+    def freqAlphabets(self, s: str) -> str:
+        stack = 0
+        ans = ''
+        for i in s:
+            if i == '#':
+                if stack >= 100:
+                    single = stack // 100
+                    ans += ''.join(list(map(lambda x: chr(ord(x) - ord('1') + ord('a')), str(single))))
+                    stack %= 100
+                ans += chr(int(stack) - 10 + ord('j'))
+                stack = 0
+            else:
+                stack = stack * 10 + int(i)
+        if stack:
+            ans += ''.join(list(map(lambda x: chr(ord(x) - ord('1') + ord('a')), str(stack))))
+        return ans
+
+    def isAlienSorted(self, words: List[str], order: str) -> bool:
+        # generate a mapping dictionary from alien language to human language in earth
+        alien = {i: earth for earth, i in zip([chr(a + ord('a')) for a in range(26)], order)}
+        # translate all words to human readable language using the dictionary above
+        words = list(map(lambda x: ''.join(alien[c] for c in x), words))
+        # sort list to see if the original order is lexicographical
+        return sorted(words) == words
     
+    def numOfMinutes(self, n: int, headID: int, manager: List[int], informTime: List[int]) -> int:
+        subs = collections.defaultdict(list)
+        for idx, i in enumerate(manager):
+            subs[i].append(idx)
+
+        curr = deque([[headID, 0]]) # element: id, time to inform
+        ans = 0
+        while curr:
+            emp, time = curr.popleft()
+            ans = max(ans, time)
+            for sub in subs[emp]:
+                curr.append([sub, time + informTime[emp]])
+        return ans
+
+    def eventualSafeNodes(self, graph: List[List[int]]) -> List[int]:
+        ans = []
+        out = [0] * len(graph)
+        back = collections.defaultdict(list)
+        curr = deque([])
+        for i, node in enumerate(graph):
+            out[i] = len(node)
+            if len(node) == 0: curr.append(i)
+            for j in node:
+                back[j].append(i)
+        
+        while curr:
+            i = curr.popleft()
+            ans.append(i)
+            for j in back[i]:
+                out[j] -= 1
+                if out[j] == 0:
+                    curr.append(j)
+        return sorted(ans)
+
+    def middleNode(self, head: ListNode) -> ListNode:
+        if not head.next: return head
+        slow, fast = head, head.next
+        while fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+        return slow if not fast else slow.next
+
+    def sumOfLeftLeaves(self, root: TreeNode) -> int:
+        def sumLeft(node, side):
+            if not node: return 0
+            if not node.left and not node.right and side: return node.val
+            return sumLeft(node.left, True) + sumLeft(node.right, False)
+        return sumLeft(root, False)
+
+    def shortestAlternatingPaths(self, n: int, redEdges: List[List[int]], blueEdges: List[List[int]]) -> List[int]:
+        # form two graph according to the color of edges
+        graph_red = collections.defaultdict(list)
+        graph_blue = collections.defaultdict(list)
+        for i, j in redEdges:
+            graph_red[i].append(j)
+        for i, j in blueEdges:
+            graph_blue[i].append(j)
+
+        # iteration
+        # we have two choice, start with red edge, or start with blue edge
+        curr = deque([[0, 0, True], [0, 0, False]]) # element = [current_node, steps, previous_edge_color: red = True, blue = False]
+        visited = {(0, True), (0, False)} # element = (node, color), at most 2*n elements
+        ans = [0] + [float('inf')] * (n - 1)
+        while curr and len(visited) < 2 * n:
+            node, step, red = curr.popleft()
+            ans[node] = min(ans[node], step)
+            nxt = graph_blue[node] if red else graph_red[node]
+            for nx in nxt:
+                if (nx, not red) in visited: continue
+                visited.add((nx, not red))
+                curr.append([nx, step + 1, not red])
+        return [i if i < float('inf') else -1 for i in ans]
+
+    def minReorder(self, n: int, connections: List[List[int]]) -> int:
+        in_graph = collections.defaultdict(list)
+        out_graph = collections.defaultdict(list)
+
+        for i, j in connections:
+            in_graph[j].append(i)
+            out_graph[i].append(j)
+
+        ans = 0
+        # start from node 0
+        curr = deque([[0, -1]]) # element = [node, pre_node]
+        while curr:
+            node, pre = curr.popleft()
+            for i in in_graph[node] + out_graph[node]:
+                if i == pre: continue
+                curr.append([i, node])
+            ans += len(out_graph[node]) - 1 if pre in out_graph[node] else len(out_graph[node])
+        return ans
+
+    def shortestPathLength(self, graph: List[List[int]]) -> int:
+        n = len(graph)
+        curr = deque([[1 << i, i, 0] for i in range(n)]) # element = [visited, node, step]
+        state = {(1 << i, i) for i in range(n)}
+        while curr:
+            visited, node, step = curr.popleft()
+            for i in graph[node]:
+                nxt = visited | (1 << i)
+                if (nxt, i) in state: continue
+                state.add((nxt, i))
+                if nxt == (1 << n) - 1: return step + 1
+                curr.append([nxt, i, step + 1])
+        return 0
