@@ -7054,3 +7054,89 @@ class Solution:
                 if nxt == (1 << n) - 1: return step + 1
                 curr.append([nxt, i, step + 1])
         return 0
+
+    def deleteDuplicates(self, head: ListNode) -> ListNode:
+        pre = ans = ListNode(-101)
+        ans.next = curr = head
+        dup = False
+        while curr and curr.next:
+            if curr.val == curr.next.val:
+                dup = True
+                curr = curr.next
+            else:
+                if dup: pre.next = curr = curr.next
+                else: pre, curr = curr, curr.next
+                dup = False
+        if dup: pre.next = None
+        return ans.next
+
+    def sortByBits(self, arr: List[int]) -> List[int]:
+        return sorted(arr, key = lambda x: [bin(x).count('1'), x])
+
+    def isAnagram(self, s: str, t: str) -> bool:
+        return sorted(s) == sorted(t)
+
+    def canReach(self, arr: List[int], start: int) -> bool:
+        # iteration
+        n = len(arr)
+        state = deque([start])
+        visited = {start}
+        while state:
+            curr = state.popleft()
+            if arr[curr] == 0: return True
+            nxt = [curr + arr[curr], curr - arr[curr]]
+            for i in nxt:
+                if 0 <= i < n and i not in visited:
+                    visited.add(i)
+                    state.append(i)
+        return False
+
+    def minimumJumps(self, forbidden: List[int], a: int, b: int, x: int) -> int:
+        forbidden = set(forbidden)
+        max_pos = max(x, max(forbidden)) + a + b
+
+        # iteration
+        state = deque([[0, False, 0]])
+        visited = {(0, False), (0, True)} # index, just jumped backward
+        while state:
+            curr, back, step = state.popleft()
+            if curr == x: return step 
+            if not back: # reached this position by a backward jump
+                nxt = curr - b
+                if 0 <= nxt <= max_pos and (nxt, True) not in visited and nxt not in forbidden:
+                    state.append([nxt, True, step + 1])
+                    visited.add((nxt, True))
+            nxt = curr + a
+            if 0 <= nxt <= max_pos and (nxt, False) not in visited and nxt not in forbidden:
+                state.append([nxt, False, step + 1])
+                visited |= {(nxt, False), (nxt, True)}
+        return -1
+
+    def addTwoNumbers(self, l1: ListNode, l2: ListNode) -> ListNode:
+        temp = ans = ListNode(-1) # dummy
+        add_one = False
+        while l1 or l2:
+            curr = add_one
+            if l1:
+                curr += l1.val
+                l1 = l1.next
+            if l2:
+                curr += l2.val
+                l2 = l2.next
+            add_one = (curr >= 10)
+            curr %= 10
+            temp.next = ListNode(curr)
+            temp = temp.next
+        if add_one:
+            temp.next = ListNode(1)
+        return ans.next
+
+    def simplifyPath(self, path: str) -> str:
+        dir = []
+        for d in path.split('/'):
+            if not d or d == '.': continue
+            if d == '..': dir.pop()
+            else: dir.append(d)
+        return '/' + '/'.join(dir)
+
+    

@@ -1718,6 +1718,13 @@ def postorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
 
 
 
+Overtime reduction
+
+- less change: standard modules
+- robustness: failure detection, failure auto-recovery
+- documentation
+- optimization: process
+
 
 
 

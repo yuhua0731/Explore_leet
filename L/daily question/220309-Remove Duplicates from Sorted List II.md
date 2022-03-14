@@ -1,0 +1,47 @@
+Given the `head` of a sorted linked list, *delete all nodes that have duplicate numbers, leaving only distinct numbers from the original list*. Return *the linked list **sorted** as well*.
+
+ 
+
+**Example 1:**
+
+![img](image_backup/220309-Remove Duplicates from Sorted List II/linkedlist1.jpg)
+
+```
+Input: head = [1,2,3,3,4,4,5]
+Output: [1,2,5]
+```
+
+**Example 2:**
+
+![img](image_backup/220309-Remove Duplicates from Sorted List II/linkedlist2.jpg)
+
+```
+Input: head = [1,1,1,2,3]
+Output: [2,3]
+```
+
+ 
+
+**Constraints:**
+
+- The number of nodes in the list is in the range `[0, 300]`.
+- `-100 <= Node.val <= 100`
+- The list is guaranteed to be **sorted** in ascending order.
+
+```python
+def deleteDuplicates(self, head: ListNode) -> ListNode:
+    pre = ans = ListNode(-101)
+    ans.next = curr = head
+    dup = False
+    while curr and curr.next:
+        if curr.val == curr.next.val:
+            dup = True
+            curr = curr.next
+        else:
+            if dup: pre.next = curr = curr.next
+            else: pre, curr = curr, curr.next
+            dup = False
+    if dup: pre.next = None
+    return ans.next
+```
+
