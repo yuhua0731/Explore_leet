@@ -260,7 +260,7 @@ def main():
     print(solu.busiestServers(k=3, arrival=[
           1, 2, 3, 4, 5], load=[5, 2, 3, 3, 3]))
     print(solu.makeLargestSpecial(s="1010101100"))
-    print(solu.partition(s="aaaaa"))
+    print(solu.partition_s(s="aaaaa"))
     print(solu.modifyString(s="ahsif??sa??"))
     print(solu.checkPartitioning(s="abc"))
     print(solu.nthSuperUglyNumber(n=12, primes=[2, 7, 13, 19]))

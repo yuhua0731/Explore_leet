@@ -1,6 +1,4 @@
-### d
-
-191. Number of 1 Bits
+### 191. Number of 1 Bits
 
 Write a function that takes an unsigned integer and returns the number of '1' bits it has (also known as the [Hamming weight](http://en.wikipedia.org/wiki/Hamming_weight)).
 
@@ -820,5 +818,135 @@ class NumArray:
 # Your NumArray object will be instantiated and called as such:
 # obj = NumArray(nums)
 # param_1 = obj.sumRange(left,right)
+```
+
+### 380. Insert Delete GetRandom O(1)
+
+Implement the `RandomizedSet` class:
+
+- `RandomizedSet()` Initializes the `RandomizedSet` object.
+- `bool insert(int val)` Inserts an item `val` into the set if not present. Returns `true` if the item was not present, `false` otherwise.
+- `bool remove(int val)` Removes an item `val` from the set if present. Returns `true` if the item was present, `false` otherwise.
+- `int getRandom()` Returns a random element from the current set of elements (it's guaranteed that at least one element exists when this method is called). Each element must have the **same probability** of being returned.
+
+You must implement the functions of the class such that each function works in **average** `O(1)` time complexity.
+
+ 
+
+**Example 1:**
+
+```
+Input
+["RandomizedSet", "insert", "remove", "insert", "getRandom", "remove", "insert", "getRandom"]
+[[], [1], [2], [2], [], [1], [2], []]
+Output
+[null, true, false, true, 2, true, false, 2]
+
+Explanation
+RandomizedSet randomizedSet = new RandomizedSet();
+randomizedSet.insert(1); // Inserts 1 to the set. Returns true as 1 was inserted successfully.
+randomizedSet.remove(2); // Returns false as 2 does not exist in the set.
+randomizedSet.insert(2); // Inserts 2 to the set, returns true. Set now contains [1,2].
+randomizedSet.getRandom(); // getRandom() should return either 1 or 2 randomly.
+randomizedSet.remove(1); // Removes 1 from the set, returns true. Set now contains [2].
+randomizedSet.insert(2); // 2 was already in the set, so return false.
+randomizedSet.getRandom(); // Since 2 is the only number in the set, getRandom() will always return 2.
+```
+
+ 
+
+**Constraints:**
+
+- `-2 ** 31 <= val <= 2 ** 31 - 1`
+- At most `2 * 10 ** 5` calls will be made to `insert`, `remove`, and `getRandom`.
+- There will be **at least one** element in the data structure when `getRandom` is called.
+
+
+
+### 622. Design Circular Queue
+
+Design your implementation of the circular queue. The circular queue is a linear data structure in which the operations are performed based on FIFO (First In First Out) principle and the last position is connected back to the first position to make a circle. It is also called "Ring Buffer".
+
+One of the benefits of the circular queue is that we can make use of the spaces in front of the queue. In a normal queue, once the queue becomes full, we cannot insert the next element even if there is a space in front of the queue. But using the circular queue, we can use the space to store new values.
+
+Implementation the `MyCircularQueue` class:
+
+- `MyCircularQueue(k)` Initializes the object with the size of the queue to be `k`.
+- `int Front()` Gets the front item from the queue. If the queue is empty, return `-1`.
+- `int Rear()` Gets the last item from the queue. If the queue is empty, return `-1`.
+- `boolean enQueue(int value)` Inserts an element into the circular queue. Return `true` if the operation is successful.
+- `boolean deQueue()` Deletes an element from the circular queue. Return `true` if the operation is successful.
+- `boolean isEmpty()` Checks whether the circular queue is empty or not.
+- `boolean isFull()` Checks whether the circular queue is full or not.
+
+You must solve the problem without using the built-in queue data structure in your programming language. 
+
+ 
+
+**Example 1:**
+
+```
+Input
+["MyCircularQueue", "enQueue", "enQueue", "enQueue", "enQueue", "Rear", "isFull", "deQueue", "enQueue", "Rear"]
+[[3], [1], [2], [3], [4], [], [], [], [4], []]
+Output
+[null, true, true, true, false, 3, true, true, true, 4]
+
+Explanation
+MyCircularQueue myCircularQueue = new MyCircularQueue(3);
+myCircularQueue.enQueue(1); // return True
+myCircularQueue.enQueue(2); // return True
+myCircularQueue.enQueue(3); // return True
+myCircularQueue.enQueue(4); // return False
+myCircularQueue.Rear();     // return 3
+myCircularQueue.isFull();   // return True
+myCircularQueue.deQueue();  // return True
+myCircularQueue.enQueue(4); // return True
+myCircularQueue.Rear();     // return 4
+```
+
+ 
+
+**Constraints:**
+
+- `1 <= k <= 1000`
+- `0 <= value <= 1000`
+- At most `3000` calls will be made to `enQueue`, `deQueue`, `Front`, `Rear`, `isEmpty`, and `isFull`.
+
+```python
+class MyCircularQueue:
+
+    def __init__(self, k: int):
+        self.stack = [-1] * k
+        self.start = 0
+        self.size = 0
+        
+    def enQueue(self, value: int) -> bool:
+        if self.isFull(): return False
+        self.stack[(self.start + self.size) % len(self.stack)] = value
+        self.size += 1
+        return True
+
+    def deQueue(self) -> bool:
+        if not self.size: return False
+        self.size -= 1
+        self.start = (self.start + 1) % len(self.stack)
+        return True
+
+    def Front(self) -> int:
+        if self.size:
+            return self.stack[self.start]
+        return -1
+
+    def Rear(self) -> int:
+        if self.size:
+            return self.stack[(self.start + self.size - 1) % len(self.stack)]
+        return -1
+
+    def isEmpty(self) -> bool:
+        return self.size == 0
+
+    def isFull(self) -> bool:
+        return len(self.stack) == self.size
 ```
 

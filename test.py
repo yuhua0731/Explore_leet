@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
-from solution import ListNode, TreeNode, fileHandler
+from solution import ListNode
 import time
-import csv
-import json
 from bitstring import BitArray
 import math
 import threading

@@ -24,10 +24,13 @@
 | Enum                        | [Enum](#Enum-class)                |
 | collections.Counter         | [counter](#Counter)                |
 | sortedcontainers.SortedList | [SortedList](#bisect-&-SortedList) |
+| json                        | [json](#json)                      |
 
 ## Tree data structure
 
 Tree are implemented from list in python
+
+[tree traversal order](#tree traversal order)
 
 #### basic type: `binary search tree`
 
@@ -338,6 +341,9 @@ d = collections.defaultdict(int)
 li = [[1, 2], [2, 4]]
 li_dict = dict(li)
 # {1: 2, 2: 4}
+
+# remove a key-value pair from dict if exist
+mydict.pop(key, None)
 ```
 
 ## Union-find algorithm
@@ -532,8 +538,6 @@ b.hex()
 ```python
 "{:.2f}".format(f)
 ```
-
-
 
 ## multiple for loops and if in the same statement
 
@@ -1307,8 +1311,6 @@ dq.peekFirst(e);
 - bad example:
 - if a state is boolean and only have two states: True or False, and this state checker only appears in few places, using state pattern is over engineering
 
-
-
 ## 220126 UML
 
 - diagrams to visualize design: structural & behavioral
@@ -1358,6 +1360,12 @@ To specify the visibility of a class member (i.e. any attribute or method), thes
 - Dependency: one class ==use== object from another class as input parameter
 - Aggregation: a class is formed with multiple classes, but those classes will not be deleted even the aggregated class is deleted (working position <= desk, chair, computer)
 - Composition: same as aggregation, but those classes will be destoried (human body = brain + blood + bones)
+
+### 组合与聚合：班级，老师，学生
+
+学生与班级为组合关系，一个学生只能属于一个班级
+
+老师和班级属于聚合关系，一个老师可以属于多个班级
 
 
 
@@ -1426,6 +1434,28 @@ a.bisect_left(element)
 
 # seems like we cannot update existing element in SortedList
 ```
+
+`pop(index = -1)`
+
+Remove and return value at index in sorted list.
+
+Raise `IndexError` if the sorted list is empty or index is out of range.
+
+Negative indices are supported.
+
+Runtime complexity: `O(log(n))` – approximate.
+
+```python
+sl = SortedList('abcde')
+sl.pop()
+'e'
+sl.pop(2)
+'c'
+sl
+SortedList(['a', 'b', 'd'])
+```
+
+
 
 ## doctest
 
@@ -1716,7 +1746,22 @@ def postorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
 5 >> 1 + 1 # 1
 ```
 
+## floor division
 
+The `//` operator explicitly *floors* the result.
+
+Flooring is not the same thing as rounding to 0; flooring always moves to the *lower integer value*.
+
+For `-6 // 4`, first the result of `-6 / 4` is calculated, so `-1.5`. Flooring then moves to the lower integer value, so `-2`.
+
+If you want to round towards zero instead, you'll have to do so explicitly; you could do this with the `int()` function on true division:
+
+```python
+-6 // 4
+-2
+int(-6 / 4)
+-1
+```
 
 Overtime reduction
 
@@ -1725,17 +1770,23 @@ Overtime reduction
 - documentation
 - optimization: process
 
+## json
 
+String in json format:
 
+```python
+s = '{"level":"TRACE","message":"type: st, ip: 10.0.65.131, hex: 01 01 26 0d f5 15 ","timestamp":"2022-06-09T07:44:35.449000+0800"}'
+s = '{"key": value}' # JSONDecodeError: Expecting property name enclosed in double quotes
+```
 
+Convert string to json(dict)
 
+## Manage custom modules in your project
 
+- Create a folder and initialize it with an empty `__init__.py` file in it.
+- Then just store all your custom class file in it and import by:
 
-
-
-
-
-后台服务器开发工程师
-
-Hive，Impala，Spark，HBase等Hadoop相关工具
+```python
+from folder_name.module_name import module_name
+```
 

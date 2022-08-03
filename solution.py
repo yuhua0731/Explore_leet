@@ -10,14 +10,12 @@ import functools
 import itertools
 from itertools import chain, product
 import heapq
-
 from sortedcontainers import SortedList
-import sortedcontainers
-
-from trie import Trie
+from lib.trie import Trie
 from union_find import UnionFind
 import re
 import bisect
+from lib.TreeNode import TreeNode
 
 
 class ListNode:
@@ -32,22 +30,6 @@ class ListNode:
             print(temp.val, end='')
             temp = temp.next
         print('')
-
-
-# Definition for a binary tree node.
-class TreeNode:
-    def __init__(self, x):
-        self.val = x
-        self.left = None
-        self.right = None
-
-    def printNode(self):
-        if self:
-            print(self.val)
-        if self.left:
-            self.left.printNode()
-        if self.right:
-            self.right.printNode()
 
 
 class fileHandler:
@@ -4495,7 +4477,7 @@ class Solution:
                 cnt = 0
         return ''.join(sorted(special)[::-1])
 
-    def partition(self, s: str) -> List[List[str]]:
+    def partition_s(self, s: str) -> List[List[str]]:
         # dp[i][j] = True if s[i:j] is a palindrome
         n = len(s)
         dp = [[False] * (n + 1) for _ in range(n + 1)]
@@ -7091,7 +7073,7 @@ class Solution:
                     state.append(i)
         return False
 
-    def minimumJumps(self, forbidden: List[int], a: int, b: int, x: int) -> int:
+    def minimumJumps(self, forbidden: List[int], a: int, b: int, x: int) -> int: 
         forbidden = set(forbidden)
         max_pos = max(x, max(forbidden)) + a + b
 
@@ -7138,5 +7120,126 @@ class Solution:
             if d == '..': dir.pop()
             else: dir.append(d)
         return '/' + '/'.join(dir)
+
+    def numRescueBoats(self, people: List[int], limit: int) -> int:
+        # each boat: maximum weight
+        # each boat: two people
+        people = deque(sorted(people)) # min to max
+        n = len(people)
+        ret = 0
+        while people:
+            curr = people.pop()
+            if people and people[0] <= limit - curr:
+                people.popleft()
+            ret += 1
+        return ret
+
+    def minimumNumbers(self, num: int, k: int) -> int:
+        # stupid solution
+        # we can only care about the last digit
+        if num == 0: return 0
+        for i in range(1, 11):
+            if i * k <= num and i * k % 10 == num % 10:
+                return i
+        return -1
+
+    def makesquare(self, matchsticks: List[int]) -> bool:
+        n = len(matchsticks)
+        total = sum(matchsticks)
+        target = total // 4
+        if total % 4 or max(matchsticks) > target: return False
+
+        @functools.cache
+        def helper(bitmask):
+            # all matchsticks are used
+            if not bitmask: return 0
+            for i in range(n):
+                if bitmask & (1 << i):
+                    # ith matchstick have not been used yet
+                    ret = helper(bitmask - (1 << i))
+                    if ret >= 0 and ret + matchsticks[i] <= target:
+                        return (ret + matchsticks[i]) % target
+            return -1
+        return helper((1 << n) - 1) == 0
+
+    def reverseBetween(self, head: ListNode, left: int, right: int) -> ListNode:
+        if left == right: return head
+        curr = dummy = ListNode(-1)
+        dummy.next = head
+        for _ in range(m - 1):
+            curr = curr.next
+        tail = curr.next 
+        # at this point, curr is the one before the first reverse node, tail is the first node that will be reversed
+
+        for _ in range(n - m):
+            tmp = curr.next
+            curr.next = tail.next
+            tail.next = tail.next.next
+            curr.next.next = tmp
+        return dummy.next
+
+    def partition(self, head: ListNode, x: int) -> ListNode:
+        queue = deque([])
+        curr = dummy = ListNode(-1)
+        curr.next = head
+        while head:
+            if head.val < x:
+                curr.next = head
+            else:
+                queue.append(head.val)
+                curr.next = ListNode(queue.popleft())
+            curr = curr.next
+            head = head.next
+        return dummy.next
+
+    def searchRange(self, nums: List[int], target: int) -> List[int]:
+        # two-point
+        # find starting position
+        if not nums: return [-1, -1]
+        left, right = 0, len(nums) - 1
+        while left < right:
+            mid = (left + right) >> 1
+            if nums[mid] < target:
+                left = mid + 1
+            else:
+                right = mid
+        if nums[left] != target: return [-1, -1]
+
+        ret = left
+        left, right = 0, len(nums) - 1
+        while left < right:
+            mid = (left + right) >> 1
+            if nums[mid] <= target:
+                left = mid + 1
+            else: 
+                right = mid
+        if nums[left] == target: return [ret, left]
+        else: return [ret, left - 1]
+
+    def findAndReplacePattern(self, words: List[str], pattern: str) -> List[str]:
+        
+        def helper(word):
+            if len(word) != len(pattern): return False
+            mapp = dict()
+            rev = dict()
+            for i, j in zip(word, pattern):
+                if i not in mapp and j not in rev:
+                    mapp[i] = j
+                    rev[j] = i
+                else:
+                    if i not in mapp or j not in rev: return False
+                    if mapp[i] != j or rev[j] != i:
+                        return False
+            return True
+
+        return [w for w in words if helper(w)]
+            
+    def uniquePaths(self, m: int, n: int) -> int:
+        # dp
+        dp = [1] * n
+        for _ in range(m - 1):
+            for i in range(1, n):
+                dp[i] += dp[i - 1]
+        return dp[-1]
 
     
