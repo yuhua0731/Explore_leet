@@ -7242,4 +7242,202 @@ class Solution:
                 dp[i] += dp[i - 1]
         return dp[-1]
 
+    def combinationSum4(self, nums: List[int], target: int) -> int:
+        # dp
+        dp = [1] + [0] * target
+        for i in range(1, target + 1):
+            for j in nums:
+                if j <= i:
+                    dp[i] += dp[i - j]
+        return dp[-1]
+
+    def reachableNodes(self, n: int, edges: List[List[int]], restricted: List[int]) -> int:
+        # union-find, TLE as well
+        # uf = UnionFind(n)
+        # for i, j in edges:
+        #     if i not in restricted and j in restricted:
+        #         uf.union(i, j)
+        # tar = uf.find(0)
+        # return len([i for i in range(n) if uf.find(i) == tar])
+         
+        
+        # TLE
+        restricted = set(restricted) # ... turns out we will end up with TLE without converting restricted to a hashset
+        graph = collections.defaultdict(list)
+        
+        for i, j in edges:
+            graph[i].append(j)
+            graph[j].append(i)
+            
+        curr = [0]
+        visited = {0}
+        
+        while curr:
+            nxt = []
+            for i in curr:
+                for n in graph[i]:
+                    if n not in visited and n not in restricted:
+                        nxt.append(n)
+                        visited.add(n)
+            curr = nxt
+        return len(visited)
     
+    def validPartition(self, nums: List[int]) -> bool:
+        # contiguous subarrays
+        # dp, dp[i] = if we can partition nums[:i]
+        dp = [True] # initialize with no element
+
+        for i in range(len(nums)):
+            tmp = False
+            # end with 3 consecutive increasing elements
+            if i >= 2 and nums[i] == nums[i - 1] + 1 and nums[i - 1] == nums[i - 2] + 1:
+                tmp = tmp or dp[-3]
+            if i >= 1 and nums[i] == nums[i - 1]:
+                tmp = tmp or dp[-2]
+            if i >= 2 and nums[i] == nums[i - 1] == nums[i - 2]:
+                tmp = tmp or dp[-3]
+            dp.append(tmp)
+        return dp[-1]
+    
+    def longestIdealString(self, s: str, k: int) -> int:
+        """a better approach
+
+        we maintain a list of length 26 called letter
+        letter[i] presents the longest length of ideal subsequences that end with letter 'a' + i
+        """
+        if k == 25: return len(s)
+        letter = [0] * 26
+        for i in s:
+            idx = ord(i) - ord('a')
+            left_boundary, right_boundary = max(0, idx - k), min(25, idx + k)
+            letter[idx] = max(letter[left_boundary : right_boundary + 1]) + 1
+        return max(letter)
+
+    def mergeSimilarItems(self, items1: List[List[int]], items2: List[List[int]]) -> List[List[int]]:
+        ret = dict()
+        for i, j in items1 + items2:
+            if i not in ret: ret[i] = 0
+            ret[i] += j
+        return sorted([[i, j] for i, j in ret.items()])
+
+    def countBadPairs(self, nums: List[int]) -> int:
+        # brute force
+        # we maintain a dict: key = expect value, value = count
+        # convert j - i = nums[j] - nums[i] to j - nums[j] = i - nums[i]
+        ex = collections.defaultdict(int)
+        ret = 0
+        for idx, i in enumerate(nums):
+            exp = idx - i
+            ret += ex[exp]
+            ex[exp] += 1
+        n = len(nums)
+        return n * (n - 1) // 2 - ret
+
+    def taskSchedulerII(self, tasks: List[int], space: int) -> int:
+        pre = dict()
+        day = 0
+        for i in tasks:
+            day += 1
+            if i not in pre: pre[i] = day
+            else:
+                day = max(day, pre[i] + space + 1)
+                pre[i] = day
+        return day
+                
+    def minimumReplacement(self, nums: List[int]) -> int:
+        right = nums[-1]
+        ret = 0
+        for i in reversed(nums[:len(nums) - 1]):
+            if i <= right: 
+                right = i
+                continue
+            q, r = i // right, i % right
+            if r == 0: ret += q - 1
+            else: 
+                ret += q
+                right = (i // (q + 1))
+        return ret
+
+    def minimumOperations(self, nums: List[int]) -> int:
+        heapq.heapify(nums)
+        target = max(nums)
+        acc = cnt = 0
+        while nums:
+            tmp = heapq.heappop(nums) - acc
+            if tmp == 0: continue
+            target -= tmp
+            cnt += 1
+            acc += tmp
+            if target == 0: break
+        return cnt
+
+    def maximumGroups(self, grades: List[int]) -> int:
+        # binary search
+        # 1 + 2 + ... + n
+        left, right = 1, len(grades) + 1
+        while left < right:
+            mid = (left + right) >> 1
+            if mid * (mid + 1) // 2 <= len(grades): left = mid + 1
+            else: right = mid
+        return left - 1
+
+    def closestMeetingNode(self, edges: List[int], node1: int, node2: int) -> int:
+        n = len(edges)
+        
+        def helper(node):
+            step = [float('inf')] * n
+            cnt = 0
+            while node != -1 and step[node] == float('inf'):
+                step[node] = cnt
+                node = edges[node]
+                cnt += 1
+            return step
+
+        s1, s2 = helper(node1), helper(node2)
+        ret_step = float('inf')
+        ret = []
+        for idx, (i, j) in enumerate(zip(s1, s2)):
+            if i < float('inf') and j < float('inf'):
+                # node idx can be reached by both
+                step = max(i, j)
+                if step < ret_step: 
+                    ret_step = step
+                    ret = [idx]
+                if step == ret_step: ret.append(idx)
+        return min(ret) if ret else -1
+
+    def longestCycle(self, edges: List[int]) -> int:
+        ingoing, outgoing = set(), set()
+        for idx, i in enumerate(edges):
+            if i != -1:
+                ingoing.add(i)
+                outgoing.add(idx)
+        cand = ingoing & outgoing 
+        # if a node is inside a circle, it should has positive ingoing and outgoing degree
+
+        visited = set()
+        ret = [-1]
+
+        def dfs(node, length, visit):
+            """helper function
+
+            Args:
+                node (int): the node we are visiting
+                length (int): the length of the path we visited
+                visit (set): a dict, key = node id, value = path length when first visited
+            """
+            visited.add(node)
+            visit[node] = length
+            nxt = edges[node]
+            if nxt in visit:
+                ret[0] = max(ret[0], length - visit[nxt] + 1)
+                visited.add(nxt)
+                return
+            if nxt not in visited and nxt in cand:
+                dfs(nxt, length + 1, visit)
+
+        for i in cand:
+            dfs(i, 1, {})
+        return ret[0]
+
+
