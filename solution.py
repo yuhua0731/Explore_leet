@@ -11,11 +11,11 @@ import itertools
 from itertools import chain, product
 import heapq
 from sortedcontainers import SortedList
-from lib.trie import Trie
-from union_find import UnionFind
+from my_lib.trie import Trie
+from my_lib.union_find import UnionFind
 import re
 import bisect
-from lib.TreeNode import TreeNode
+from my_lib.TreeNode import TreeNode
 
 
 class ListNode:
@@ -7251,7 +7251,7 @@ class Solution:
                     dp[i] += dp[i - j]
         return dp[-1]
 
-    def reachableNodes(self, n: int, edges: List[List[int]], restricted: List[int]) -> int:
+    def reachableNodes_2(self, n: int, edges: List[List[int]], restricted: List[int]) -> int:
         # union-find, TLE as well
         # uf = UnionFind(n)
         # for i, j in edges:
@@ -7358,7 +7358,7 @@ class Solution:
                 right = (i // (q + 1))
         return ret
 
-    def minimumOperations(self, nums: List[int]) -> int:
+    def minimumOperations_2(self, nums: List[int]) -> int:
         heapq.heapify(nums)
         target = max(nums)
         acc = cnt = 0
@@ -7440,4 +7440,434 @@ class Solution:
             dfs(i, 1, {})
         return ret[0]
 
+    def repeatedCharacter(self, s: str) -> str:
+        visited = set()
+        for i in s:
+            if i in visited: return i
+            visited.add(i)
+
+    def equalPairs(self, grid: List[List[int]]) -> int:
+        n = len(grid)
+        for i, j in product(range(n), range(n)):
+            grid[i][j] = str(grid[i][j])
+        row = collections.Counter([','.join(r) for r in grid])
+        col = collections.Counter([','.join([grid[i][j] for i in range(n)]) for j in range(n)])
+        intersect = row.keys() & col.keys()
+        return sum([row[i] * col[i] for i in intersect])
+
+    def countExcellentPairs(self, nums: List[int], k: int) -> int:
+        cnt = collections.Counter(map(int.bit_count, set(nums)))
+        return sum(cnt[n1] * cnt[n2] for n1, n2 in product(cnt.keys(), cnt.keys()) if n1 + n2 >= k)
+
+    def bestHand(self, ranks: List[int], suits: List[str]) -> str:
+        if len(set(suits)) == 1: return "Flush"
+        cnt = collections.Counter(ranks)
+        ret = max(cnt.values())
+        if ret >= 3: return "Three of a Kind"
+        if ret == 2: return "Pair"
+        return "High Card"
+
+    def zeroFilledSubarray(self, nums: List[int]) -> int:
+        ret = cnt = 0
+        nums.append(1)
+        for i in nums:
+            if i == 0: cnt += 1
+            else:
+                ret += cnt * (cnt + 1) // 2
+                cnt = 0
+        return ret
+
+    def shortestSequence(self, rolls: List[int], k: int) -> int:
+        visited = set()
+        ret = 0
+        for i in rolls:
+            visited.add(i)
+            if len(visited) == k:
+                ret += 1
+                visited.clear()
+        return ret + 1
+
+    def numberOfPairs(self, nums: List[int]) -> List[int]:
+        cnt = collections.Counter(nums)
+        return [sum([i >> 1 for i in cnt.values()]), sum([i & 1 for i in cnt.values()])]
+
+    def maximumSum(self, nums: List[int]) -> int:
+        ret = collections.defaultdict(list)
+        for i in nums:
+            tmp = sum(int(j) for j in str(i))
+            ret[tmp].append(i)
+        return max([-1] + [sum(sorted(i, reverse = True)[:2]) for i in ret.values() if len(i) >= 2])
+
+    def smallestTrimmedNumbers(self, nums: List[str], queries: List[List[int]]) -> List[int]:
+        # brute force first with memorization
+        n = len(nums[0])
+
+        @functools.cache
+        def helper(digit):
+            tmp = [int(i[n - digit:]) for i in nums]
+            tmp = [[i, idx] for idx, i in enumerate(tmp)]
+            tmp = [idx for _, idx in sorted(tmp)]
+            return tmp
+
+        return [helper(j)[i - 1] for i, j in queries]
+
+    def minOperations(self, nums: List[int], numsDivide: List[int]) -> int:
+        # simple gcd function
+        def gcd(a: int, b: int) -> int:
+            if a < b: a, b = b, a
+            while b != 0:
+                a %= b
+                a, b = b, a
+            return a
+        
+        g = numsDivide[0]
+        for i in numsDivide:
+            g = gcd(g, i)
+        
+        cnt = collections.Counter(nums)
+        ret = 0
+        for k in sorted(cnt.keys()):
+            if g % k == 0: return ret
+            else: ret += cnt[k]
+        return -1
+    
+    def fillCups(self, amount: List[int]) -> int:
+        amount.sort()
+        if sum(amount[:2]) <= amount[-1]: return amount[-1]
+        return math.ceil((sum(amount[:2]) - amount[-1]) / 2) + amount[-1]
+
+    def minSetSize(self, arr: List[int]) -> int:
+        target = math.ceil(len(arr) / 2)
+        cnt = collections.Counter(arr)
+        curr = ret = 0
+        for v in sorted(cnt.values(), reverse=True):
+            curr += v
+            ret += 1
+            if curr >= target: return ret
+
+    def canChange(self, start: str, target: str) -> bool:
+        if start.replace('_', '') != target.replace('_', ''): return False
+        start_L, start_R = [], []
+        target_L, target_R = [], []
+        for idx, i in enumerate(start):
+            if i == 'L': start_L.append(idx)
+            if i == 'R': start_R.append(idx)
+        for idx, i in enumerate(target):
+            if i == 'L': target_L.append(idx)
+            if i == 'R': target_R.append(idx)
+        for i, j in zip(start_L, target_L):
+            if i < j: return False
+        for i, j in zip(start_R, target_R):
+            if i > j: return False
+        return True
+
+    def idealArrays(self, n: int, maxValue: int) -> int:
+        MOD = 10 ** 9 + 7
+        
+        @functools.cache
+        def cal(k):
+            return math.comb(n - 1, k - 1)
+        
+        @functools.cache
+        def dfs(last, size):
+            ret = 0
+            if size > 0: ret += cal(size)
+            mul = 2
+            while last * mul <= maxValue:
+                ret += dfs(last * mul, size + 1)
+                mul += 1
+            return ret
+
+        return (dfs(1, 1) + dfs(1, 0)) % MOD
+
+    def movesToStamp(self, stamp: str, target: str) -> List[int]:
+        n = len(stamp)
+        cnt = 0
+        ret = []
+
+        def match(s):
+            for i, j in zip(stamp, s):
+                if i == '*' or j == '*': continue
+                if i != j: return False
+            return True
+
+        while cnt < len(target) * 10:
+            for i in range(len(target)):
+                if i + n > len(target): break
+                if any(c != '*' for c in target[i : i + n]) and match(target[i : i + n]):
+                    target = target[:i] + '*' * n + target[i + n:]
+                    ret = [i] + ret
+                    if all(c == '*' for c in target): return ret
+                    break
+            cnt += 1
+            if len(ret) != cnt: return []
+        return []
+    
+    def maxSumSubmatrix(self, matrix: List[List[int]], k: int) -> int:
+        # convert 2d to 1d, and then use SortedList to find the most cloest element
+        m, n = len(matrix), len(matrix[0])
+
+        def helper(arr):
+            """a helper function that return the biggest sum of subarrays that is smaller or equal to k
+
+            Args:
+                arr (list): input list
+
+            Returns:
+                int: biggest sum <= k
+            """
+            pre = 0
+            ret = -float('inf')
+            sl = SortedList([pre])
+            for i in arr:
+                pre += i
+                # pre - target <= k
+                # target >= pre - k
+                target = pre - k # find the smallest previous sum that is bigger or equal to target
+                idx = sl.bisect_left(target)
+                if idx < len(sl): ret = max(ret, pre - sl[idx])
+                sl.add(pre)
+            return ret
+
+        ret = -float('inf')
+        for r1 in range(m):
+            curr = [0] * n
+            for r2 in range(r1, m):
+                curr = [a + b for a, b in zip(curr, matrix[r2])]
+                ret = max(ret, helper(curr))
+        return ret
+
+
+        # TLE
+        m, n = len(matrix), len(matrix[0])
+        for i, j in product(range(m), range(n)):
+            if i > 0: matrix[i][j] += matrix[i - 1][j]
+            if j > 0: matrix[i][j] += matrix[i][j - 1]
+            if i > 0 and j > 0: matrix[i][j] -= matrix[i - 1][j - 1]
+        ret = -float('inf')
+        for i, j in product(range(m), range(n)):
+            for p, q in product(range(i, m), range(j, n)):
+                sub = matrix[p][q]
+                if i > 0: sub -= matrix[i - 1][q]
+                if j > 0: sub -= matrix[p][j - 1]
+                if i > 0 and j > 0: sub += matrix[i - 1][j - 1]
+                if sub > ret and sub < k: ret = sub
+                if sub == k: return sub
+        return ret
+
+    def minOperations(self, logs: List[str]) -> int:
+        ret = 0
+        for i in logs:
+            if i == '../': ret = max(0, ret - 1)
+            elif i != './': ret += 1
+        return ret
+
+    def gardenNoAdj(self, n: int, paths: List[List[int]]) -> List[int]:
+        # adjacent painting
+        # greedy?
+        graph = collections.defaultdict(set)
+        for i, j in paths:
+            graph[i].add(j)
+            graph[j].add(i)
+        ret = [0] * (n + 1)
+        for i in range(1, n + 1):
+            neighbor = set(ret[j] for j in graph[i])
+            for c in range(1, 5):
+                if c not in neighbor: 
+                    ret[i] = c
+                    break
+        return ret[1:]
+
+    def getLengthOfOptimalCompression(self, s: str, k: int) -> int:
+        # dp
+        @functools.cache
+        def helper(idx, last_char, last_cnt, remain):
+            if remain < 0: return float('inf')
+            if idx == len(s): return 0
+
+            if s[idx] == last_char:
+                # to keep it 
+                add_one = 1 if last_cnt in [1, 9, 99, 999] else 0
+                return add_one + helper(idx + 1, last_char, last_cnt + 1, remain)
+            else:
+                keep = 1 + helper(idx + 1, s[idx], 1, remain)
+                remove = helper(idx + 1, last_char, last_cnt, remain - 1)
+                return min(keep, remove)
+
+        return helper(0, '', 0, k)
+
+    def maxLength(self, arr: List[str]) -> int:
+        @functools.cache
+        def helper(idx, bitmask):
+            if idx == len(arr): return 0
+            curr = arr[idx]
+            ret = helper(idx + 1, bitmask) # do not add current element
+            can_add = True
+            for i in curr:
+                if bitmask & (1 << (ord(i) - ord('a'))):
+                    can_add = False
+                    break
+                else:
+                    bitmask |= (1 << (ord(i) - ord('a'))) 
+            if can_add:
+                ret = max(ret, len(curr) + helper(idx + 1, bitmask))
+            return ret
+        return helper(0, 0)
+          
+    def numOfArrays(self, n: int, m: int, k: int) -> int:
+        # dp
+        # dp[A][c][b] represents for the number of ways that 
+        # totally A numbers are present
+        # current maximum number is b and has exactly c comparisons till now
+        
+        # we can downsize the dp array to 2d, since dp[A] only depends on dp[A - 1]
+        # nxt[c][b] = dp[c - 1][1] + dp[c - 1][2] + ... dp[c - 1][b - 1] + dp[c][b] * b
+        # 1 bug found: this sum should not take 'dp[c][i] where i > b' into account, since we need to keep the maximum number presented
+        # 2 bug found: 
+        #   when you are going to append a new number without change the maximum number presented, you can choose any number between [1, b]
+        #   when you are going to append a new number and change the maximum number presented, you can only choose the maximum number b
+        # thus
+        # nxt[c][b - 1] = dp[c - 1][1] + dp[c - 1][2] + ... dp[c - 1][b - 2] + dp[c][b - 1] * (b - 1)
+        # nxt[c][b]     = dp[c - 1][1] + dp[c - 1][2] + ... dp[c - 1][b - 2] + dp[c - 1][b - 1] + dp[c][b] * b
+        # in one loop of b, we don't need to recalculate all element, we can use prefix sum to speed up
+        # simplyfy: nxt[c][b] = nxt[c][b - 1] - dp[c][b - 1] * (b - 1) + dp[c - 1][b - 1] + dp[c][b] * b
+        #                         ↑ pre_sum
+
+        MOD = 10 ** 9 + 7
+        dp = [[0] * (m + 1) for _ in range(k + 1)]
+        # initialization
+        # total 1 number present, exactly 1 comparison
+        for i in range(1, m + 1): dp[1][i] = 1
+        for _ in range(1, n):
+            nxt = [[0] * (m + 1) for _ in range(k + 1)]
+            for c in range(1, k + 1):
+                for b in range(1, m + 1):
+                    nxt[c][b] = (nxt[c][b - 1] - dp[c][b - 1] * (b - 1) + dp[c - 1][b - 1] + dp[c][b] * b) % MOD
+            dp = nxt
+        return sum(dp[k]) % MOD
+                    
+    def maxDotProduct(self, nums1: List[int], nums2: List[int]) -> int:
+        # dp = [[0] * (len(nums2) + 1) for _ in range(len(nums1) + 1)]
+        # dp[i][j] represents for the maximum dot product of nums1[:i] and nums2[:j]
+        # dp[i][j] = max(dp[i - 1][j - 1] + nums1[i - 1] * nums2[j - 1], dp[i - 1][j], dp[i][j - 1])
+        # dp[0][j] = dp[i][0] = 0
+        # m, n = len(nums1), len(nums2)
+        # dp = [[0] * (n + 1) for _ in range(m + 1)]
+        # for i in range(1, m + 1):
+        #     for j in range(1, n + 1):
+        #         dp[i][j] = max(dp[i - 1][j - 1] + nums1[i - 1] * nums2[j - 1], dp[i - 1][j], dp[i][j - 1])
+        # return dp[-1][-1]
+
+        # space optimization
+        # since dp[i] only depends on dp[i - 1]
+        # we can use a 1d array to represent for dp
+        # dp[j] = max(dp[j - 1] + nums1[i - 1] * nums2[j - 1], dp[j], nxt[j - 1])
+        if max(nums1) < 0 and min(nums2) > 0: return max(nums1) * min(nums2)
+        if max(nums2) < 0 and min(nums1) > 0: return max(nums2) * min(nums1)
+        m, n = len(nums1), len(nums2)
+        dp = [0] * (n + 1)
+        for i in range(1, m + 1):
+            nxt = [0]
+            for j in range(1, n + 1):
+                nxt.append(max(dp[j - 1] + nums1[i - 1] * nums2[j - 1], dp[j], nxt[-1]))
+            dp = nxt
+        return dp[-1]
+
+    def minOperations(self, nums: List[int]) -> int:
+        # the target range [x, y], inclusively
+        # sort the list first, then perform a sliding window algorithm, and find the largest subarray that contains elements in [x, y]
+        n = len(nums)
+        nums = sorted(set(nums))
+        new_n = len(nums)
+        
+        ret = cnt = 0
+        start, end = 0, 0
+        while end < new_n:
+            cnt += 1 # add nums[end] to the subarray
+
+            while nums[end] - nums[start] > n - 1:
+                start += 1
+                cnt -= 1
+            end += 1
+            ret = max(ret, cnt)
+        return n - ret
+    
+    def fullBloomFlowers(self, flowers: List[List[int]], people: List[int]) -> List[int]:
+        # heapq
+        # we maintain a heap that stores the flowers that are blooming
+        # for each arrived person, we pop all flowers that has a start day <= person's arrival day
+        # then we push the popped flowers back to the heap, and pop all the flowers that has an end day < person's arrival day
+        heapq.heapify(flowers)
+        blooming = []
+
+        n = len(people)
+        ret = [-1] * n
+        # sort people by arrival day
+        people = sorted(enumerate(people), key=lambda x: x[1])
+        for idx, day in people:
+            while flowers and flowers[0][0] <= day:
+                heapq.heappush(blooming, heapq.heappop(flowers)[1])
+            while blooming and blooming[0] < day:
+                heapq.heappop(blooming)
+            ret[idx] = len(blooming)
+        return ret
+
+    class MountainArray:
+        def __init__(self, arr):
+            self.list = arr
+
+        def get(self, index):
+            return self.list[index]
+
+        def length(self):
+            return len(self.list)
+
+    def findInMountainArray(self, target: int, mountain_arr: MountainArray) -> int:
+        # binary search
+        def find_peak(left, right):
+            while left < right:
+                mid = (left + right) >> 1
+                if mountain_arr.get(mid) < mountain_arr.get(mid + 1):
+                    left = mid + 1
+                else:
+                    right = mid
+            return left
+        
+        peak = find_peak(0, mountain_arr.length() - 1)
+
+        def find_target(left, right, increase: bool):
+            while left < right:
+                mid = (left + right) >> 1
+                curr = mountain_arr.get(mid)
+                if curr == target: return mid
+                if increase:
+                    if curr > target: right = mid
+                    else: left = mid + 1
+                else:
+                    if curr < target: right = mid
+                    else: left = mid + 1
+            return left if mountain_arr.get(left) == target else -1
+                
+        left, right = find_target(0, peak, True), find_target(peak, mountain_arr.length() - 1, False)
+        if left > -1: return left
+        return right
+
+    def knightDialer(self, n: int) -> int:
+        dir = [[1, 2], [1, -2], [-1, 2], [-1, -2], [2, 1], [2, -1], [-2, 1], [-2, -1]]
+        MOD = 10 ** 9 + 7
+        def valid(x, y):
+            if x < 0 or x > 3 or y < 0 or y > 2: return False
+            if x == 3 and y != 1: return False
+            return True
+
+        dp = [[1] * 3 for _ in range(4)]
+        dp[3][0] = dp[3][2] = 0
+        for _ in range(n - 1):
+            nxt = [[0] * 3 for _ in range(4)]
+            for i, j in product(range(4), range(3)):
+                for x, y in dir:
+                    if valid(i + x, j + y):
+                        nxt[i + x][j + y] += dp[i][j]
+            dp = [[j % MOD for j in i] for i in nxt] 
+        return sum([sum(i) for i in dp]) % MOD
 

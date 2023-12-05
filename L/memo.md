@@ -169,6 +169,28 @@ match point:
         print(f"Point is not on the diagonal.")
 ```
 
+```python
+def file_handler_v2(command):
+    match command.split(): # here match parameter is a list
+        case ['show']:
+            print('List all files and directories: ')
+            # code to list files
+        case ['remove' | 'delete', *files] if '--ask' in files:
+            del_files = [f for f in files if len(f.split('.'))>1]
+            print('Please confirm: Removing files: {}'.format(del_files))
+            # code to accept user input, then remove files
+        case ['remove' | 'delete', *files]:
+            print('Removing files: {}'.format(files))
+            # code to remove files
+        case _:
+            print('Command not recognized')
+
+file_handler_v2('remove --ask a.txt b.txt')
+file_handler_v2('remove a.txt b.txt')
+file_handler_v2('show')
+file_handler_v2('r')
+```
+
 ## List
 
 to use `List` type:
@@ -239,6 +261,8 @@ str_list = list(filter(lambda item: item, str_list))
 
 ## set
 
+> set are mutable, but it cannot contain mutable item.
+
 - `.remove()` raise an keyError if element does not exist
 - `.discard()` will not raise error
 - `.pop()` pop out an arbitrary element, and will raise an error if set is empty
@@ -271,6 +295,7 @@ set1.union(set2) = A + B + C
 set1.intersection(set2) = B
 set1.difference(set2) = A
 set1.symmetric_difference(set2) = A + C
+set1.difference_update(set2) = A + C
 
 set1.issubset(set2)
 set1.issuperset(set2)
@@ -1790,3 +1815,449 @@ Convert string to json(dict)
 from folder_name.module_name import module_name
 ```
 
+## how to make time loop precise in python?
+
+TODO
+
+```python
+import time
+starttime = time.time()
+for i in range(10):
+    print(time.time())
+    time.sleep((i + 1) * 0.01 + starttime - time.time())
+    
+"""
+1664373934.079011
+1664373934.0909262
+1664373934.100663
+1664373934.109956
+1664373934.1194391
+1664373934.130721
+1664373934.1397278
+1664373934.15042
+1664373934.159122
+1664373934.1703591
+"""
+```
+
+## canopen
+
+- ### Datatype
+
+```python
+BOOLEAN = 0x1
+INTEGER8 = 0x2
+INTEGER16 = 0x3
+INTEGER32 = 0x4
+UNSIGNED8 = 0x5
+UNSIGNED16 = 0x6
+UNSIGNED32 = 0x7
+REAL32 = 0x8
+VISIBLE_STRING = 0x9
+OCTET_STRING = 0xA
+UNICODE_STRING = 0xB
+DOMAIN = 0xF
+REAL64 = 0x11
+INTEGER64 = 0x15
+UNSIGNED64 = 0x1B
+
+SIGNED_TYPES = (INTEGER8, INTEGER16, INTEGER32, INTEGER64)
+UNSIGNED_TYPES = (UNSIGNED8, UNSIGNED16, UNSIGNED32, UNSIGNED64)
+INTEGER_TYPES = SIGNED_TYPES + UNSIGNED_TYPES
+FLOAT_TYPES = (REAL32, REAL64)
+NUMBER_TYPES = INTEGER_TYPES + FLOAT_TYPES
+DATA_TYPES = (VISIBLE_STRING, OCTET_STRING, UNICODE_STRING, DOMAIN)
+
+STRUCT_TYPES = {
+    BOOLEAN: struct.Struct("?"),
+    INTEGER8: struct.Struct("b"),
+    INTEGER16: struct.Struct("<h"),
+    INTEGER32: struct.Struct("<l"),
+    INTEGER64: struct.Struct("<q"),
+    UNSIGNED8: struct.Struct("B"),
+    UNSIGNED16: struct.Struct("<H"),
+    UNSIGNED32: struct.Struct("<L"),
+    UNSIGNED64: struct.Struct("<Q"),
+    REAL32: struct.Struct("<f"),
+    REAL64: struct.Struct("<d")
+}
+```
+
+## uname -a
+
+![image-20230613173606067](image_backup/memo/image-20230613173606067.png)
+
+![image-20230613173722180](image_backup/memo/image-20230613173722180.png)
+
+## id() (known as identifier/address)
+
+`id()` returns an object’s integer identifier. Using the `id()` function, you can verify that two variables indeed point to the same object:
+
+```python
+>>> n = 300
+>>> m = n
+>>> id(n)
+60127840
+>>> id(m)
+60127840
+
+>>> m = 400
+>>> id(m)
+60127872
+```
+
+> Deep dive
+>
+> - For purposes of optimization, the interpreter creates objects for the integers in the range `[-5, 256]` at startup, and then reuses them during program execution.
+>
+> ```python
+> >>> m = 300
+> >>> n = 300
+> >>> id(m)
+> 60062304
+> >>> id(n)
+> 60062896
+> 
+> >>> m = 30
+> >>> n = 30
+> >>> id(m)
+> 1405569120
+> >>> id(n)
+> 1405569120
+> ```
+
+## Variable name rules
+
+variable names in Python can be any length and can consist of uppercase and lowercase letters (`A-Z`, `a-z`), digits (`0-9`), and the underscore character (`_`). the first character of a variable name cannot be a digit.
+
+> - Camel Case: `numberOfCollegeGraduates`
+> - Pascal Case: `NumberOfCollegeGraduates`
+> - Snake Case: `number_of_college_graduates`
+
+```python
+>>> help("keywords")
+# will list all reserved keywords in python
+```
+
+## isinstance()
+
+[`isinstance()`](https://realpython.com/lessons/inherit-from-python-class/#t=371.96) takes two arguments, an object and a class. It checks if the object in the first argument is an instance of the class in the second argument and returns either `True` or `False`.
+
+All objects created from a child class are instances of the ==parent== class, although they may not be instances of other child classes.
+
+## functools.reduce()
+
+**Working :** 
+
+- At first step, ==first two elements== of sequence are picked and the ==result is obtained==.
+- Next step is to ==apply the same function== to the previously attained result and the number just succeeding the second element and the result is again stored.
+- This process continues till no more elements are left in the container.
+- The final returned result is returned and printed on console.
+
+## frozen set
+
+-  `f |= {'foo'}` does not raise an exception. The `|=` augmented assignment operator does not modify `f` directly in this example. Rather, it creates a new frozen set equal to the original `f` with `'foo'` added.
+- `f.add()` would raise an exception. Frozen sets are immutable, so the modifying methods available for standard sets are not available for frozen sets.
+- The only way is to use the `frozenset()` function.
+
+## threading
+
+- Python `threading` is restricted to a ==single== CPU at one time. The `multiprocessing` library will allow you to run code on ==different processors==.
+- [`concurrent.futures.ThreadPoolExecutor`](https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor) offers a higher level interface to push tasks to a background thread without blocking execution of the calling thread, while still being able to retrieve their results when needed.
+- [`queue`](https://docs.python.org/3/library/queue.html#module-queue) provides a thread-safe interface for exchanging data between running threads.
+- [`asyncio`](https://docs.python.org/3/library/asyncio.html#module-asyncio) offers an alternative approach to achieving task level concurrency without requiring the use of multiple operating system threads.
+
+## operands
+
+When two ==non-Boolean values== are joined by `and` or `or`, the value of the expression is one of the operands, not `True` or `False`.
+
+For two non-Boolean values `a` and `b`:
+
+| If `a` is | `a or b` is | `a and b` is |
+| --------- | ----------- | ------------ |
+| truthy    | `a`         | `b`          |
+| falsy     | `b`         | `a`          |
+
+## print sep
+
+```python
+# code for disabling the softspace feature
+print('G','F','G', sep='') # GFG
+
+# for formatting a date
+print('09','12','2016', sep='-') # 09-12-2016
+
+# another example
+print('pratik','geeksforgeeks', sep='@') # pratik@geeksforgeeks
+```
+
+## Exception
+
+> **Exceptions** versus **Syntax error**
+
+![Illustration of  raise statement usage](image_backup/memo/raise.3931e8819e08.png)
+
+```python
+raise Exception('x should not exceed 5. The value of x was: {}'.format(x))
+```
+
+![Python assert statement](image_backup/memo/assert.f6d344f0c0b4.png)
+
+```python
+import sys
+assert ('linux' in sys.platform), "This code runs on Linux only."
+```
+
+![Diagram explaining try except else finally statements](image_backup/memo/try_except_else_finally.a7fac6c36c55.png)
+
+```python
+try:
+    with open('file.log') as file:
+        read_data = file.read()
+except FileNotFoundError as fnf_error:
+    print(fnf_error)
+else:
+    print('Executing the else clause.')
+finally:
+    print('Cleaning up, irrespective of any exceptions.')
+```
+
+- exception type
+
+```python
+class B(Exception):
+    pass
+
+class C(B):
+    pass
+
+class D(C):
+    pass
+
+for cls in [B, C, D]:
+    try:
+        raise cls()
+    except D:
+        print("D")
+    except C:
+        print("C")
+    except B:
+        print("B")
+        
+# B
+# C
+# D
+```
+
+## built-in functions
+
+https://docs.python.org/3/library/functions.html
+
+![image-20230922131907657](image_backup/memo/image-20230922131907657.png)
+
+- **iter**(*object*) **iter**(*object*, *sentinel*)
+  - Return an [iterator](https://docs.python.org/3/glossary.html#term-iterator) object. 
+  - Without a second argument, *object* must be a ==collection object== which supports the [iterable](https://docs.python.org/3/glossary.html#term-iterable) protocol (the `__iter__()` method), or it must support the sequence protocol (the `__getitem__()` method with integer arguments starting at `0`). If it does not support either of those protocols, [`TypeError`](https://docs.python.org/3/library/exceptions.html#TypeError) is raised. 
+  - If the second argument, *sentinel*, is given, then *object* must be a ==callable== object. The iterator created in this case will ==call *object* with no arguments for each call== to its [`__next__()`](https://docs.python.org/3/library/stdtypes.html#iterator.__next__) method; if the value returned is equal to *sentinel*, [`StopIteration`](https://docs.python.org/3/library/exceptions.html#StopIteration) will be raised, otherwise the value will be returned.
+
+```python
+arr = [1, 2, 3]
+it = iter(arr)
+print(it.__next__())
+print(next(it))
+print(it.__next__())
+# 1 2 3
+
+class DoubleIt:
+    def __init__(self):
+        self.start = 1
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        self.start *= 2
+        return self.start
+
+    __call__ = __next__
+    
+my_iter = iter(DoubleIt(), 16)
+
+for x in my_iter:
+    print(x)
+# 2 4 8
+```
+
+- **breakpoint**(**args*, ***kws*)
+
+  - This function drops you into the debugger at the call site. Specifically, it calls [`sys.breakpointhook()`](https://docs.python.org/3/library/sys.html#sys.breakpointhook), passing `args` and `kws` straight through. By default, `sys.breakpointhook()` calls [`pdb.set_trace()`](https://docs.python.org/3/library/pdb.html#pdb.set_trace) expecting no arguments. However, [`sys.breakpointhook()`](https://docs.python.org/3/library/sys.html#sys.breakpointhook) can be set to some other function and [`breakpoint()`](https://docs.python.org/3/library/functions.html#breakpoint) will automatically call that, allowing you to drop into the debugger of choice. If [`sys.breakpointhook()`](https://docs.python.org/3/library/sys.html#sys.breakpointhook) is not accessible, this function will raise [`RuntimeError`](https://docs.python.org/3/library/exceptions.html#RuntimeError).
+
+  - By default, the behavior of [`breakpoint()`](https://docs.python.org/3/library/functions.html#breakpoint) can be changed with the [`PYTHONBREAKPOINT`](https://docs.python.org/3/using/cmdline.html#envvar-PYTHONBREAKPOINT) environment variable. See [`sys.breakpointhook()`](https://docs.python.org/3/library/sys.html#sys.breakpointhook) for usage details.
+
+- repr() ascii()
+
+```python
+a = 1
+b = 'aa'
+print(repr(a))
+print(repr(b))
+print(ascii(a))
+print(ascii(b))
+```
+
+- @**classmethod**
+  - Transform a method into a class method. A class method receives the class as an ==implicit first argument==, just like an instance method receives the instance. To declare a class method, use this idiom:
+
+```python
+class C:
+    @classmethod
+    def f(cls, arg1, arg2): ...
+```
+
+- **divmod**(*a*, *b*)
+  - Take two (non-complex) numbers as arguments. For integers, the result is the same as `(a // b, a % b)`. For floating point numbers the result is `(math.floor(a / b), a % b)`.
+- **hash**(*object*)
+  - Return the hash value of the object (if it has one). Hash values are integers.
+
+- **exec**(*object*, *globals=None*, *locals=None*, */*, *, *closure=None*) 
+
+  > at the ==module== level, globals and locals are the ==same== dictionary. If exec gets two separate objects as *globals* and *locals*, the code will be executed as if it were ==embedded in a class definition==.
+
+```python
+# Comment above regarding `eval` applies to `exec` as well
+if sys.version_info >= (3, 11):
+    def exec(
+        __source: str | ReadableBuffer | CodeType, # source code or string to be executed
+        __globals: dict[str, Any] | None = None, # global variables
+        __locals: Mapping[str, object] | None = None, # mapping
+        *,
+        closure: tuple[_Cell, ...] | None = None,
+    ) -> None: ...
+
+else:
+    def exec(
+        __source: str | ReadableBuffer | CodeType,
+        __globals: dict[str, Any] | None = None,
+        __locals: Mapping[str, object] | None = None,
+    ) -> None: ...
+    
+exec("print('hello')", globals() locals()) # example
+```
+
+- *class* **object**
+
+  - Return a new featureless object. [`object`](https://docs.python.org/3/library/functions.html#object) is a base for all classes. It has methods that are common to all instances of Python classes. 
+
+  - [`object`](https://docs.python.org/3/library/functions.html#object) does *not* have a [`__dict__`](https://docs.python.org/3/library/stdtypes.html#object.__dict__), so you can’t assign arbitrary attributes to an instance of the [`object`](https://docs.python.org/3/library/functions.html#object) class.
+
+- @**staticmethod**
+
+  - A static method does not receive an implicit first argument. To declare a static method, use this idiom:
+
+  ```python
+  class C:
+      @staticmethod
+      def f(arg1, arg2, argN): ...
+  ```
+
+- **__import__**(*name*, *globals=None*, *locals=None*, *fromlist=()*, *level=0*)
+  - This function is invoked by the [`import`](https://docs.python.org/3/reference/simple_stmts.html#import) statement.
+- **vars**() **vars**(*object*)
+  - Return the [`__dict__`](https://docs.python.org/3/library/stdtypes.html#object.__dict__) attribute for a module, class, instance, or any other object with a [`__dict__`](https://docs.python.org/3/library/stdtypes.html#object.__dict__) attribute.
+
+## positional-only parameter
+
+A slash(/) in the argument list of a function denotes that the parameters prior to it are positional-only. Positional-only parameters are the ones ==without an externally usable name==.
+
+```python
+>>> help(divmod)
+Help on built-in function divmod in module builtins:
+
+divmod(x, y, /)
+    Return the tuple (x//y, x%y).  Invariant: div*y + mod == x.
+    
+>>> divmod(x=3, y=4)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: divmod() takes no keyword arguments
+```
+
+## property
+
+*fget* is a function for getting an attribute value. *fset* is a function for setting an attribute value. *fdel* is a function for deleting an attribute value. And *doc* creates a docstring for the attribute.
+
+```python
+class C:
+    def __init__(self):
+        self._x = None
+
+    def getx(self):
+        return self._x
+
+    def setx(self, value):
+        self._x = value
+
+    def delx(self):
+        del self._x
+
+    x = property(getx, setx, delx, "I'm the 'x' property.")
+```
+
+The `@property` decorator turns the `voltage()` method into a ==“getter”== for a read-only attribute with the same name, and it sets the docstring for *voltage* to “Get the current voltage.”
+
+```python
+class C:
+    def __init__(self):
+        self._x = None
+
+    @property
+    def x(self):
+        """I'm the 'x' property."""
+        return self._x
+
+    @x.setter
+    def x(self, value):
+        self._x = value
+
+    @x.deleter
+    def x(self):
+        del self._x
+```
+
+## Array in python
+
+```python
+# general syntax
+# variable_name = array(typecode,[elements])
+
+import array as arr 
+
+numbers = arr.array('i',[10,20,30]) # O(1)时间，O(n)空间
+print(numbers)
+# output
+# array('i', [10, 20, 30])
+
+numbers.insert(index, value) # O(1)添加到末尾，O(n)添加到首位 | O(1)空间
+numbers[1] # O(1) both
+numbers.remove(index, value) # O(1)删除末尾，O(n)删除首位 | O(1)空间
+numbers.index(element_value) # O(n)时间，O(1)空间
+numbers[1] = 1 # update one element O(1) both
+```
+
+| TYPECODE | C TYPE             | PYTHON TYPE       | SIZE |
+| :------- | :----------------- | :---------------- | :--- |
+| 'b'      | signed char        | int               | 1    |
+| 'B'      | unsigned char      | int               | 1    |
+| 'u'      | wchar_t            | Unicode character | 2    |
+| 'h'      | signed short       | int               | 2    |
+| 'H'      | unsigned short     | int               | 2    |
+| 'i'      | signed int         | int               | 2    |
+| 'I'      | unsigned int       | int               | 2    |
+| 'l'      | signed long        | int               | 4    |
+| 'L'      | unsigned long      | int               | 4    |
+| 'q'      | signed long long   | int               | 8    |
+| 'Q'      | unsigned long long | int               | 8    |
+| 'f'      | float              | float             | 4    |
+| 'd'      | double             | float             | 8    |
+
+- 
