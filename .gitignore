@@ -135,3 +135,6 @@ test.py
 
 # google drive temp files
 *.driveupload
+
+# personalized files
+batch-info-generator

@@ -7871,3 +7871,47 @@ class Solution:
             dp = [[j % MOD for j in i] for i in nxt] 
         return sum([sum(i) for i in dp]) % MOD
 
+    def daysBetweenDates(self, date1: str, date2: str) -> int:
+        def get_date(s):
+            s = s.split('-')
+            s = list(map(int, s))
+            return s
+        
+        date1, date2 = get_date(date1), get_date(date2)
+        
+        def compare(d1, d2):
+            if d1[0] > d2[0]: return 1
+            if d1[0] == d2[0] and d1[1] > d2[1]: return 1
+            if d1[0] == d2[0] and d1[1] == d2[1] and d1[2] > d2[2]: return 1
+
+        # compare two date and swap them if date1 > date2
+        if compare(date1, date2): date1, date2 = date2, date1
+
+        def year(s):
+            if not s % 400 or (s % 100 and not s % 4): return 366
+            return 365
+
+        def month(y, m):
+            if m == 2: return year(y) - (365 - 28)
+            if m in [1, 3, 5, 7, 8, 10, 12]: return 31
+            return 30
+        
+        ret = 0
+        ret += sum(year(y) for y in range(date1[0], date2[0]))
+        ret += sum(month(date2[0], m) for m in range(1, date2[1]))
+        ret += date2[2]
+        ret -= sum(month(date1[0], m) for m in range(1, date1[1]))
+        ret -= date1[2]
+        return ret
+
+    def totalMoney(self, n: int) -> int:
+        week, day = divmod(n, 7)
+        ret = 0
+        if week:
+            # full weeks 
+            ret += 7 * (0 + week - 1) * week // 2
+            ret += week * (1 + 7) * 7 // 2
+        # rest days
+        ret += sum(i for i in range(week + 1, week + day + 1))
+        return ret
+
